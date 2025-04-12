@@ -52,9 +52,9 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="text-2xl font-bold text-gray-800 flex items-center">
-            <span className="text-black mr-1">can</span>
+            <span className="text-black mr-1">Can</span>
             <span className="text-teal-500">●</span>
-            <span className="text-black">n</span>
+            <span className="text-black">Cure</span>
           </Link>
         </div>
 
@@ -162,9 +162,9 @@ export function Navbar() {
           {/* Chat content goes here */}
           <button
             onClick={toggleChat}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 h-12 w-12"
           >
-            Close
+            ×
           </button>
         </div>
       )}
