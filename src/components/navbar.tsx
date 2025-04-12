@@ -125,7 +125,10 @@ export function Navbar() {
 
       {/* Chat modal */}
       {isChatOpen && (
-        <div style={{zIndex:'999'}}className="fixed bottom-16 right-10 w-full md:w-1/3 bg-white shadow-lg rounded-t-lg p-4">
+        <div
+          style={{ zIndex: '999', backgroundColor: 'rgba(90, 207, 199, 0.4)' }}
+          className="fixed bottom-16 right-10 w-full md:w-1/3 shadow-lg rounded-t-lg p-4"
+        >
           <h2 className="text-lg font-semibold mb-2">Chat with us</h2>
           <p className="text-gray-600 mb-4">
             How can we assist you today?
@@ -133,18 +136,11 @@ export function Navbar() {
           {/* Chat content */}
           <div className="h-64 overflow-y-auto border border-gray-300 rounded-lg p-2 mb-4">
             {/* Chat messages go here */}
-            <div className="mb-2">
-              <strong>User:</strong> Hello, I have a question about your services.
-            </div>
-            <div className="mb-2">
-              <strong>Agent:</strong> Sure! What would you like to know?
-            </div>
-            <div className="mb-2">
-              <strong>User:</strong> Can you explain the pricing model?
-            </div>
-            <div className="mb-2">
-              <strong>Agent:</strong> Absolutely! We have several pricing tiers based on your needs.
-            </div>
+            {messages.map((message, index) => (
+              <div key={index} className="mb-2">
+              <strong>{message.sender}:</strong> {message.text}
+              </div>
+            ))}
           </div>
           <input
             type="text"
@@ -154,8 +150,8 @@ export function Navbar() {
           <button
             className="bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors"
           >
-            Send 
-            </button>
+            Send
+          </button>
           {/* Chat content goes here */}
           <button
             onClick={toggleChat}
