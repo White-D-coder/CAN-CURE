@@ -34,7 +34,7 @@ export function Services() {
         <ServiceCard
           title="Clinical Trials"
           description="Our mission is to assist pharma companies in their clinical trials with our specialized services."
-          image="/scientist-lab.jpg"
+          image="../blood.jpeg" // Replaced with a GIF
           variant="horizontal"
           className="bg-white"
         />
@@ -52,7 +52,7 @@ export function Services() {
         <ServiceCard
           title="Histology"
           description="Specimens received are processed, sectioned, and stained for microscopic evaluation."
-          image="/histology-colors.jpg"
+          image="/histology-colors.mp4" // Replaced with a video
           variant="horizontal"
           className="bg-white"
         />
