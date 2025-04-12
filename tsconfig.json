@@ -34,7 +34,7 @@
     ".next/types/**/*.ts",
     "next-env.d.ts",
     "build/types/**/*.ts"
-  ],
+, "src/supabaseClient.js"  ],
   "exclude": [
     "node_modules"
   ]
