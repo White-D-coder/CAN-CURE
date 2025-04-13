@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { Sidebar } from "lucide-react";
+import SideBar from "./SideBar";
 
 export function Navbar() {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -59,8 +61,9 @@ export function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center space-x-8">
-          <Link href="/what-we-do" className="text-gray-700 hover:text-teal-500 transition-colors">
+          <Link href="./sidebar" className="text-gray-700 hover:text-teal-500 transition-colors">
             What we do
+
           </Link>
           <div className="relative group">
             <button className="flex items-center text-gray-700 hover:text-teal-500 transition-colors">
@@ -81,10 +84,10 @@ export function Navbar() {
               </svg>
             </button>
           </div>
-          <Link href="#pricing" className="text-gray-700 hover:text-teal-500 transition-colors">
+          <Link href="/pricing" className="text-gray-700 hover:text-teal-500 transition-colors">
             Pricing
           </Link>
-          <Link href="#blog" className="text-gray-700 hover:text-teal-500 transition-colors">
+          <Link href="/blog" className="text-gray-700 hover:text-teal-500 transition-colors">
             Blog
           </Link>
         </nav>
