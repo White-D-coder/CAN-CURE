@@ -87,7 +87,7 @@ export function Navbar() {
             </Link>
 
           <Link href="/contact" className="text-gray-700 hover:text-teal-500 transition-colors">
-            Contact
+            Contact Us
           </Link>
           <Link href="/blog" className="text-gray-700 hover:text-teal-500 transition-colors">
             Blog
