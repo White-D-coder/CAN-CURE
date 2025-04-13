@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { Services } from "@/components/services";
-import WhatWeDo from "./what-we-do";
+import WhatWeDo from "../pages/what-we-do";
 
 export default function Home() {
   return (

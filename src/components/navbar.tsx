@@ -59,7 +59,7 @@ export function Navbar() {
         </div>
 
         <nav className="hidden md:flex items-center space-x-8">
-          <Link href="#what-we-do" className="text-gray-700 hover:text-teal-500 transition-colors">
+          <Link href="/what-we-do" className="text-gray-700 hover:text-teal-500 transition-colors">
             What we do
           </Link>
           <div className="relative group">
