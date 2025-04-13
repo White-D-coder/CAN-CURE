@@ -21,10 +21,10 @@ export function Services() {
   return (
     <section className="w-full px-6 py-12">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Flow Cytometry */}
+        {/* Immunotherapy */}
         <ServiceCard
-          title="Flow Cytometry"
-          description="We offer the fastest flow cytometry capabilities at all of our locations."
+          title="Immunotherapy"
+          description="Harnessing the power of the immune system to fight cancer with cutting-edge treatments."
           icon={<FlowCytometryIcon />}
           variant="horizontal"
           className="bg-white"
@@ -33,26 +33,26 @@ export function Services() {
         {/* Clinical Trials */}
         <ServiceCard
           title="Clinical Trials"
-          description="Our mission is to assist pharma companies in their clinical trials with our specialized services."
-          image="../blood.jpeg" // Replaced with a GIF
+          description="Providing access to innovative cancer treatments through our specialized clinical trials."
+          image="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Q2xpbmljYWwlMjBUcmlhbHN8ZW58MHx8MHx8fDA%3D" 
           variant="horizontal"
           className="bg-white"
         />
 
-        {/* Molecular Genetics */}
+        {/* Genetic Testing */}
         <ServiceCard
-          title="Molecular Genetics"
-          description="We offer a variety of test across our facilities for molecular genetic analysis."
+          title="Genetic Testing"
+          description="Comprehensive genetic testing to identify cancer risks and personalize treatment plans."
           icon={<MolecularGeneticsIcon />}
           variant="horizontal"
           className="bg-white"
         />
 
-        {/* Histology */}
+        {/* Radiation Therapy */}
         <ServiceCard
-          title="Histology"
-          description="Specimens received are processed, sectioned, and stained for microscopic evaluation."
-          image="/histology-colors.mp4" // Replaced with a video
+          title="Radiation Therapy"
+          description="Advanced radiation therapy techniques to target and destroy cancer cells effectively."
+          image="https://plus.unsplash.com/premium_photo-1702598456138-f5ddd6a96679?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8UmFkaWF0aW9uJTIwVGhlcmFweXxlbnwwfHwwfHx8MA%3D%3D" // Replaced with a video
           variant="horizontal"
           className="bg-white"
         />

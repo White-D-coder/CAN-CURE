@@ -5,15 +5,16 @@ export function Hero() {
     <section className="w-full relative overflow-hidden rounded-3xl bg-white">
       <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col relative z-10">
         <div className="max-w-2xl">
-          <h1 className="text-5xl font-bold text-gray-800 mb-6 leading-tight">
-            The future of<br />
-            Leveraging science
-          </h1>
-          <p className="text-gray-600 mb-8 text-lg max-w-xl">
-            Our scientific, pathology, and regulatory teams have the
-            experience needed to propel novel drug discoveries and
-            the development of companion diagnostics.
-          </p>
+            <h1
+              className="text-5xl font-bold text-gray-800 mb-6 leading-tight opacity-0.5 animate-fade-in-fast"
+              style={{ animation: "fadeIn 0.2s forwards" }}
+            >
+              The future of<br />
+              Leveraging science
+            </h1>
+            <p className="text-gray-600 mb-8 text-lg max-w-xl">
+            Together, we are advancing groundbreaking research and innovative solutions to bring hope and healing to those affected by cancer.
+            </p>
           <Link
             href="#proposition"
             className="flex items-center bg-black text-white hover:bg-gray-800 px-6 py-3 rounded-full font-medium transition-colors w-fit"
@@ -44,5 +45,6 @@ export function Hero() {
         <div className="absolute right-60 bottom-20 w-60 h-60 rounded-full bg-gradient-to-tr from-teal-100 to-teal-300/20 blur-sm" />
       </div>
     </section>
+    
   );
 }
