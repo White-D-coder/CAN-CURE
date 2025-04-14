@@ -6,7 +6,7 @@ import ChatBot from "../components/ChatBot";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Fusion - Leveraging Science",
+  title: "CanCure - Leveraging Science",
   description: "Scientific and pathology services for novel drug discoveries",
 };
 
