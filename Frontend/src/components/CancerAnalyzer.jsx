@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MoreHorizontal, ArrowRight, Plus, Minus, RotateCw, RefreshCcw, Info, Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-
+import Chat from './Chat'
 const CancerAnalyzer = () => {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
@@ -24,24 +24,24 @@ const CancerAnalyzer = () => {
 
     setLoading(true);
     
-    // Simulate AI analysis with a timeout
-    setTimeout(() => {
-      const responses = activeTab === 'scan' ? [
-        "Image analysis complete. The scan shows potential areas of concern that require further evaluation. We recommend scheduling a consultation with our radiologists.",
-        "Based on the image analysis, the findings appear to be within normal parameters. However, we suggest follow-up screening as recommended by your healthcare provider.",
-        "The uploaded image has been processed. Initial analysis indicates some anomalies that warrant professional review. Please consult with our specialists.",
-      ] : [
-        "Based on the information provided, we recommend scheduling a consultation with our oncologists. Your symptoms suggest early-stage indicators that require professional evaluation.",
-        "Our AI analysis indicates low risk factors, but we advise preventative screening as a precautionary measure. Would you like to schedule an appointment?",
-        "The symptoms you've described match several treatable conditions. Our team can provide a more detailed analysis during a consultation. Shall we connect you with a specialist?",
-        "Initial analysis suggests potential concerns that should be addressed promptly. We recommend immediate consultation with our oncology team.",
-      ];
+    // // Simulate AI analysis with a timeout
+    // setTimeout(() => {
+    //   const responses = activeTab === 'scan' ? [
+    //     "Image analysis complete. The scan shows potential areas of concern that require further evaluation. We recommend scheduling a consultation with our radiologists.",
+    //     "Based on the image analysis, the findings appear to be within normal parameters. However, we suggest follow-up screening as recommended by your healthcare provider.",
+    //     "The uploaded image has been processed. Initial analysis indicates some anomalies that warrant professional review. Please consult with our specialists.",
+    //   ] : [
+    //     "Based on the information provided, we recommend scheduling a consultation with our oncologists. Your symptoms suggest early-stage indicators that require professional evaluation.",
+    //     "Our AI analysis indicates low risk factors, but we advise preventative screening as a precautionary measure. Would you like to schedule an appointment?",
+    //     "The symptoms you've described match several treatable conditions. Our team can provide a more detailed analysis during a consultation. Shall we connect you with a specialist?",
+    //     "Initial analysis suggests potential concerns that should be addressed promptly. We recommend immediate consultation with our oncology team.",
+    //   ];
       
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-      setAnalysisResult(randomResponse);
-      setLoading(false);
-    }, 2000);
-  };
+  //     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+  //     setAnalysisResult(randomResponse);
+  //     setLoading(false);
+  //   }, 2000);
+   };
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
