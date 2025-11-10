@@ -3,7 +3,9 @@ import bcrypt from 'bcryptjs';
 import express from 'express';
 import {loginMiddleware, signupMiddleware} from '../middleware/middleware.js';
 import jwt from 'jsonwebtoken';
-const JWT_SECRET='fake_jwt_key'
+import dotenv from 'dotenv'
+dotenv.config()
+const JWT_SECRET= process.dotenv.JWT_SECRET
 const app=express()
 app.use(express.json())
 
