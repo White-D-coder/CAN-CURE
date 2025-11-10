@@ -1,0 +1,63 @@
+import prisma from '../db/prisma.js';
+import bcrypt from 'bcryptjs';
+import express from 'express';
+import {loginMiddleware, signupMiddleware} from '../middleware/middleware.js';
+import jwt from 'jsonwebtoken';
+const JWT_SECRET='fake_jwt_key'
+const app=express()
+app.use(express.json())
+
+app.post('/signup',signupMiddleware,async(req,res)=>{
+     try {
+        const{username,email,password}=req.body
+        const user=await prisma.user.findUnique({
+            where:{email:email}
+        })
+        if (user){
+            return res.status(409).json({message:"User  already exists"})
+        }
+        const newpassword = await bcrypt.hash(password,10)
+
+        const newUser=await prisma.user.create({
+            data:{name:username,email:email,password:newpassword}
+        })
+        const token = jwt.sign({email:newUser.email},JWT_SECRET,{expiresIn:'1h'})
+
+        return res.status(201).json({message:"User created",token})
+
+
+    }
+    
+        catch (error) {
+        return res.status(500).json({message:"Internal Server Error"})
+    }
+})
+app.post('/login',loginMiddleware,async(req,res)=>{
+    try{
+        const{email,password}=req.body
+        const find= await prisma.user.findUnique({
+            where:{
+                email:email
+            }
+        })
+        if (!find){
+            return res.status(404).json({message:"No user found"})
+        }
+        const ismatch= await bcrypt.compare(password,find.password)
+        if (!ismatch){
+            return res.status(401).json({message:"Invalid password"})
+        }
+        const token2=jwt.sign({email:find.email},JWT_SECRET,{expiresIn:'1h'})
+      
+        return res.status(200).json({message:"Login successful",token2})
+
+
+    }
+    catch(error){
+        return res.status(500).json({message:"Internal Server Error"})
+    }
+})
+app.listen(3000,()=>{ 
+    console.log("Server started on port 3000")
+})
+export default app;
