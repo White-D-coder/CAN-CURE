@@ -1,25 +1,62 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 
-
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  password  String 
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  name     String?
+  password String
+  medicines Medicine[]
+}
+
+model Doctor {
+  doctorId     Int @id @default(autoincrement())
+  name         String
+  specialist   String
+  experience   Int
+  email        String @unique
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          Int      @id @default(autoincrement())
+  date        String
+  time        String
+  patientName String
+  doctor      Doctor   @relation(fields: [doctorId], references: [doctorId])
+  doctorId    Int
+}
+
+model Admin {
+  adminId  Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
+
+model Medicine {
+  medId       Int      @id @default(autoincrement())
+  medName     String
+  description String
+  dose        String
+  frequency   String
+  startDate   DateTime
+  endDate     DateTime
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+}
+
+model CancerType {
+  cancerId    Int    @id @default(autoincrement())
+  name        String
+  stage       Int
+  description String
+  symptoms    String
+  treatments  String
 }
