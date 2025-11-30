@@ -12,11 +12,11 @@ export const signupMiddleware = (req, res, next) => {
     }
     next()
 }
-export const loginMiddleware = (req, res, next) => {
-    const { email, password } = req.body
-    const { authorization } = req.headers
-    if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" })
+export const loginMiddleware=(req,res,next)=>{
+    const {email,password}=req.body
+    const {authorization}=eq.headers
+    if (!email || !password){
+        return res.status(400).json({message:"Email and password are required"})
     }
     if (!email.includes('@')) {
         return res.status(400).json({ message: "Invalid email format" })

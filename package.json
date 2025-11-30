@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "name": "can-cure-root",
     "version": "1.0.0",
     "scripts": {
@@ -11,3 +12,10 @@
         "concurrently": "^8.2.2"
     }
 }
+=======
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "prisma": "^6.19.0"
+  }
+}
+>>>>>>> fa182b8 (local change)

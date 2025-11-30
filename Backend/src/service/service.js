@@ -66,8 +66,15 @@ app.post('/login', async (req, res) => {
         console.error("Login Error:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
+
 })
+<<<<<<< HEAD
 app.listen(3000, () => {
     console.log("Server started on port 3000 - SERVER UPDATED")
+=======
+
+app.listen(3000,()=>{ 
+    console.log("Server started on port 3000")
+>>>>>>> fa182b8 (local change)
 })
 export default app;
