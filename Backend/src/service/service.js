@@ -8,7 +8,9 @@ dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET
 import doctorRoutes from '../routes/doctor.routes.js';
 
+import cors from 'cors';
 const app = express()
+app.use(cors());
 app.use(express.json())
 
 app.use('/api/doctors', doctorRoutes);
@@ -35,10 +37,11 @@ app.post('/signup', signupMiddleware, async (req, res) => {
     }
 
     catch (error) {
-        return res.status(500).json({ message: "Internal Server Error" })
+        console.error("Signup Error:", error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 })
-app.post('/login', loginMiddleware, async (req, res) => {
+app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body
         const find = await prisma.user.findUnique({
@@ -60,10 +63,11 @@ app.post('/login', loginMiddleware, async (req, res) => {
 
     }
     catch (error) {
-        return res.status(500).json({ message: "Internal Server Error" })
+        console.error("Login Error:", error);
+        return res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 })
 app.listen(3000, () => {
-    console.log("Server started on port 3000")
+    console.log("Server started on port 3000 - SERVER UPDATED")
 })
 export default app;

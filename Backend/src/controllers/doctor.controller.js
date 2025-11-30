@@ -1,6 +1,6 @@
 import { prisma } from '../db/prisma.js';
 
-const credoc = async (req, res) => {
+export const credoc = async (req, res) => {
     try {
         const { name, specialist, experience, email } = req.body;
         const doctor = await prisma.doctor.create({
@@ -17,7 +17,7 @@ const credoc = async (req, res) => {
     }
 };
 
-const getD = async (req, res) => {
+export const getD = async (req, res) => {
     try {
         const doctors = await prisma.doctor.findMany();
         res.status(200).json(doctors);
@@ -26,14 +26,14 @@ const getD = async (req, res) => {
     }
 };
 
-const getDocId = async (req, res) => {
+export const getDocId = async (req, res) => {
     try {
         const ide = req.params.id;
         const doctor = await prisma.doctor.findUnique({
             where: { doctorId: parseInt(ide) }
         });
         if (!doctor) {
-            return res.status(404).json({ message: 'Doctor not found' });
+            return res.status(404).json({ message: 'Doc not found' });
         }
         res.status(200).json(doctor);
     } catch (err) {
@@ -41,7 +41,7 @@ const getDocId = async (req, res) => {
     }
 };
 
-const updateDoc = async (req, res) => {
+export const updateDoc = async (req, res) => {
     try {
         const ide = req.params.id;
         const { name, specialist, experience, email } = req.body;
@@ -60,7 +60,7 @@ const updateDoc = async (req, res) => {
     }
 };
 
-const delDoc = async (req, res) => {
+export const delDoc = async (req, res) => {
     try {
         const ide = req.params.id;
         await prisma.doctor.delete({
@@ -71,11 +71,3 @@ const delDoc = async (req, res) => {
         res.status(500).json({ err: err.message });
     }
 };
-
-module.exports = {
-    credoc,
-    getD,
-    getDocId,
-    updateDoc,
-    delDoc
-}
