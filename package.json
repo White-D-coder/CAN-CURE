@@ -1,21 +1,13 @@
 {
-<<<<<<< HEAD
-    "name": "can-cure-root",
-    "version": "1.0.0",
-    "scripts": {
-        "start": "concurrently \"npm run server\" \"npm run client\"",
-        "server": "cd Backend && npm run dev",
-        "client": "cd frontend && npm run dev",
-        "install-all": "npm install && cd Backend && npm install && cd ../frontend && npm install"
-    },
-    "devDependencies": {
-        "concurrently": "^8.2.2"
-    }
-}
-=======
-  "dependencies": {
-    "@prisma/client": "^6.19.0",
-    "prisma": "^6.19.0"
+  "name": "can-cure-root",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd Backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "install-all": "npm install && cd Backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
->>>>>>> fa182b8 (local change)

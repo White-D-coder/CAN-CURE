@@ -85,13 +85,7 @@ app.post('/login', async (req, res) => {
     }
 
 })
-<<<<<<< HEAD
 app.listen(3000, () => {
     console.log("Server started on port 3000 - SERVER UPDATED")
-=======
-
-app.listen(3000,()=>{ 
-    console.log("Server started on port 3000")
->>>>>>> fa182b8 (local change)
 })
 export default app;

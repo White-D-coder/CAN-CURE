@@ -1,21 +1,36 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
-import { getSystemStats, getAllUsers } from '../../api/admin';
+import {
+    getSystemStats,
+    getAllUsers,
+    getAllDoctors,
+    createDoctor,
+    updateDoctor,
+    deleteDoctor,
+    createPatient,
+    updatePatient,
+    deletePatient
+} from '../../api/admin';
 
 const AdminDashboard = () => {
     const [doctors, setDoctors] = useState([]);
     const [patients, setPatients] = useState([]);
     const [stats, setStats] = useState({ doctors: 0, patients: 0, appointments: 0 });
-    const [activeTab, setActiveTab] = useState('doctors'); // 'doctors' or 'patients'
-    const [formData, setFormData] = useState({
+    const [activeTab, setActiveTab] = useState('doctors');
+    const [doctorFormData, setDoctorFormData] = useState({
         name: '',
         specialist: '',
         experience: '',
         email: '',
         password: 'password123'
     });
-    const [editingId, setEditingId] = useState(null);
+    const [patientFormData, setPatientFormData] = useState({
+        name: '',
+        email: '',
+        password: 'password123'
+    });
+    const [editingDoctorId, setEditingDoctorId] = useState(null);
+    const [editingPatientId, setEditingPatientId] = useState(null);
     const [error, setError] = useState('');
     const { logout } = useAuth();
 
@@ -26,11 +41,11 @@ const AdminDashboard = () => {
     const fetchInitialData = async () => {
         try {
             const [doctorsRes, statsRes, patientsRes] = await Promise.all([
-                api.get('/api/doctors'),
+                getAllDoctors(),
                 getSystemStats(),
                 getAllUsers()
             ]);
-            setDoctors(doctorsRes.data);
+            setDoctors(doctorsRes);
             setStats(statsRes);
             setPatients(patientsRes);
             setError('');
@@ -42,9 +57,8 @@ const AdminDashboard = () => {
 
     const fetchDoctors = async () => {
         try {
-            const response = await api.get('/api/doctors');
-            setDoctors(response.data);
-            // Update stats as well
+            const response = await getAllDoctors();
+            setDoctors(response);
             const statsRes = await getSystemStats();
             setStats(statsRes);
         } catch (err) {
@@ -52,22 +66,33 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const fetchPatients = async () => {
+        try {
+            const response = await getAllUsers();
+            setPatients(response);
+            const statsRes = await getSystemStats();
+            setStats(statsRes);
+        } catch (err) {
+            console.error('Error fetching patients:', err);
+        }
+    };
+
+    const handleDoctorSubmit = async (e) => {
         e.preventDefault();
         try {
             const data = {
-                ...formData,
-                experience: parseInt(formData.experience)
+                ...doctorFormData,
+                experience: parseInt(doctorFormData.experience)
             };
 
-            if (editingId) {
-                await api.put(`/api/doctors/${editingId}`, data);
+            if (editingDoctorId) {
+                await updateDoctor(editingDoctorId, data);
             } else {
-                await api.post('/api/doctors', data);
+                await createDoctor(data);
             }
 
-            setFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
-            setEditingId(null);
+            setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
+            setEditingDoctorId(null);
             setError('');
             fetchDoctors();
         } catch (err) {
@@ -76,27 +101,69 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleEdit = (doctor) => {
-        setFormData({
+    const handlePatientSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingPatientId) {
+                await updatePatient(editingPatientId, patientFormData);
+            } else {
+                await createPatient(patientFormData);
+            }
+
+            setPatientFormData({ name: '', email: '', password: 'password123' });
+            setEditingPatientId(null);
+            setError('');
+            fetchPatients();
+        } catch (err) {
+            console.error('Error saving patient:', err);
+            setError('Failed to save patient. Please try again.');
+        }
+    };
+
+    const handleEditDoctor = (doctor) => {
+        setDoctorFormData({
             name: doctor.name,
             specialist: doctor.specialist,
             experience: doctor.experience,
             email: doctor.email,
-            password: doctor.password || ''
+            password: ''
         });
-        setEditingId(doctor.doctorId);
+        setEditingDoctorId(doctor.doctorId);
         setActiveTab('doctors');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const handleDelete = async (id) => {
+    const handleEditPatient = (patient) => {
+        setPatientFormData({
+            name: patient.name,
+            email: patient.email,
+            password: ''
+        });
+        setEditingPatientId(patient.id);
+        setActiveTab('patients');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDeleteDoctor = async (id) => {
         if (window.confirm('Are you sure you want to delete this doctor?')) {
             try {
-                await api.delete(`/api/doctors/${id}`);
+                await deleteDoctor(id);
                 fetchDoctors();
             } catch (err) {
                 console.error('Error deleting doctor:', err);
                 setError('Failed to delete doctor.');
+            }
+        }
+    };
+
+    const handleDeletePatient = async (id) => {
+        if (window.confirm('Are you sure you want to delete this patient?')) {
+            try {
+                await deletePatient(id);
+                fetchPatients();
+            } catch (err) {
+                console.error('Error deleting patient:', err);
+                setError('Failed to delete patient.');
             }
         }
     };
@@ -114,7 +181,6 @@ const AdminDashboard = () => {
                 </button>
             </div>
 
-            {/* Stats Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '40px' }}>
                 <div className="card" style={{ textAlign: 'center', padding: '24px' }}>
                     <h3 style={{ margin: 0, color: '#6b7280', fontSize: '14px', textTransform: 'uppercase' }}>Total Doctors</h3>
@@ -143,7 +209,6 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            {/* Tabs */}
             <div style={{ marginBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
                 <button
                     onClick={() => setActiveTab('doctors')}
@@ -173,25 +238,24 @@ const AdminDashboard = () => {
                         fontSize: '16px'
                     }}
                 >
-                    View Patients
+                    Manage Patients
                 </button>
             </div>
 
             {activeTab === 'doctors' ? (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
-                    {/* Form Section */}
                     <div className="card" style={{ height: 'fit-content' }}>
                         <h3 style={{ marginTop: 0, marginBottom: '24px' }}>
-                            {editingId ? 'Edit Doctor' : 'Add New Doctor'}
+                            {editingDoctorId ? 'Edit Doctor' : 'Add New Doctor'}
                         </h3>
 
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleDoctorSubmit}>
                             <div className="input-group">
                                 <label>Name</label>
                                 <input
                                     type="text"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    value={doctorFormData.name}
+                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, name: e.target.value })}
                                     required
                                     placeholder="Dr. John Doe"
                                 />
@@ -201,8 +265,8 @@ const AdminDashboard = () => {
                                 <label>Specialist</label>
                                 <input
                                     type="text"
-                                    value={formData.specialist}
-                                    onChange={(e) => setFormData({ ...formData, specialist: e.target.value })}
+                                    value={doctorFormData.specialist}
+                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, specialist: e.target.value })}
                                     required
                                     placeholder="Cardiologist"
                                 />
@@ -212,8 +276,8 @@ const AdminDashboard = () => {
                                 <label>Experience (Years)</label>
                                 <input
                                     type="number"
-                                    value={formData.experience}
-                                    onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                                    value={doctorFormData.experience}
+                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, experience: e.target.value })}
                                     required
                                     placeholder="5"
                                     min="0"
@@ -224,8 +288,8 @@ const AdminDashboard = () => {
                                 <label>Email</label>
                                 <input
                                     type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    value={doctorFormData.email}
+                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })}
                                     required
                                     placeholder="doctor@example.com"
                                 />
@@ -235,26 +299,26 @@ const AdminDashboard = () => {
                                 <label>Password</label>
                                 <input
                                     type="text"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    required
-                                    placeholder="password123"
+                                    value={doctorFormData.password}
+                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, password: e.target.value })}
+                                    required={!editingDoctorId}
+                                    placeholder={editingDoctorId ? "Leave blank to keep current" : "password123"}
                                 />
                             </div>
 
                             <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
                                 <button type="submit" className="btn" style={{ flex: 1 }}>
-                                    {editingId ? 'Update Doctor' : 'Add Doctor'}
+                                    {editingDoctorId ? 'Update Doctor' : 'Add Doctor'}
                                 </button>
 
-                                {editingId && (
+                                {editingDoctorId && (
                                     <button
                                         type="button"
                                         className="btn"
                                         style={{ backgroundColor: '#6b7280' }}
                                         onClick={() => {
-                                            setEditingId(null);
-                                            setFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
+                                            setEditingDoctorId(null);
+                                            setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
                                         }}
                                     >
                                         Cancel
@@ -264,7 +328,6 @@ const AdminDashboard = () => {
                         </form>
                     </div>
 
-                    {/* List Section */}
                     <div className="card">
                         <h3 style={{ marginTop: 0, marginBottom: '24px' }}>Doctors List</h3>
 
@@ -295,7 +358,7 @@ const AdminDashboard = () => {
                                                 <td style={{ padding: '12px' }}>{doctor.email}</td>
                                                 <td style={{ padding: '12px' }}>
                                                     <button
-                                                        onClick={() => handleEdit(doctor)}
+                                                        onClick={() => handleEditDoctor(doctor)}
                                                         style={{
                                                             marginRight: '16px',
                                                             background: 'none',
@@ -308,7 +371,7 @@ const AdminDashboard = () => {
                                                         Edit
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(doctor.doctorId)}
+                                                        onClick={() => handleDeleteDoctor(doctor.doctorId)}
                                                         style={{
                                                             background: 'none',
                                                             border: 'none',
@@ -329,47 +392,138 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             ) : (
-                <div className="card">
-                    <h3 style={{ marginTop: 0, marginBottom: '24px' }}>Registered Patients</h3>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
-                                    <th style={{ padding: '12px' }}>ID</th>
-                                    <th style={{ padding: '12px' }}>Name</th>
-                                    <th style={{ padding: '12px' }}>Email</th>
-                                    <th style={{ padding: '12px' }}>Appointments</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {patients.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="4" style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
-                                            No patients registered yet.
-                                        </td>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+                    <div className="card" style={{ height: 'fit-content' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>
+                            {editingPatientId ? 'Edit Patient' : 'Add New Patient'}
+                        </h3>
+
+                        <form onSubmit={handlePatientSubmit}>
+                            <div className="input-group">
+                                <label>Name</label>
+                                <input
+                                    type="text"
+                                    value={patientFormData.name}
+                                    onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })}
+                                    required
+                                    placeholder="John Doe"
+                                />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    value={patientFormData.email}
+                                    onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })}
+                                    required
+                                    placeholder="patient@example.com"
+                                />
+                            </div>
+
+                            <div className="input-group">
+                                <label>Password</label>
+                                <input
+                                    type="text"
+                                    value={patientFormData.password}
+                                    onChange={(e) => setPatientFormData({ ...patientFormData, password: e.target.value })}
+                                    required={!editingPatientId}
+                                    placeholder={editingPatientId ? "Leave blank to keep current" : "password123"}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+                                <button type="submit" className="btn" style={{ flex: 1 }}>
+                                    {editingPatientId ? 'Update Patient' : 'Add Patient'}
+                                </button>
+
+                                {editingPatientId && (
+                                    <button
+                                        type="button"
+                                        className="btn"
+                                        style={{ backgroundColor: '#6b7280' }}
+                                        onClick={() => {
+                                            setEditingPatientId(null);
+                                            setPatientFormData({ name: '', email: '', password: 'password123' });
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
+                        </form>
+                    </div>
+
+                    <div className="card">
+                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>Registered Patients</h3>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
+                                        <th style={{ padding: '12px' }}>ID</th>
+                                        <th style={{ padding: '12px' }}>Name</th>
+                                        <th style={{ padding: '12px' }}>Email</th>
+                                        <th style={{ padding: '12px' }}>Appointments</th>
+                                        <th style={{ padding: '12px' }}>Actions</th>
                                     </tr>
-                                ) : (
-                                    patients.map((patient) => (
-                                        <tr key={patient.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                            <td style={{ padding: '12px' }}>#{patient.id}</td>
-                                            <td style={{ padding: '12px' }}>{patient.name}</td>
-                                            <td style={{ padding: '12px' }}>{patient.email}</td>
-                                            <td style={{ padding: '12px' }}>
-                                                <span style={{
-                                                    backgroundColor: '#e0e7ff',
-                                                    color: '#4f46e5',
-                                                    padding: '4px 8px',
-                                                    borderRadius: '12px',
-                                                    fontSize: '12px'
-                                                }}>
-                                                    {patient._count?.Appointments || 0}
-                                                </span>
+                                </thead>
+                                <tbody>
+                                    {patients.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
+                                                No patients registered yet.
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ) : (
+                                        patients.map((patient) => (
+                                            <tr key={patient.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                                                <td style={{ padding: '12px' }}>#{patient.id}</td>
+                                                <td style={{ padding: '12px' }}>{patient.name}</td>
+                                                <td style={{ padding: '12px' }}>{patient.email}</td>
+                                                <td style={{ padding: '12px' }}>
+                                                    <span style={{
+                                                        backgroundColor: '#e0e7ff',
+                                                        color: '#4f46e5',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '12px',
+                                                        fontSize: '12px'
+                                                    }}>
+                                                        {patient._count?.Appointments || 0}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '12px' }}>
+                                                    <button
+                                                        onClick={() => handleEditPatient(patient)}
+                                                        style={{
+                                                            marginRight: '16px',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            color: '#4f46e5',
+                                                            cursor: 'pointer',
+                                                            fontWeight: 500
+                                                        }}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeletePatient(patient.id)}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            color: '#ef4444',
+                                                            cursor: 'pointer',
+                                                            fontWeight: 500
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}
