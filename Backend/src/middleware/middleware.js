@@ -14,7 +14,7 @@ export const signupMiddleware = (req, res, next) => {
 }
 export const loginMiddleware=(req,res,next)=>{
     const {email,password}=req.body
-    const {authorization}=eq.headers
+    const {authorization}=req.headers
     if (!email || !password){
         return res.status(400).json({message:"Email and password are required"})
     }

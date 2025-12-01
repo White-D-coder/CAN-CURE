@@ -2,7 +2,7 @@ import express from "express";
 import { prisma } from "../db/prisma";
 const router = express.Router();
 router.get("/dashboard", async (req, res) => {
-  if (req.user == "Admin") {
+  if (req.user.role == "Admin") {
     const time = await prisma.doctor.findMany({
       where: { status: "Active" },
       select: { time: true },
@@ -17,14 +17,13 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 router.get("/profile/:id", async (req, res) => {
-    if (req.user=="Patient"){
+    if (req.user.role=="Patient"){
+        const {id}=req.params
         const prof= await prisma.user.findUnique({
             where:{id:id},
             include:{
                 Appointments:{
                     select:{
-                    date:true,
-                    time:true,
                     doctor:{
                         name:true,
                         specialist:true
