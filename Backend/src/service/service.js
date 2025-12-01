@@ -7,6 +7,8 @@ import dotenv from 'dotenv'
 dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET
 import doctorRoutes from '../routes/doctor.routes.js';
+import adminRoutes from '../routes/admin.routes.js';
+import reportRoutes from '../routes/report.routes.js';
 
 import cors from 'cors';
 const app = express()
@@ -14,6 +16,8 @@ app.use(cors());
 app.use(express.json())
 
 app.use('/api/doctors', doctorRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.post('/signup', signupMiddleware, async (req, res) => {
     try {
@@ -43,28 +47,41 @@ app.post('/signup', signupMiddleware, async (req, res) => {
 })
 app.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body
-        const find = await prisma.user.findUnique({
-            where: {
-                email: email
+        const { identifier, password } = req.body;
+
+        const admin = await prisma.admin.findUnique({ where: { username: identifier } });
+        if (admin) {
+            const isMatch = password === admin.password || await bcrypt.compare(password, admin.password);
+
+            if (isMatch) {
+                const token = jwt.sign({ id: admin.adminId, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+                return res.status(200).json({ message: "Login successful", token, role: 'admin', user: { username: admin.username } });
             }
-        })
-        if (!find) {
-            return res.status(404).json({ message: "No user found" })
         }
-        const ismatch = await bcrypt.compare(password, find.password)
-        if (!ismatch) {
-            return res.status(401).json({ message: "Invalid password" })
+
+        const doctor = await prisma.doctor.findUnique({ where: { email: identifier } });
+        if (doctor) {
+            const isMatch = await bcrypt.compare(password, doctor.password);
+            if (password === doctor.password) {
+                const token = jwt.sign({ id: doctor.doctorId, role: 'doctor' }, JWT_SECRET, { expiresIn: '1h' });
+                return res.status(200).json({ message: "Login successful", token, role: 'doctor', user: { name: doctor.name, email: doctor.email } });
+            }
         }
-        const token2 = jwt.sign({ email: find.email }, JWT_SECRET, { expiresIn: '1h' })
 
-        return res.status(200).json({ message: "Login successful", token2 })
+        const user = await prisma.user.findUnique({ where: { email: identifier } });
+        if (user) {
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (isMatch) {
+                const token = jwt.sign({ id: user.id, role: 'patient' }, JWT_SECRET, { expiresIn: '1h' });
+                return res.status(200).json({ message: "Login successful", token, role: 'patient', user: { name: user.name, email: user.email } });
+            }
+        }
 
+        return res.status(401).json({ message: "Invalid credentials" });
 
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Login Error:", error);
-        return res.status(500).json({ message: "Internal Server Error", error: error.message })
+        return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 })
 app.listen(3000, () => {

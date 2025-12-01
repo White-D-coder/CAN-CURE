@@ -18,9 +18,16 @@ function Login() {
         }
 
         try {
-            const res = await api.post('/login', { email, password });
-            login(res.data.token2, { email });
-            navigate('/doctors');
+            const res = await api.post('/login', { identifier: email, password });
+            login(res.data.token, { ...res.data.user, role: res.data.role });
+
+            if (res.data.role === 'admin') {
+                navigate('/admin');
+            } else if (res.data.role === 'doctor') {
+                navigate('/doctors');
+            } else {
+                navigate('/dashboard');
+            }
         } catch (err) {
             setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
         }
@@ -39,7 +46,7 @@ function Login() {
 
                 <form onSubmit={handleLogin}>
                     <div className="input-group">
-                        <label>Email</label>
+                        <label>Email / Username</label>
                         <input
                             type="email"
                             placeholder="you@example.com"

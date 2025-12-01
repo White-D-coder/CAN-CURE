@@ -16,6 +16,7 @@ model User {
   medicines Medicine[]
   Appointments Appointment[]
   CancerType CancerType[]
+  Reports    Report[]
   
 }
 
@@ -25,7 +26,9 @@ model Doctor {
   specialist   String
   experience   Int
   email        String @unique
+  password     String @default("password123")
   appointments Appointment[]
+  Reports      Report[]
 }
 
 model Appointment {
@@ -68,3 +71,14 @@ model CancerType {
   userId      Int
 }
 
+
+model Report {
+  reportId    Int      @id @default(autoincrement())
+  reportName  String
+  reportUrl   String
+  date        DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  doctor      Doctor?  @relation(fields: [doctorId], references: [doctorId])
+  doctorId    Int?
+}
