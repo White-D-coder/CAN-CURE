@@ -5,6 +5,10 @@ import Signup from './pages/Auth/Signup';
 import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import UserDashboard from './pages/UserDashboard/UserDashboard';
+import MedicalHistory from './pages/UserDashboard/MedicalHistory';
+import Medications from './pages/UserDashboard/Medications';
+import Reports from './pages/UserDashboard/Reports';
+import Layout from './components/Layout';
 
 const PrivateRoute = ({ children }) => {
     const { token } = useAuth();
@@ -21,7 +25,9 @@ function App() {
                     path="/admin"
                     element={
                         <PrivateRoute>
-                            <AdminDashboard />
+                            <Layout>
+                                <AdminDashboard />
+                            </Layout>
                         </PrivateRoute>
                     }
                 />
@@ -29,7 +35,9 @@ function App() {
                     path="/doctors"
                     element={
                         <PrivateRoute>
-                            <DoctorDashboard />
+                            <Layout>
+                                <DoctorDashboard />
+                            </Layout>
                         </PrivateRoute>
                     }
                 />
@@ -37,7 +45,39 @@ function App() {
                     path="/dashboard"
                     element={
                         <PrivateRoute>
-                            <UserDashboard />
+                            <Layout>
+                                <UserDashboard />
+                            </Layout>
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/history"
+                    element={
+                        <PrivateRoute>
+                            <Layout>
+                                <MedicalHistory />
+                            </Layout>
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/medications"
+                    element={
+                        <PrivateRoute>
+                            <Layout>
+                                <Medications />
+                            </Layout>
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/reports"
+                    element={
+                        <PrivateRoute>
+                            <Layout>
+                                <Reports />
+                            </Layout>
                         </PrivateRoute>
                     }
                 />
