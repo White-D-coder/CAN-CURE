@@ -58,7 +58,7 @@ app.post('/login', async (req, res) => {
 
             if (isMatch) {
                 const token = jwt.sign({ id: admin.adminId, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: "Login successful", token, role: 'admin', user: { username: admin.username } });
+                return res.status(200).json({ message: "Login successful", token, role: 'admin', user: { id: admin.adminId, username: admin.username, role: 'admin' } });
             }
         }
 
@@ -67,7 +67,7 @@ app.post('/login', async (req, res) => {
             const isMatch = await bcrypt.compare(password, doctor.password);
             if (isMatch || password === doctor.password) {
                 const token = jwt.sign({ id: doctor.doctorId, role: 'doctor' }, JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: "Login successful", token, role: 'doctor', user: { name: doctor.name, email: doctor.email } });
+                return res.status(200).json({ message: "Login successful", token, role: 'doctor', user: { id: doctor.doctorId, name: doctor.name, email: doctor.email, role: 'doctor' } });
             }
         }
 
@@ -76,7 +76,7 @@ app.post('/login', async (req, res) => {
             const isMatch = await bcrypt.compare(password, user.password);
             if (isMatch) {
                 const token = jwt.sign({ id: user.id, role: 'patient' }, JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: "Login successful", token, role: 'patient', user: { name: user.name, email: user.email } });
+                return res.status(200).json({ message: "Login successful", token, role: 'patient', user: { id: user.id, name: user.name, email: user.email, role: 'patient' } });
             }
         }
 

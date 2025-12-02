@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getDoctorAppointments, getPatientDetails, addPrescription, updatePrescription } from '../../api/doctor';
+import { getDoctorAppointments, getPatientDetails, addPrescription, updatePrescription, addReport, updateReport } from '../../api/doctor';
 
 const DoctorDashboard = () => {
     const { user, logout } = useAuth();
@@ -8,6 +8,8 @@ const DoctorDashboard = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Prescription State
     const [prescriptionForm, setPrescriptionForm] = useState({
         medName: '',
         description: '',
@@ -18,6 +20,14 @@ const DoctorDashboard = () => {
     });
     const [editingPrescriptionId, setEditingPrescriptionId] = useState(null);
     const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
+
+    // Report State
+    const [reportForm, setReportForm] = useState({
+        reportName: '',
+        reportUrl: ''
+    });
+    const [editingReportId, setEditingReportId] = useState(null);
+    const [showReportForm, setShowReportForm] = useState(false);
 
     useEffect(() => {
         if (user && user.id) {
@@ -62,6 +72,12 @@ const DoctorDashboard = () => {
             startDate: '',
             endDate: ''
         });
+        setShowReportForm(false);
+        setEditingReportId(null);
+        setReportForm({
+            reportName: '',
+            reportUrl: ''
+        });
     };
 
     const handlePrescriptionSubmit = async (e) => {
@@ -72,7 +88,6 @@ const DoctorDashboard = () => {
             } else {
                 await addPrescription(user.id, selectedPatient.id, prescriptionForm);
             }
-            // Refresh patient details
             await handleViewPatient(selectedPatient.id);
             setShowPrescriptionForm(false);
             setEditingPrescriptionId(null);
@@ -101,6 +116,39 @@ const DoctorDashboard = () => {
         });
         setEditingPrescriptionId(med.medId);
         setShowPrescriptionForm(true);
+    };
+
+    const handleReportSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const reportData = {
+                ...reportForm,
+                userId: selectedPatient.id,
+                doctorId: user.id
+            };
+
+            if (editingReportId) {
+                await updateReport(editingReportId, reportData);
+            } else {
+                await addReport(reportData);
+            }
+            await handleViewPatient(selectedPatient.id);
+            setShowReportForm(false);
+            setEditingReportId(null);
+            setReportForm({ reportName: '', reportUrl: '' });
+        } catch (err) {
+            console.error('Error saving report:', err);
+            setError('Failed to save report.');
+        }
+    };
+
+    const handleEditReport = (report) => {
+        setReportForm({
+            reportName: report.reportName,
+            reportUrl: report.reportUrl
+        });
+        setEditingReportId(report.reportId);
+        setShowReportForm(true);
     };
 
     if (loading && !selectedPatient) return <div className="container" style={{ padding: '32px', textAlign: 'center' }}>Loading...</div>;
@@ -323,7 +371,45 @@ const DoctorDashboard = () => {
                         </div>
 
                         <div className="card">
-                            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Lab Reports</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                <h3 style={{ marginTop: 0 }}>Lab Reports</h3>
+                                <button
+                                    onClick={() => setShowReportForm(!showReportForm)}
+                                    className="btn"
+                                    style={{ padding: '4px 8px', fontSize: '12px' }}
+                                >
+                                    {showReportForm ? 'Cancel' : '+ Add Report'}
+                                </button>
+                            </div>
+
+                            {showReportForm && (
+                                <form onSubmit={handleReportSubmit} style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Report Name</label>
+                                        <input
+                                            type="text"
+                                            value={reportForm.reportName}
+                                            onChange={(e) => setReportForm({ ...reportForm, reportName: e.target.value })}
+                                            required
+                                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        />
+                                    </div>
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Report URL</label>
+                                        <input
+                                            type="url"
+                                            value={reportForm.reportUrl}
+                                            onChange={(e) => setReportForm({ ...reportForm, reportUrl: e.target.value })}
+                                            required
+                                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        />
+                                    </div>
+                                    <button type="submit" className="btn" style={{ width: '100%' }}>
+                                        {editingReportId ? 'Update Report' : 'Add Report'}
+                                    </button>
+                                </form>
+                            )}
+
                             {selectedPatient.Reports && selectedPatient.Reports.length > 0 ? (
                                 <ul style={{ listStyle: 'none', padding: 0 }}>
                                     {selectedPatient.Reports.map((report) => (
@@ -343,14 +429,22 @@ const DoctorDashboard = () => {
                                                     {new Date(report.date).toLocaleDateString()}
                                                 </span>
                                             </div>
-                                            <a
-                                                href={report.reportUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ color: '#4f46e5', textDecoration: 'none' }}
-                                            >
-                                                View
-                                            </a>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <a
+                                                    href={report.reportUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ color: '#4f46e5', textDecoration: 'none', fontSize: '14px' }}
+                                                >
+                                                    View
+                                                </a>
+                                                <button
+                                                    onClick={() => handleEditReport(report)}
+                                                    style={{ background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', fontSize: '14px' }}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>

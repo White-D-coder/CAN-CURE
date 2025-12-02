@@ -28,3 +28,20 @@ export const getReportsByPatient = async (req, res) => {
         res.status(500).json({ err: err.message });
     }
 };
+
+export const updateReport = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reportName, reportUrl } = req.body;
+        const report = await prisma.report.update({
+            where: { reportId: parseInt(id) },
+            data: {
+                reportName,
+                reportUrl
+            }
+        });
+        res.status(200).json(report);
+    } catch (err) {
+        res.status(500).json({ err: err.message });
+    }
+};
