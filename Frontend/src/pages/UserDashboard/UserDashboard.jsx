@@ -23,6 +23,7 @@ const UserDashboard = () => {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, []);
 
@@ -146,20 +147,10 @@ const UserDashboard = () => {
     };
 
     return (
-            </div >
+        <div className="dashboard-container">
+            <div className="content-wrapper">{renderContent()}</div>
 
-    <div className="card" style={{ padding: '32px' }}>
-        <h2>Welcome, {user?.name || 'Patient'}!</h2>
-        <p style={{ color: '#6b7280', marginTop: '16px' }}>
-            This is your personal health dashboard.
-        </p>
-
-        <div style={{ marginTop: '32px', padding: '24px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}>
-            <h3 style={{ marginTop: 0 }}>Your Health Overview</h3>
-            <p>No active appointments or medications found.</p>
         </div>
-    </div>
-        </div >
     );
 };
 
