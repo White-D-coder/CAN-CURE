@@ -48,7 +48,7 @@ function Login() {
                     <div className="input-group">
                         <label>Email / Username</label>
                         <input
-                            type="email"
+                            type="text"
                             placeholder="you@example.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}

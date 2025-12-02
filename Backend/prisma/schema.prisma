@@ -3,53 +3,52 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
-
 
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  name     String?
-  password String
-  medicines Medicine[]
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  email        String        @unique
+  name         String?
+  password     String
+  medicines    Medicine[]
   Appointments Appointment[]
-  CancerType CancerType[]
-  Reports    Report[]
-  
-}
-
-model Doctor {
-  doctorId     Int @id @default(autoincrement())
-  name         String
-  specialist   String
-  experience   Int
-  email        String @unique
-  password     String @default("password123")
-  appointments Appointment[]
+  CancerType   CancerType[]
   Reports      Report[]
 }
 
+model Doctor {
+  doctorId     String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  specialist   String
+  experience   Int
+  email        String        @unique
+  password     String        @default("password123")
+  appointments Appointment[]
+  Reports      Report[]
+  medicines    Medicine[]
+}
+
 model Appointment {
-  id          Int      @id @default(autoincrement())
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
   date        String
   time        String
   patientName String
-  doctor      Doctor   @relation(fields: [doctorId], references: [doctorId])
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  doctorId    Int
+  doctor      Doctor @relation(fields: [doctorId], references: [doctorId])
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String @db.ObjectId
+  doctorId    String @db.ObjectId
 }
 
 model Admin {
-  adminId  Int    @id @default(autoincrement())
+  adminId  String @id @default(auto()) @map("_id") @db.ObjectId
   username String @unique
   password String
 }
 
 model Medicine {
-  medId       Int      @id @default(autoincrement())
+  medId       String   @id @default(auto()) @map("_id") @db.ObjectId
   medName     String
   description String
   dose        String
@@ -57,28 +56,29 @@ model Medicine {
   startDate   DateTime
   endDate     DateTime
   user        User     @relation(fields: [userId], references: [id])
-  userId      Int
+  userId      String   @db.ObjectId
+  doctor      Doctor?  @relation(fields: [doctorId], references: [doctorId])
+  doctorId    String?  @db.ObjectId
 }
 
 model CancerType {
-  cancerId    Int    @id @default(autoincrement())
+  cancerId    String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   stage       Int
   description String
   symptoms    String
   treatments  String
   user        User   @relation(fields: [userId], references: [id])
-  userId      Int
+  userId      String @db.ObjectId
 }
 
-
 model Report {
-  reportId    Int      @id @default(autoincrement())
-  reportName  String
-  reportUrl   String
-  date        DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  doctor      Doctor?  @relation(fields: [doctorId], references: [doctorId])
-  doctorId    Int?
+  reportId   String   @id @default(auto()) @map("_id") @db.ObjectId
+  reportName String
+  reportUrl  String
+  date       DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  doctor     Doctor?  @relation(fields: [doctorId], references: [doctorId])
+  doctorId   String?  @db.ObjectId
 }

@@ -5,11 +5,7 @@ import Signup from './pages/Auth/Signup';
 import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import UserDashboard from './pages/UserDashboard/UserDashboard';
-
-const PrivateRoute = ({ children }) => {
-    const { token } = useAuth();
-    return token ? children : <Navigate to="/login" />;
-};
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
     return (
@@ -17,30 +13,34 @@ function App() {
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+
                 <Route
                     path="/admin"
                     element={
-                        <PrivateRoute>
+                        <ProtectedRoute allowedRoles={['admin']}>
                             <AdminDashboard />
-                        </PrivateRoute>
+                        </ProtectedRoute>
                     }
                 />
+
                 <Route
                     path="/doctors"
                     element={
-                        <PrivateRoute>
+                        <ProtectedRoute allowedRoles={['doctor', 'admin']}>
                             <DoctorDashboard />
-                        </PrivateRoute>
+                        </ProtectedRoute>
                     }
                 />
+
                 <Route
                     path="/dashboard"
                     element={
-                        <PrivateRoute>
+                        <ProtectedRoute allowedRoles={['patient', 'admin']}>
                             <UserDashboard />
-                        </PrivateRoute>
+                        </ProtectedRoute>
                     }
                 />
+
                 <Route path="/" element={<Navigate to="/login" />} />
             </Routes>
         </Router>

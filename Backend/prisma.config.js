@@ -7,7 +7,7 @@ export default defineConfig({
   schema: "./prisma/schema.prisma",
 
   datasource: {
-    adapter: "mysql",
+    adapter: "mongodb",
     url: process.env.DATABASE_URL,
   },
 });

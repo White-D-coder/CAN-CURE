@@ -1,0 +1,24 @@
+import express from 'express';
+import {
+    getD,
+    getDocId,
+    getDoctorAppointments,
+    getPatientDetails,
+    addPrescription,
+    updatePrescription
+} from '../controllers/doctor.controller.js';
+
+import { verifyDoctor } from '../middleware/middleware.js';
+
+const router = express.Router();
+
+router.use(verifyDoctor);
+
+router.get('/', getD);
+router.get('/:id', getDocId);
+router.get('/:id/appointments', getDoctorAppointments);
+router.get('/:doctorId/patient/:patientId', getPatientDetails);
+router.post('/:id/patient/:patientId/prescription', addPrescription);
+router.put('/:id/patient/:patientId/prescription/:medId', updatePrescription);
+
+export default router;

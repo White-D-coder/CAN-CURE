@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getDoctorAppointments, getPatientDetails } from '../../api/doctor';
+import { getDoctorAppointments, getPatientDetails, addPrescription, updatePrescription } from '../../api/doctor';
 
 const DoctorDashboard = () => {
     const { user, logout } = useAuth();
@@ -8,6 +8,16 @@ const DoctorDashboard = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [prescriptionForm, setPrescriptionForm] = useState({
+        medName: '',
+        description: '',
+        dose: '',
+        frequency: '',
+        startDate: '',
+        endDate: ''
+    });
+    const [editingPrescriptionId, setEditingPrescriptionId] = useState(null);
+    const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
 
     useEffect(() => {
         if (user && user.id) {
@@ -42,6 +52,55 @@ const DoctorDashboard = () => {
 
     const closePatientView = () => {
         setSelectedPatient(null);
+        setShowPrescriptionForm(false);
+        setEditingPrescriptionId(null);
+        setPrescriptionForm({
+            medName: '',
+            description: '',
+            dose: '',
+            frequency: '',
+            startDate: '',
+            endDate: ''
+        });
+    };
+
+    const handlePrescriptionSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingPrescriptionId) {
+                await updatePrescription(user.id, selectedPatient.id, editingPrescriptionId, prescriptionForm);
+            } else {
+                await addPrescription(user.id, selectedPatient.id, prescriptionForm);
+            }
+            // Refresh patient details
+            await handleViewPatient(selectedPatient.id);
+            setShowPrescriptionForm(false);
+            setEditingPrescriptionId(null);
+            setPrescriptionForm({
+                medName: '',
+                description: '',
+                dose: '',
+                frequency: '',
+                startDate: '',
+                endDate: ''
+            });
+        } catch (err) {
+            console.error('Error saving prescription:', err);
+            setError('Failed to save prescription.');
+        }
+    };
+
+    const handleEditPrescription = (med) => {
+        setPrescriptionForm({
+            medName: med.medName,
+            description: med.description,
+            dose: med.dose,
+            frequency: med.frequency,
+            startDate: med.startDate.split('T')[0],
+            endDate: med.endDate.split('T')[0]
+        });
+        setEditingPrescriptionId(med.medId);
+        setShowPrescriptionForm(true);
     };
 
     if (loading && !selectedPatient) return <div className="container" style={{ padding: '32px', textAlign: 'center' }}>Loading...</div>;
@@ -139,14 +198,110 @@ const DoctorDashboard = () => {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
                         <div className="card">
-                            <h3 style={{ marginTop: 0, marginBottom: '16px' }}>Medical History</h3>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                <h3 style={{ marginTop: 0 }}>Medical History</h3>
+                                <button
+                                    onClick={() => setShowPrescriptionForm(!showPrescriptionForm)}
+                                    className="btn"
+                                    style={{ padding: '4px 8px', fontSize: '12px' }}
+                                >
+                                    {showPrescriptionForm ? 'Cancel' : '+ Add Prescription'}
+                                </button>
+                            </div>
+
+                            {showPrescriptionForm && (
+                                <form onSubmit={handlePrescriptionSubmit} style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px' }}>
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Medicine Name</label>
+                                        <input
+                                            type="text"
+                                            value={prescriptionForm.medName}
+                                            onChange={(e) => setPrescriptionForm({ ...prescriptionForm, medName: e.target.value })}
+                                            required
+                                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        />
+                                    </div>
+                                    <div style={{ marginBottom: '12px' }}>
+                                        <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Description</label>
+                                        <input
+                                            type="text"
+                                            value={prescriptionForm.description}
+                                            onChange={(e) => setPrescriptionForm({ ...prescriptionForm, description: e.target.value })}
+                                            required
+                                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Dose</label>
+                                            <input
+                                                type="text"
+                                                value={prescriptionForm.dose}
+                                                onChange={(e) => setPrescriptionForm({ ...prescriptionForm, dose: e.target.value })}
+                                                required
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Frequency</label>
+                                            <input
+                                                type="text"
+                                                value={prescriptionForm.frequency}
+                                                onChange={(e) => setPrescriptionForm({ ...prescriptionForm, frequency: e.target.value })}
+                                                required
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>Start Date</label>
+                                            <input
+                                                type="date"
+                                                value={prescriptionForm.startDate}
+                                                onChange={(e) => setPrescriptionForm({ ...prescriptionForm, startDate: e.target.value })}
+                                                required
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px' }}>End Date</label>
+                                            <input
+                                                type="date"
+                                                value={prescriptionForm.endDate}
+                                                onChange={(e) => setPrescriptionForm({ ...prescriptionForm, endDate: e.target.value })}
+                                                required
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <button type="submit" className="btn" style={{ width: '100%' }}>
+                                        {editingPrescriptionId ? 'Update Prescription' : 'Add Prescription'}
+                                    </button>
+                                </form>
+                            )}
+
                             {selectedPatient.medicines && selectedPatient.medicines.length > 0 ? (
                                 <ul style={{ paddingLeft: '20px' }}>
                                     {selectedPatient.medicines.map((med) => (
-                                        <li key={med.medId} style={{ marginBottom: '8px' }}>
-                                            <strong>{med.medName}</strong> - {med.dose} ({med.frequency})
-                                            <br />
-                                            <span style={{ fontSize: '12px', color: '#6b7280' }}>{med.description}</span>
+                                        <li key={med.medId} style={{ marginBottom: '12px' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                                <div>
+                                                    <strong>{med.medName}</strong> - {med.dose} ({med.frequency})
+                                                    <br />
+                                                    <span style={{ fontSize: '12px', color: '#6b7280' }}>{med.description}</span>
+                                                    <br />
+                                                    <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                        {new Date(med.startDate).toLocaleDateString()} - {new Date(med.endDate).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleEditPrescription(med)}
+                                                    style={{ background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', fontSize: '12px' }}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>

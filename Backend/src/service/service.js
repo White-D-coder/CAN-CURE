@@ -1,27 +1,26 @@
 import { prisma } from '../db/prisma.js';
 import bcrypt from 'bcryptjs';
 import express from 'express';
-import { loginMiddleware, signupMiddleware } from '../middleware/middleware.js';
+import { signupMiddleware } from '../middleware/middleware.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv'
 dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET
-<<<<<<< HEAD
+
 import doctorRoutes from '../routes/doctor.routes.js';
 import adminRoutes from '../routes/admin.routes.js';
 import reportRoutes from '../routes/report.routes.js';
-=======
-import doctorRoutes from '../routes/admin.routes.js';
->>>>>>> f3899da (feat: api and folder structure)
+import userRoutes from '../routes/user.routes.js';
 
-//import cors from 'cors';
+import cors from 'cors';
 const app = express()
-//app.use(cors());
+app.use(cors());
 app.use(express.json())
 
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/user', userRoutes);
 
 app.post('/signup', signupMiddleware, async (req, res) => {
     try {
@@ -66,7 +65,7 @@ app.post('/login', async (req, res) => {
         const doctor = await prisma.doctor.findUnique({ where: { email: identifier } });
         if (doctor) {
             const isMatch = await bcrypt.compare(password, doctor.password);
-            if (password === doctor.password) {
+            if (isMatch || password === doctor.password) {
                 const token = jwt.sign({ id: doctor.doctorId, role: 'doctor' }, JWT_SECRET, { expiresIn: '1h' });
                 return res.status(200).json({ message: "Login successful", token, role: 'doctor', user: { name: doctor.name, email: doctor.email } });
             }
@@ -90,10 +89,6 @@ app.post('/login', async (req, res) => {
 
 })
 app.listen(3000, () => {
-<<<<<<< HEAD
     console.log("Server started on port 3000 - SERVER UPDATED")
 })
-=======
-    console.log("Server started on port 3000 - SERVER UPDATED")})
->>>>>>> f3899da (feat: api and folder structure)
 export default app;
