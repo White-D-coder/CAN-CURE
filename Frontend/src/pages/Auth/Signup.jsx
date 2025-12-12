@@ -27,8 +27,8 @@ const Signup = () => {
                 password
             });
 
-            login(response.data.token, { email, username });
-            navigate('/doctors');
+            login(response.data.token, response.data.user);
+            navigate('/dashboard');
         } catch (err) {
             console.error("Signup Error:", err);
             setError(err.response?.data?.error || err.response?.data?.message || 'Signup failed. Please try again.');

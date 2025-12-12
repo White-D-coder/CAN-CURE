@@ -46,9 +46,19 @@ app.post('/signup', signupMiddleware, async (req, res) => {
                 password: newpassword
             }
         })
-        const token = jwt.sign({ email: newUser.email }, JWT_SECRET, { expiresIn: '1h' })
+        const token = jwt.sign({ id: newUser.id, role: 'patient' }, JWT_SECRET, { expiresIn: '1h' })
 
-        return res.status(201).json({ message: "User created", token })
+        return res.status(201).json({
+            message: "User created",
+            token,
+            role: 'patient',
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                role: 'patient'
+            }
+        })
 
 
     }
