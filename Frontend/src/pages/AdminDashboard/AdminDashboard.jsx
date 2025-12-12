@@ -9,7 +9,10 @@ import {
     deleteDoctor,
     createPatient,
     updatePatient,
-    deletePatient
+    deletePatient,
+    createTimeSlots,
+    updateSlotStatus,
+    getDoctorSlots
 } from '../../api/admin';
 
 const AdminDashboard = () => {
@@ -17,6 +20,8 @@ const AdminDashboard = () => {
     const [patients, setPatients] = useState([]);
     const [stats, setStats] = useState({ doctors: 0, patients: 0, appointments: 0 });
     const [activeTab, setActiveTab] = useState('doctors');
+
+    // Doctor Form Data
     const [doctorFormData, setDoctorFormData] = useState({
         name: '',
         specialist: '',
@@ -24,14 +29,27 @@ const AdminDashboard = () => {
         email: '',
         password: 'password123'
     });
+    const [editingDoctorId, setEditingDoctorId] = useState(null);
+
+    // Patient Form Data
     const [patientFormData, setPatientFormData] = useState({
         name: '',
         email: '',
         password: 'password123'
     });
-    const [editingDoctorId, setEditingDoctorId] = useState(null);
     const [editingPatientId, setEditingPatientId] = useState(null);
+
+    // Schedule Management Data
+    const [scheduleData, setScheduleData] = useState({
+        doctorId: '',
+        date: '',
+        slots: []
+    });
+    const [doctorSlots, setDoctorSlots] = useState([]);
+    const [newSlotTime, setNewSlotTime] = useState('');
+
     const [error, setError] = useState('');
+    const [successMsg, setSuccessMsg] = useState('');
     const { logout } = useAuth();
 
     useEffect(() => {
@@ -94,6 +112,7 @@ const AdminDashboard = () => {
             setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
             setEditingDoctorId(null);
             setError('');
+            setSuccessMsg('Doctor saved successfully');
             fetchDoctors();
         } catch (err) {
             console.error('Error saving doctor:', err);
@@ -113,6 +132,7 @@ const AdminDashboard = () => {
             setPatientFormData({ name: '', email: '', password: 'password123' });
             setEditingPatientId(null);
             setError('');
+            setSuccessMsg('Patient saved successfully');
             fetchPatients();
         } catch (err) {
             console.error('Error saving patient:', err);
@@ -120,6 +140,53 @@ const AdminDashboard = () => {
         }
     };
 
+    // Schedule Management Functions
+    const handleFetchSlots = async () => {
+        if (!scheduleData.doctorId || !scheduleData.date) return;
+        try {
+            const slots = await getDoctorSlots(scheduleData.doctorId, scheduleData.date);
+            setDoctorSlots(slots);
+        } catch (err) {
+            console.error("Error fetching slots:", err);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'schedule') {
+            handleFetchSlots();
+        }
+    }, [scheduleData.doctorId, scheduleData.date, activeTab]);
+
+    const handleCreateSlot = async () => {
+        if (!newSlotTime) return;
+        try {
+            await createTimeSlots({
+                doctorId: scheduleData.doctorId,
+                date: scheduleData.date,
+                slots: [newSlotTime]
+            });
+            setNewSlotTime('');
+            handleFetchSlots();
+            setSuccessMsg('Slot created successfully');
+        } catch (err) {
+            setError('Failed to create slot');
+        }
+    };
+
+    const handleToggleFreeze = async (slot) => {
+        try {
+            const newStatus = slot.status === 'FROZEN' ? 'PENDING' : 'FROZEN';
+            await updateSlotStatus({
+                slotId: slot.id,
+                status: newStatus
+            });
+            handleFetchSlots();
+        } catch (err) {
+            setError('Failed to update slot status');
+        }
+    };
+
+    // ... (Edit/Delete handlers remain same)
     const handleEditDoctor = (doctor) => {
         setDoctorFormData({
             name: doctor.name,
@@ -197,15 +264,13 @@ const AdminDashboard = () => {
             </div>
 
             {error && (
-                <div style={{
-                    backgroundColor: '#fee2e2',
-                    color: '#991b1b',
-                    padding: '12px',
-                    borderRadius: '6px',
-                    marginBottom: '24px',
-                    textAlign: 'center'
-                }}>
+                <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px', borderRadius: '6px', marginBottom: '24px', textAlign: 'center' }}>
                     {error}
+                </div>
+            )}
+            {successMsg && (
+                <div style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '12px', borderRadius: '6px', marginBottom: '24px', textAlign: 'center' }}>
+                    {successMsg}
                 </div>
             )}
 
@@ -240,97 +305,59 @@ const AdminDashboard = () => {
                 >
                     Manage Patients
                 </button>
+                <button
+                    onClick={() => setActiveTab('schedule')}
+                    style={{
+                        padding: '12px 24px',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: activeTab === 'schedule' ? '2px solid #4f46e5' : 'none',
+                        color: activeTab === 'schedule' ? '#4f46e5' : '#6b7280',
+                        fontWeight: activeTab === 'schedule' ? 'bold' : 'normal',
+                        cursor: 'pointer',
+                        fontSize: '16px'
+                    }}
+                >
+                    Manage Schedule
+                </button>
             </div>
 
-            {activeTab === 'doctors' ? (
+            {activeTab === 'doctors' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+                    {/* Doctor Form - Same as before */}
                     <div className="card" style={{ height: 'fit-content' }}>
-                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>
-                            {editingDoctorId ? 'Edit Doctor' : 'Add New Doctor'}
-                        </h3>
-
+                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>{editingDoctorId ? 'Edit Doctor' : 'Add New Doctor'}</h3>
                         <form onSubmit={handleDoctorSubmit}>
+                            {/* ... inputs ... */}
                             <div className="input-group">
                                 <label>Name</label>
-                                <input
-                                    type="text"
-                                    value={doctorFormData.name}
-                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, name: e.target.value })}
-                                    required
-                                    placeholder="Dr. John Doe"
-                                />
+                                <input type="text" value={doctorFormData.name} onChange={(e) => setDoctorFormData({ ...doctorFormData, name: e.target.value })} required placeholder="Dr. John Doe" />
                             </div>
-
                             <div className="input-group">
                                 <label>Specialist</label>
-                                <input
-                                    type="text"
-                                    value={doctorFormData.specialist}
-                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, specialist: e.target.value })}
-                                    required
-                                    placeholder="Cardiologist"
-                                />
+                                <input type="text" value={doctorFormData.specialist} onChange={(e) => setDoctorFormData({ ...doctorFormData, specialist: e.target.value })} required placeholder="Cardiologist" />
                             </div>
-
                             <div className="input-group">
                                 <label>Experience (Years)</label>
-                                <input
-                                    type="number"
-                                    value={doctorFormData.experience}
-                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, experience: e.target.value })}
-                                    required
-                                    placeholder="5"
-                                    min="0"
-                                />
+                                <input type="number" value={doctorFormData.experience} onChange={(e) => setDoctorFormData({ ...doctorFormData, experience: e.target.value })} required placeholder="5" min="0" />
                             </div>
-
                             <div className="input-group">
                                 <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={doctorFormData.email}
-                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })}
-                                    required
-                                    placeholder="doctor@example.com"
-                                />
+                                <input type="email" value={doctorFormData.email} onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })} required placeholder="doctor@example.com" />
                             </div>
-
                             <div className="input-group">
                                 <label>Password</label>
-                                <input
-                                    type="text"
-                                    value={doctorFormData.password}
-                                    onChange={(e) => setDoctorFormData({ ...doctorFormData, password: e.target.value })}
-                                    required={!editingDoctorId}
-                                    placeholder={editingDoctorId ? "Leave blank to keep current" : "password123"}
-                                />
+                                <input type="text" value={doctorFormData.password} onChange={(e) => setDoctorFormData({ ...doctorFormData, password: e.target.value })} required={!editingDoctorId} placeholder={editingDoctorId ? "Leave blank to keep current" : "password123"} />
                             </div>
-
                             <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
-                                <button type="submit" className="btn" style={{ flex: 1 }}>
-                                    {editingDoctorId ? 'Update Doctor' : 'Add Doctor'}
-                                </button>
-
-                                {editingDoctorId && (
-                                    <button
-                                        type="button"
-                                        className="btn"
-                                        style={{ backgroundColor: '#6b7280' }}
-                                        onClick={() => {
-                                            setEditingDoctorId(null);
-                                            setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
-                                        }}
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
+                                <button type="submit" className="btn" style={{ flex: 1 }}>{editingDoctorId ? 'Update Doctor' : 'Add Doctor'}</button>
+                                {editingDoctorId && <button type="button" className="btn" style={{ backgroundColor: '#6b7280' }} onClick={() => { setEditingDoctorId(null); setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' }); }}>Cancel</button>}
                             </div>
                         </form>
                     </div>
 
                     <div className="card">
                         <h3 style={{ marginTop: 0, marginBottom: '24px' }}>Doctors List</h3>
-
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
@@ -343,113 +370,46 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {doctors.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
-                                                No doctors found. Add one to get started.
+                                    {doctors.map((doctor) => (
+                                        <tr key={doctor.doctorId} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                                            <td style={{ padding: '12px' }}>{doctor.name}</td>
+                                            <td style={{ padding: '12px' }}>{doctor.specialist}</td>
+                                            <td style={{ padding: '12px' }}>{doctor.experience}y</td>
+                                            <td style={{ padding: '12px' }}>{doctor.email}</td>
+                                            <td style={{ padding: '12px' }}>
+                                                <button onClick={() => handleEditDoctor(doctor)} style={{ marginRight: '16px', background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', fontWeight: 500 }}>Edit</button>
+                                                <button onClick={() => handleDeleteDoctor(doctor.doctorId)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 500 }}>Delete</button>
                                             </td>
                                         </tr>
-                                    ) : (
-                                        doctors.map((doctor) => (
-                                            <tr key={doctor.doctorId} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                                <td style={{ padding: '12px' }}>{doctor.name}</td>
-                                                <td style={{ padding: '12px' }}>{doctor.specialist}</td>
-                                                <td style={{ padding: '12px' }}>{doctor.experience}y</td>
-                                                <td style={{ padding: '12px' }}>{doctor.email}</td>
-                                                <td style={{ padding: '12px' }}>
-                                                    <button
-                                                        onClick={() => handleEditDoctor(doctor)}
-                                                        style={{
-                                                            marginRight: '16px',
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            color: '#4f46e5',
-                                                            cursor: 'pointer',
-                                                            fontWeight: 500
-                                                        }}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteDoctor(doctor.doctorId)}
-                                                        style={{
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            color: '#ef4444',
-                                                            cursor: 'pointer',
-                                                            fontWeight: 500
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
-                    <div className="card" style={{ height: 'fit-content' }}>
-                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>
-                            {editingPatientId ? 'Edit Patient' : 'Add New Patient'}
-                        </h3>
+            )}
 
+            {activeTab === 'patients' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+                    {/* Patient Form - Same as before */}
+                    <div className="card" style={{ height: 'fit-content' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>{editingPatientId ? 'Edit Patient' : 'Add New Patient'}</h3>
                         <form onSubmit={handlePatientSubmit}>
                             <div className="input-group">
                                 <label>Name</label>
-                                <input
-                                    type="text"
-                                    value={patientFormData.name}
-                                    onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })}
-                                    required
-                                    placeholder="John Doe"
-                                />
+                                <input type="text" value={patientFormData.name} onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })} required placeholder="John Doe" />
                             </div>
-
                             <div className="input-group">
                                 <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={patientFormData.email}
-                                    onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })}
-                                    required
-                                    placeholder="patient@example.com"
-                                />
+                                <input type="email" value={patientFormData.email} onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })} required placeholder="patient@example.com" />
                             </div>
-
                             <div className="input-group">
                                 <label>Password</label>
-                                <input
-                                    type="text"
-                                    value={patientFormData.password}
-                                    onChange={(e) => setPatientFormData({ ...patientFormData, password: e.target.value })}
-                                    required={!editingPatientId}
-                                    placeholder={editingPatientId ? "Leave blank to keep current" : "password123"}
-                                />
+                                <input type="text" value={patientFormData.password} onChange={(e) => setPatientFormData({ ...patientFormData, password: e.target.value })} required={!editingPatientId} placeholder={editingPatientId ? "Leave blank to keep current" : "password123"} />
                             </div>
-
                             <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
-                                <button type="submit" className="btn" style={{ flex: 1 }}>
-                                    {editingPatientId ? 'Update Patient' : 'Add Patient'}
-                                </button>
-
-                                {editingPatientId && (
-                                    <button
-                                        type="button"
-                                        className="btn"
-                                        style={{ backgroundColor: '#6b7280' }}
-                                        onClick={() => {
-                                            setEditingPatientId(null);
-                                            setPatientFormData({ name: '', email: '', password: 'password123' });
-                                        }}
-                                    >
-                                        Cancel
-                                    </button>
-                                )}
+                                <button type="submit" className="btn" style={{ flex: 1 }}>{editingPatientId ? 'Update Patient' : 'Add Patient'}</button>
+                                {editingPatientId && <button type="button" className="btn" style={{ backgroundColor: '#6b7280' }} onClick={() => { setEditingPatientId(null); setPatientFormData({ name: '', email: '', password: 'password123' }); }}>Cancel</button>}
                             </div>
                         </form>
                     </div>
@@ -468,62 +428,128 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {patients.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
-                                                No patients registered yet.
+                                    {patients.map((patient) => (
+                                        <tr key={patient.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                                            <td style={{ padding: '12px' }}>#{patient.id}</td>
+                                            <td style={{ padding: '12px' }}>{patient.name}</td>
+                                            <td style={{ padding: '12px' }}>{patient.email}</td>
+                                            <td style={{ padding: '12px' }}>
+                                                <span style={{ backgroundColor: '#e0e7ff', color: '#4f46e5', padding: '4px 8px', borderRadius: '12px', fontSize: '12px' }}>{patient._count?.Appointments || 0}</span>
+                                            </td>
+                                            <td style={{ padding: '12px' }}>
+                                                <button onClick={() => handleEditPatient(patient)} style={{ marginRight: '16px', background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', fontWeight: 500 }}>Edit</button>
+                                                <button onClick={() => handleDeletePatient(patient.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 500 }}>Delete</button>
                                             </td>
                                         </tr>
-                                    ) : (
-                                        patients.map((patient) => (
-                                            <tr key={patient.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                                <td style={{ padding: '12px' }}>#{patient.id}</td>
-                                                <td style={{ padding: '12px' }}>{patient.name}</td>
-                                                <td style={{ padding: '12px' }}>{patient.email}</td>
-                                                <td style={{ padding: '12px' }}>
-                                                    <span style={{
-                                                        backgroundColor: '#e0e7ff',
-                                                        color: '#4f46e5',
-                                                        padding: '4px 8px',
-                                                        borderRadius: '12px',
-                                                        fontSize: '12px'
-                                                    }}>
-                                                        {patient._count?.Appointments || 0}
-                                                    </span>
-                                                </td>
-                                                <td style={{ padding: '12px' }}>
-                                                    <button
-                                                        onClick={() => handleEditPatient(patient)}
-                                                        style={{
-                                                            marginRight: '16px',
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            color: '#4f46e5',
-                                                            cursor: 'pointer',
-                                                            fontWeight: 500
-                                                        }}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeletePatient(patient.id)}
-                                                        style={{
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            color: '#ef4444',
-                                                            cursor: 'pointer',
-                                                            fontWeight: 500
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'schedule' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+                    <div className="card" style={{ height: 'fit-content' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>Manage Schedule</h3>
+                        <div className="input-group">
+                            <label>Select Doctor</label>
+                            <select
+                                value={scheduleData.doctorId}
+                                onChange={(e) => setScheduleData({ ...scheduleData, doctorId: e.target.value })}
+                                style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                            >
+                                <option value="">-- Select Doctor --</option>
+                                {doctors.map(doc => (
+                                    <option key={doc.doctorId} value={doc.doctorId}>{doc.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="input-group">
+                            <label>Select Date</label>
+                            <input
+                                type="date"
+                                value={scheduleData.date}
+                                onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                                min={new Date().toISOString().split('T')[0]}
+                            />
+                        </div>
+
+                        <div style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '20px' }}>
+                            <h4 style={{ margin: '0 0 12px' }}>Add Time Slot</h4>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <input
+                                    type="time"
+                                    value={newSlotTime}
+                                    onChange={(e) => setNewSlotTime(e.target.value)}
+                                    style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                                />
+                                <button
+                                    onClick={handleCreateSlot}
+                                    className="btn"
+                                    disabled={!scheduleData.doctorId || !scheduleData.date || !newSlotTime}
+                                    style={{ opacity: (!scheduleData.doctorId || !scheduleData.date || !newSlotTime) ? 0.5 : 1 }}
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card">
+                        <h3 style={{ marginTop: 0, marginBottom: '24px' }}>
+                            Time Slots {scheduleData.date && `for ${scheduleData.date}`}
+                        </h3>
+
+                        {!scheduleData.doctorId || !scheduleData.date ? (
+                            <p style={{ color: '#6b7280', textAlign: 'center', padding: '20px' }}>
+                                Select a doctor and date to view slots.
+                            </p>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '12px' }}>
+                                {doctorSlots.length === 0 ? (
+                                    <p style={{ gridColumn: '1/-1', color: '#6b7280', textAlign: 'center' }}>No slots created yet.</p>
+                                ) : (
+                                    doctorSlots.map(slot => (
+                                        <div
+                                            key={slot.id}
+                                            style={{
+                                                border: '1px solid #e5e7eb',
+                                                borderRadius: '8px',
+                                                padding: '12px',
+                                                backgroundColor: slot.status === 'FROZEN' ? '#f3f4f6' :
+                                                    slot.status === 'BOOKED' ? '#e0e7ff' :
+                                                        slot.status === 'AVAILABLE' ? '#dcfce7' : '#fff',
+                                                opacity: slot.status === 'FROZEN' ? 0.7 : 1
+                                            }}
+                                        >
+                                            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{slot.time}</div>
+                                            <div style={{ fontSize: '12px', marginBottom: '8px', textTransform: 'uppercase', color: '#4b5563' }}>
+                                                {slot.status}
+                                            </div>
+                                            {slot.status !== 'BOOKED' && (
+                                                <button
+                                                    onClick={() => handleToggleFreeze(slot)}
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '4px',
+                                                        fontSize: '12px',
+                                                        backgroundColor: slot.status === 'FROZEN' ? '#4f46e5' : '#ef4444',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '4px',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                >
+                                                    {slot.status === 'FROZEN' ? 'Unfreeze' : 'Freeze'}
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

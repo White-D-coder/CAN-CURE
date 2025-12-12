@@ -25,16 +25,26 @@ app.use('/api/user', userRoutes);
 app.post('/signup', signupMiddleware, async (req, res) => {
     try {
         const { username, email, password } = req.body
-        const user = await prisma.user.findUnique({
-            where: { email: email }
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: email },
+                    { username: username }
+                ]
+            }
         })
         if (user) {
-            return res.status(409).json({ message: "User  already exists" })
+            return res.status(409).json({ message: "User or Email already exists" })
         }
         const newpassword = await bcrypt.hash(password, 10)
 
         const newUser = await prisma.user.create({
-            data: { name: username, email: email, password: newpassword }
+            data: {
+                username: username,
+                name: username, // Fallback for name
+                email: email,
+                password: newpassword
+            }
         })
         const token = jwt.sign({ email: newUser.email }, JWT_SECRET, { expiresIn: '1h' })
 
@@ -62,7 +72,14 @@ app.post('/login', async (req, res) => {
             }
         }
 
-        const doctor = await prisma.doctor.findUnique({ where: { email: identifier } });
+        const doctor = await prisma.doctor.findFirst({
+            where: {
+                OR: [
+                    { email: identifier },
+                    { username: identifier }
+                ]
+            }
+        });
         if (doctor) {
             const isMatch = await bcrypt.compare(password, doctor.password);
             if (isMatch || password === doctor.password) {
@@ -71,7 +88,14 @@ app.post('/login', async (req, res) => {
             }
         }
 
-        const user = await prisma.user.findUnique({ where: { email: identifier } });
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: identifier },
+                    { username: identifier }
+                ]
+            }
+        });
         if (user) {
             const isMatch = await bcrypt.compare(password, user.password);
             if (isMatch) {

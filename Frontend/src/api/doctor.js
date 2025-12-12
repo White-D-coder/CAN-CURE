@@ -29,3 +29,13 @@ export const updateReport = async (reportId, data) => {
     const response = await api.patch(`/api/reports/${reportId}`, data);
     return response.data;
 };
+
+export const getDoctorSlots = async (doctorId, date) => {
+    const response = await api.get(`/api/doctors/schedule?doctorId=${doctorId}&date=${date}`);
+    return response.data;
+};
+
+export const approveSlot = async (slotId) => {
+    const response = await api.put(`/api/doctors/schedule/approve`, { slotId });
+    return response.data;
+};

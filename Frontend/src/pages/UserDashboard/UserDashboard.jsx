@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getDashboardData, getDoctors, bookAppointment } from '../../api/user';
+import { getDashboardData, getDoctors, bookAppointment, getDoctorAvailability } from '../../api/user';
 import { useNavigate } from 'react-router-dom';
 
 const UserDashboard = () => {
@@ -41,6 +41,34 @@ const UserDashboard = () => {
         navigate('/login');
     };
 
+    const [availability, setAvailability] = useState({ isFull: false, availableSlots: [] });
+    const [checkingAvailability, setCheckingAvailability] = useState(false);
+
+    useEffect(() => {
+        const checkAvailability = async () => {
+            if (bookingData.doctorId && bookingData.date) {
+                setCheckingAvailability(true);
+                try {
+                    const data = await getDoctorAvailability(bookingData.doctorId, bookingData.date);
+                    setAvailability(data);
+                    // Reset time if currently selected time is not available
+                    if (bookingData.time && !data.availableSlots.includes(bookingData.time)) {
+                        setBookingData(prev => ({ ...prev, time: '' }));
+                    }
+                } catch (err) {
+                    console.error("Failed to check availability", err);
+                    setAvailability({ isFull: false, availableSlots: [] });
+                } finally {
+                    setCheckingAvailability(false);
+                }
+            } else {
+                setAvailability({ isFull: false, availableSlots: [] });
+            }
+        };
+
+        checkAvailability();
+    }, [bookingData.doctorId, bookingData.date]);
+
     const handleBookingChange = (e) => {
         setBookingData({ ...bookingData, [e.target.name]: e.target.value });
     };
@@ -55,8 +83,13 @@ const UserDashboard = () => {
             const data = await getDashboardData();
             setDashboardData(data);
             setBookingData({ doctorId: '', date: '', time: '', patientName: user?.name || '' });
+            // Re-check availability to update slots immediately
+            if (bookingData.doctorId && bookingData.date) {
+                const avail = await getDoctorAvailability(bookingData.doctorId, bookingData.date);
+                setAvailability(avail);
+            }
         } catch (err) {
-            setBookingStatus('Failed to book appointment.');
+            setBookingStatus(err.response?.data?.message || 'Failed to book appointment.');
             console.error(err);
         }
     };
@@ -66,6 +99,7 @@ const UserDashboard = () => {
 
     const renderContent = () => {
         switch (activeTab) {
+            // ... (other cases remain same, only 'book' changes)
             case 'overview':
                 return (
                     <div className="dashboard-section">
@@ -147,17 +181,35 @@ const UserDashboard = () => {
                                     value={bookingData.date}
                                     onChange={handleBookingChange}
                                     required
+                                    min={new Date().toISOString().split('T')[0]}
                                 />
+                                {availability.isFull && (
+                                    <p style={{ color: 'red', fontSize: '0.9rem', marginTop: '5px' }}>
+                                        Doctor is fully booked for this date. Please choose another date.
+                                    </p>
+                                )}
                             </div>
                             <div className="form-group">
-                                <label>Time</label>
-                                <input
-                                    type="time"
+                                <label>Time Slot</label>
+                                <select
                                     name="time"
                                     value={bookingData.time}
                                     onChange={handleBookingChange}
                                     required
-                                />
+                                    disabled={!bookingData.date || availability.availableSlots.length === 0}
+                                >
+                                    <option value="">-- Select Time Slot --</option>
+                                    {availability.availableSlots.map(slot => (
+                                        <option key={slot} value={slot}>
+                                            {slot}
+                                        </option>
+                                    ))}
+                                </select>
+                                {bookingData.date && availability.availableSlots.length === 0 && !availability.isFull && (
+                                    <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '5px' }}>
+                                        No available slots for this date.
+                                    </p>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>Patient Name</label>
@@ -169,7 +221,14 @@ const UserDashboard = () => {
                                     required
                                 />
                             </div>
-                            <button type="submit" className="submit-btn">Book Appointment</button>
+                            <button
+                                type="submit"
+                                className="submit-btn"
+                                disabled={availability.isFull || !bookingData.time}
+                                style={availability.isFull ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                            >
+                                Book Appointment
+                            </button>
                             {bookingStatus && <p className="status-msg">{bookingStatus}</p>}
                         </form>
                     </div>

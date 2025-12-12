@@ -2,18 +2,24 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axios';
+import { motion } from 'framer-motion';
+import { User, Mail, Lock, Activity, ArrowRight, AlertCircle } from 'lucide-react';
 
 const Signup = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
         try {
             const response = await api.post('/signup', {
                 username,
@@ -26,63 +32,130 @@ const Signup = () => {
         } catch (err) {
             console.error("Signup Error:", err);
             setError(err.response?.data?.error || err.response?.data?.message || 'Signup failed. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="container" style={{ maxWidth: '400px', marginTop: '64px' }}>
-            <div className="card">
-                <h2 style={{ textAlign: 'center', marginBottom: '32px' }}>Sign Up</h2>
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="card"
+                style={{ width: '100%', maxWidth: '450px', padding: '40px' }}
+            >
+                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                        style={{
+                            width: '64px',
+                            height: '64px',
+                            background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                            borderRadius: '16px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto 16px',
+                            boxShadow: '0 10px 25px -5px rgba(2, 132, 199, 0.4)'
+                        }}
+                    >
+                        <Activity size={32} color="white" />
+                    </motion.div>
+                    <h2 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>Create Account</h2>
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Join our medical platform today</p>
+                </div>
 
                 {error && (
-                    <div style={{ color: 'red', marginBottom: '16px', textAlign: 'center' }}>
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="error-message"
+                        style={{
+                            background: '#fef2f2',
+                            border: '1px solid #fee2e2',
+                            color: '#ef4444',
+                            padding: '12px',
+                            borderRadius: '8px',
+                            marginBottom: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '0.9rem'
+                        }}
+                    >
+                        <AlertCircle size={18} />
                         {error}
-                    </div>
+                    </motion.div>
                 )}
 
                 <form onSubmit={handleSubmit}>
                     <div className="input-group">
                         <label>Username</label>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            placeholder="Enter your username"
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <User className="input-icon" size={20} />
+                            <input
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                                placeholder="Choose a username"
+                            />
+                        </div>
                     </div>
 
                     <div className="input-group">
                         <label>Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            placeholder="Enter your email"
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <Mail className="input-icon" size={20} />
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                                placeholder="Enter your email"
+                            />
+                        </div>
                     </div>
 
                     <div className="input-group">
                         <label>Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            placeholder="Enter your password"
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <Lock className="input-icon" size={20} />
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                placeholder="Create a strong password"
+                            />
+                        </div>
                     </div>
 
-                    <button type="submit" className="btn" style={{ width: '100%', marginTop: '16px' }}>
-                        Create Account
-                    </button>
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        type="submit"
+                        className="btn"
+                        style={{ width: '100%', marginTop: '8px' }}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Creating Account...' : (
+                            <>
+                                Sign Up <ArrowRight size={18} />
+                            </>
+                        )}
+                    </motion.button>
                 </form>
 
-                <p style={{ marginTop: '16px', textAlign: 'center' }}>
-                    Already have an account? <Link to="/login">Login</Link>
+                <p style={{ marginTop: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                    Already have an account?{' '}
+                    <Link to="/login" style={{ fontWeight: '600' }}>Sign In</Link>
                 </p>
-            </div>
+            </motion.div>
         </div>
     );
 };

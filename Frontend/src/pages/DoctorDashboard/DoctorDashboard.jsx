@@ -1,13 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { getDoctorAppointments, getPatientDetails, addPrescription, updatePrescription, addReport, updateReport } from '../../api/doctor';
+import {
+    getDoctorAppointments,
+    getPatientDetails,
+    addPrescription,
+    updatePrescription,
+    addReport,
+    updateReport,
+    getDoctorSlots,
+    approveSlot
+} from '../../api/doctor';
 
 const DoctorDashboard = () => {
     const { user, logout } = useAuth();
+    const [activeTab, setActiveTab] = useState('appointments'); // 'appointments' or 'schedule'
     const [appointments, setAppointments] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Schedule State
+    const [scheduleDate, setScheduleDate] = useState('');
+    const [mySlots, setMySlots] = useState([]);
 
     // Prescription State
     const [prescriptionForm, setPrescriptionForm] = useState({
@@ -44,6 +58,33 @@ const DoctorDashboard = () => {
             console.error('Error fetching appointments:', err);
             setError('Failed to load appointments.');
             setLoading(false);
+        }
+    };
+
+    // Schedule Functions
+    const fetchMySlots = async () => {
+        if (!user.id || !scheduleDate) return;
+        try {
+            const slots = await getDoctorSlots(user.id, scheduleDate);
+            setMySlots(slots);
+        } catch (err) {
+            console.error("Error fetching slots:", err);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'schedule') {
+            fetchMySlots();
+        }
+    }, [scheduleDate, activeTab]);
+
+    const handleApproveSlot = async (slotId) => {
+        try {
+            await approveSlot(slotId);
+            fetchMySlots();
+        } catch (err) {
+            console.error("Error approving slot:", err);
+            setError("Failed to approve slot");
         }
     };
 
@@ -183,43 +224,152 @@ const DoctorDashboard = () => {
             )}
 
             {!selectedPatient ? (
-                <div className="card">
-                    <h2 style={{ marginTop: 0, marginBottom: '24px' }}>Your Appointments</h2>
-                    {appointments.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#6b7280', padding: '32px' }}>No appointments scheduled.</p>
+                <>
+                    <div style={{ marginBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
+                        <button
+                            onClick={() => setActiveTab('appointments')}
+                            style={{
+                                padding: '12px 24px',
+                                background: 'none',
+                                border: 'none',
+                                borderBottom: activeTab === 'appointments' ? '2px solid #4f46e5' : 'none',
+                                color: activeTab === 'appointments' ? '#4f46e5' : '#6b7280',
+                                fontWeight: activeTab === 'appointments' ? 'bold' : 'normal',
+                                cursor: 'pointer',
+                                fontSize: '16px'
+                            }}
+                        >
+                            Appointments
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('schedule')}
+                            style={{
+                                padding: '12px 24px',
+                                background: 'none',
+                                border: 'none',
+                                borderBottom: activeTab === 'schedule' ? '2px solid #4f46e5' : 'none',
+                                color: activeTab === 'schedule' ? '#4f46e5' : '#6b7280',
+                                fontWeight: activeTab === 'schedule' ? 'bold' : 'normal',
+                                cursor: 'pointer',
+                                fontSize: '16px'
+                            }}
+                        >
+                            My Schedule
+                        </button>
+                    </div>
+
+                    {activeTab === 'appointments' ? (
+                        <div className="card">
+                            <h2 style={{ marginTop: 0, marginBottom: '24px' }}>Your Appointments</h2>
+                            {appointments.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: '#6b7280', padding: '32px' }}>No appointments scheduled.</p>
+                            ) : (
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
+                                                <th style={{ padding: '12px' }}>Date</th>
+                                                <th style={{ padding: '12px' }}>Time</th>
+                                                <th style={{ padding: '12px' }}>Patient Name</th>
+                                                <th style={{ padding: '12px' }}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {appointments.map((apt) => (
+                                                <tr key={apt.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                                                    <td style={{ padding: '12px' }}>{apt.date}</td>
+                                                    <td style={{ padding: '12px' }}>{apt.time}</td>
+                                                    <td style={{ padding: '12px' }}>{apt.user.name}</td>
+                                                    <td style={{ padding: '12px' }}>
+                                                        <button
+                                                            onClick={() => handleViewPatient(apt.userId)}
+                                                            className="btn"
+                                                            style={{ padding: '6px 12px', fontSize: '14px' }}
+                                                        >
+                                                            View Records
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
                     ) : (
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ borderBottom: '2px solid #e5e7eb', textAlign: 'left' }}>
-                                        <th style={{ padding: '12px' }}>Date</th>
-                                        <th style={{ padding: '12px' }}>Time</th>
-                                        <th style={{ padding: '12px' }}>Patient Name</th>
-                                        <th style={{ padding: '12px' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {appointments.map((apt) => (
-                                        <tr key={apt.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                            <td style={{ padding: '12px' }}>{apt.date}</td>
-                                            <td style={{ padding: '12px' }}>{apt.time}</td>
-                                            <td style={{ padding: '12px' }}>{apt.user.name}</td>
-                                            <td style={{ padding: '12px' }}>
-                                                <button
-                                                    onClick={() => handleViewPatient(apt.userId)}
-                                                    className="btn"
-                                                    style={{ padding: '6px 12px', fontSize: '14px' }}
-                                                >
-                                                    View Records
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="card">
+                            <h2 style={{ marginTop: 0, marginBottom: '24px' }}>My Schedule</h2>
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ marginRight: '12px' }}>Select Date:</label>
+                                <input
+                                    type="date"
+                                    value={scheduleDate}
+                                    onChange={(e) => setScheduleDate(e.target.value)}
+                                    min={new Date().toISOString().split('T')[0]}
+                                    style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+                                />
+                            </div>
+
+                            {!scheduleDate ? (
+                                <p style={{ color: '#6b7280', textAlign: 'center', padding: '20px' }}>
+                                    Select a date to view your time slots.
+                                </p>
+                            ) : (
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' }}>
+                                    {mySlots.length === 0 ? (
+                                        <p style={{ gridColumn: '1/-1', color: '#6b7280', textAlign: 'center' }}>
+                                            No slots assigned for this date.
+                                        </p>
+                                    ) : (
+                                        mySlots.map(slot => (
+                                            <div
+                                                key={slot.id}
+                                                style={{
+                                                    border: '1px solid #e5e7eb',
+                                                    borderRadius: '8px',
+                                                    padding: '16px',
+                                                    backgroundColor: slot.status === 'PENDING' ? '#fff7ed' :
+                                                        slot.status === 'AVAILABLE' ? '#dcfce7' :
+                                                            slot.status === 'BOOKED' ? '#e0e7ff' : '#f3f4f6',
+                                                    textAlign: 'center'
+                                                }}
+                                            >
+                                                <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>{slot.time}</div>
+                                                <div style={{
+                                                    fontSize: '12px',
+                                                    marginBottom: '12px',
+                                                    textTransform: 'uppercase',
+                                                    fontWeight: 'bold',
+                                                    color: slot.status === 'PENDING' ? '#c2410c' :
+                                                        slot.status === 'AVAILABLE' ? '#166534' :
+                                                            slot.status === 'BOOKED' ? '#4338ca' : '#4b5563'
+                                                }}>
+                                                    {slot.status}
+                                                </div>
+
+                                                {slot.status === 'PENDING' ? (
+                                                    <button
+                                                        onClick={() => handleApproveSlot(slot.id)}
+                                                        className="btn"
+                                                        style={{ width: '100%', fontSize: '14px', padding: '6px' }}
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                ) : slot.status === 'FROZEN' ? (
+                                                    <span style={{ fontSize: '12px', color: '#ef4444' }}>Frozen by Admin</span>
+                                                ) : (
+                                                    <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                        {slot.status === 'BOOKED' ? 'Booked' : 'Active'}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
-                </div>
+                </>
             ) : (
                 <div>
                     <button

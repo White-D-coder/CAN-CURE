@@ -46,3 +46,18 @@ export const deletePatient = async (id) => {
     const response = await axios.delete(`${API_URL}/patients/${id}`);
     return response.data;
 };
+
+export const createTimeSlots = async (data) => {
+    const response = await axios.post(`${API_URL}/schedule/create`, data);
+    return response.data;
+};
+
+export const updateSlotStatus = async (data) => {
+    const response = await axios.put(`${API_URL}/schedule/status`, data);
+    return response.data;
+};
+
+export const getDoctorSlots = async (doctorId, date) => {
+    const response = await axios.get(`${API_URL}/schedule?doctorId=${doctorId}&date=${date}`);
+    return response.data;
+};
