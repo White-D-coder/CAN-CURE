@@ -25,7 +25,6 @@ function Login() {
 
         try {
             const res = await api.post('/login', { identifier: email, password });
-            console.log("this is res",res)
             login(res.data.token, { ...res.data.user, role: res.data.role });
 
             if (res.data.role === 'admin') {
