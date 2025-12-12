@@ -17,10 +17,6 @@ const app = express()
 app.use(cors());
 app.use(express.json())
 
-app.use('/',(req,res) => {
-    res.send('OK server is running')
-})
-
 
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/admin', adminRoutes);
