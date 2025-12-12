@@ -22,6 +22,10 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/user', userRoutes);
 
+app.get('/', (req, res) => {
+    res.send("Welcome to CAN-CURE Backend Service")
+})
+
 app.post('/signup', signupMiddleware, async (req, res) => {
     try {
         const { username, email, password } = req.body
