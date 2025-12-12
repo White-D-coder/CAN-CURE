@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getDashboardData, getDoctors, bookAppointment, getDoctorAvailability } from '../../api/user';
 import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Calendar, FileText, Pill, LogOut, User, Clock, CheckCircle, AlertCircle, Plus, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const UserDashboard = () => {
     const { user, logout } = useAuth();
@@ -18,6 +20,9 @@ const UserDashboard = () => {
         patientName: user?.name || ''
     });
     const [bookingStatus, setBookingStatus] = useState('');
+
+    const [availability, setAvailability] = useState({ isFull: false, availableSlots: [] });
+    const [checkingAvailability, setCheckingAvailability] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,14 +41,6 @@ const UserDashboard = () => {
         fetchData();
     }, []);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
-
-    const [availability, setAvailability] = useState({ isFull: false, availableSlots: [] });
-    const [checkingAvailability, setCheckingAvailability] = useState(false);
-
     useEffect(() => {
         const checkAvailability = async () => {
             if (bookingData.doctorId && bookingData.date) {
@@ -51,7 +48,6 @@ const UserDashboard = () => {
                 try {
                     const data = await getDoctorAvailability(bookingData.doctorId, bookingData.date);
                     setAvailability(data);
-                    // Reset time if currently selected time is not available
                     if (bookingData.time && !data.availableSlots.includes(bookingData.time)) {
                         setBookingData(prev => ({ ...prev, time: '' }));
                     }
@@ -69,6 +65,11 @@ const UserDashboard = () => {
         checkAvailability();
     }, [bookingData.doctorId, bookingData.date]);
 
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
+
     const handleBookingChange = (e) => {
         setBookingData({ ...bookingData, [e.target.name]: e.target.value });
     };
@@ -79,231 +80,336 @@ const UserDashboard = () => {
         try {
             await bookAppointment(bookingData);
             setBookingStatus('Appointment booked successfully!');
-            // Refresh dashboard data
             const data = await getDashboardData();
             setDashboardData(data);
             setBookingData({ doctorId: '', date: '', time: '', patientName: user?.name || '' });
-            // Re-check availability to update slots immediately
             if (bookingData.doctorId && bookingData.date) {
                 const avail = await getDoctorAvailability(bookingData.doctorId, bookingData.date);
                 setAvailability(avail);
             }
+            setTimeout(() => setBookingStatus(''), 3000);
         } catch (err) {
             setBookingStatus(err.response?.data?.message || 'Failed to book appointment.');
-            console.error(err);
         }
     };
 
-    if (loading) return <div className="loading">Loading...</div>;
-    if (error) return <div className="error">{error}</div>;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="flex items-center gap-3 text-primary-600 font-medium">
+                <div className="animate-spin"><LayoutDashboard size={24} /></div>
+                Loading dashboard...
+            </div>
+        </div>
+    );
+    
+    if (error) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="text-red-500 font-medium flex items-center gap-2">
+                <AlertCircle size={20} /> {error}
+            </div>
+        </div>
+    );
 
     const renderContent = () => {
         switch (activeTab) {
-            // ... (other cases remain same, only 'book' changes)
             case 'overview':
                 return (
-                    <div className="dashboard-section">
-                        <h3>Welcome back, {user?.name}</h3>
-                        <div className="stats-grid">
-                            <div className="stat-card">
-                                <h4>Appointments</h4>
-                                <p>{dashboardData?.Appointments?.length || 0}</p>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                        <header className="mb-8">
+                            <h2 className="text-2xl font-bold text-slate-800">Welcome back, {user?.name}</h2>
+                            <p className="text-slate-500">Here's an overview of your health records</p>
+                        </header>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                                    <Calendar size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 text-sm font-medium">Appointments</p>
+                                    <p className="text-2xl font-bold text-slate-900">{dashboardData?.Appointments?.length || 0}</p>
+                                </div>
                             </div>
-                            <div className="stat-card">
-                                <h4>Prescriptions</h4>
-                                <p>{dashboardData?.medicines?.length || 0}</p>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                                    <Pill size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 text-sm font-medium">Prescriptions</p>
+                                    <p className="text-2xl font-bold text-slate-900">{dashboardData?.medicines?.length || 0}</p>
+                                </div>
                             </div>
-                            <div className="stat-card">
-                                <h4>Reports</h4>
-                                <p>{dashboardData?.Reports?.length || 0}</p>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 transition-transform hover:-translate-y-1">
+                                <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+                                    <FileText size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 text-sm font-medium">Lab Reports</p>
+                                    <p className="text-2xl font-bold text-slate-900">{dashboardData?.Reports?.length || 0}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                        {/* Recent Activity or Quick Actions could go here */}
+                    </motion.div>
                 );
             case 'appointments':
                 return (
-                    <div className="dashboard-section">
-                        <h3>My Appointments</h3>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold text-slate-800">My Appointments</h3>
+                            <button onClick={() => setActiveTab('book')} className="btn btn-primary text-sm py-2">
+                                <Plus size={16} /> Book New
+                            </button>
+                        </div>
+
                         {dashboardData?.Appointments?.length > 0 ? (
-                            <div className="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Doctor</th>
-                                            <th>Specialist</th>
-                                            <th>Date</th>
-                                            <th>Time</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {dashboardData.Appointments.map((apt) => (
-                                            <tr key={apt.id}>
-                                                <td>{apt.doctor?.name}</td>
-                                                <td>{apt.doctor?.specialist}</td>
-                                                <td>{new Date(apt.date).toLocaleDateString()}</td>
-                                                <td>{apt.time}</td>
+                            <div className="card overflow-hidden p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                                            <tr>
+                                                <th className="p-4">Doctor</th>
+                                                <th className="p-4">Specialist</th>
+                                                <th className="p-4">Date</th>
+                                                <th className="p-4">Time</th>
+                                                <th className="p-4">Status</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {dashboardData.Appointments.map((apt) => (
+                                                <tr key={apt.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="p-4 font-medium text-slate-900">{apt.doctor?.name}</td>
+                                                    <td className="p-4 text-slate-600">{apt.doctor?.specialist}</td>
+                                                    <td className="p-4 text-slate-600 flex items-center gap-2">
+                                                        <Calendar size={14} className="text-slate-400" />
+                                                        {new Date(apt.date).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="p-4 text-slate-600">
+                                                        <div className="flex items-center gap-2">
+                                                            <Clock size={14} className="text-slate-400" />
+                                                            {apt.time}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold border border-green-200">
+                                                            Confirmed
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         ) : (
-                            <p>No appointments found.</p>
+                            <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+                                <Calendar className="mx-auto text-slate-300 mb-3" size={48} />
+                                <p className="text-slate-500">No appointments scheduled.</p>
+                                <button onClick={() => setActiveTab('book')} className="mt-4 btn btn-secondary text-sm">
+                                    Book Now
+                                </button>
+                            </div>
                         )}
-                    </div>
+                    </motion.div>
                 );
             case 'book':
                 return (
-                    <div className="dashboard-section">
-                        <h3>Book an Appointment</h3>
-                        <form onSubmit={handleBookingSubmit} className="booking-form">
-                            <div className="form-group">
-                                <label>Select Doctor</label>
-                                <select
-                                    name="doctorId"
-                                    value={bookingData.doctorId}
-                                    onChange={handleBookingChange}
-                                    required
-                                >
-                                    <option value="">-- Select Doctor --</option>
-                                    {doctors.map(doc => (
-                                        <option key={doc.doctorId} value={doc.doctorId}>
-                                            {doc.name} ({doc.specialist})
-                                        </option>
-                                    ))}
-                                </select>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <div className="max-w-2xl mx-auto">
+                            <h3 className="text-xl font-bold text-slate-800 mb-6">Book an Appointment</h3>
+                            
+                            <div className="card">
+                                <form onSubmit={handleBookingSubmit} className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="input-group">
+                                            <label className="input-label">Select Doctor</label>
+                                            <select
+                                                name="doctorId"
+                                                value={bookingData.doctorId}
+                                                onChange={handleBookingChange}
+                                                required
+                                                className="input-field"
+                                            >
+                                                <option value="">-- Select Doctor --</option>
+                                                {doctors.map(doc => (
+                                                    <option key={doc.doctorId} value={doc.doctorId}>
+                                                        {doc.name} ({doc.specialist})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="input-group">
+                                            <label className="input-label">Date</label>
+                                            <input
+                                                type="date"
+                                                name="date"
+                                                value={bookingData.date}
+                                                onChange={handleBookingChange}
+                                                required
+                                                min={new Date().toISOString().split('T')[0]}
+                                                className="input-field"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    {availability.isFull && (
+                                        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
+                                            <AlertCircle size={16} />
+                                            Doctor is fully booked for this date.
+                                        </div>
+                                    )}
+
+                                    <div className="input-group">
+                                        <label className="input-label">Time Slot</label>
+                                        <select
+                                            name="time"
+                                            value={bookingData.time}
+                                            onChange={handleBookingChange}
+                                            required
+                                            disabled={!bookingData.date || availability.availableSlots.length === 0}
+                                            className="input-field disabled:bg-slate-100 disabled:text-slate-400"
+                                        >
+                                            <option value="">-- Select Time Slot --</option>
+                                            {availability.availableSlots.map(slot => (
+                                                <option key={slot} value={slot}>
+                                                    {slot}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {bookingData.date && availability.availableSlots.length === 0 && !availability.isFull && (
+                                            <p className="text-slate-500 text-xs mt-2 ml-1">No available slots for selected date.</p>
+                                        )}
+                                    </div>
+
+                                    <div className="input-group">
+                                        <label className="input-label">Patient Name</label>
+                                        <input
+                                            type="text"
+                                            name="patientName"
+                                            value={bookingData.patientName}
+                                            onChange={handleBookingChange}
+                                            required
+                                            className="input-field"
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary w-full justify-center"
+                                        disabled={availability.isFull || !bookingData.time || bookingStatus === 'Booking...'}
+                                        style={availability.isFull ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                                    >
+                                        {bookingStatus === 'Booking...' ? 'Processing...' : 'Confirm Booking'}
+                                    </button>
+
+                                    {bookingStatus && bookingStatus !== 'Booking...' && (
+                                        <div className={`p-4 rounded-xl flex items-center gap-2 ${bookingStatus.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                                            {bookingStatus.includes('success') ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                                            <span className="font-medium">{bookingStatus}</span>
+                                        </div>
+                                    )}
+                                </form>
                             </div>
-                            <div className="form-group">
-                                <label>Date</label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={bookingData.date}
-                                    onChange={handleBookingChange}
-                                    required
-                                    min={new Date().toISOString().split('T')[0]}
-                                />
-                                {availability.isFull && (
-                                    <p style={{ color: 'red', fontSize: '0.9rem', marginTop: '5px' }}>
-                                        Doctor is fully booked for this date. Please choose another date.
-                                    </p>
-                                )}
-                            </div>
-                            <div className="form-group">
-                                <label>Time Slot</label>
-                                <select
-                                    name="time"
-                                    value={bookingData.time}
-                                    onChange={handleBookingChange}
-                                    required
-                                    disabled={!bookingData.date || availability.availableSlots.length === 0}
-                                >
-                                    <option value="">-- Select Time Slot --</option>
-                                    {availability.availableSlots.map(slot => (
-                                        <option key={slot} value={slot}>
-                                            {slot}
-                                        </option>
-                                    ))}
-                                </select>
-                                {bookingData.date && availability.availableSlots.length === 0 && !availability.isFull && (
-                                    <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '5px' }}>
-                                        No available slots for this date.
-                                    </p>
-                                )}
-                            </div>
-                            <div className="form-group">
-                                <label>Patient Name</label>
-                                <input
-                                    type="text"
-                                    name="patientName"
-                                    value={bookingData.patientName}
-                                    onChange={handleBookingChange}
-                                    required
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="submit-btn"
-                                disabled={availability.isFull || !bookingData.time}
-                                style={availability.isFull ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                            >
-                                Book Appointment
-                            </button>
-                            {bookingStatus && <p className="status-msg">{bookingStatus}</p>}
-                        </form>
-                    </div>
+                        </div>
+                    </motion.div>
                 );
             case 'prescriptions':
                 return (
-                    <div className="dashboard-section">
-                        <h3>My Prescriptions</h3>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <h3 className="text-xl font-bold text-slate-800 mb-6">My Prescriptions</h3>
                         {dashboardData?.medicines?.length > 0 ? (
-                            <div className="prescriptions-grid">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {dashboardData.medicines.map((med) => (
-                                    <div key={med.medId} className="prescription-card">
-                                        <div className="rx-header">
-                                            <span className="rx-icon">💊</span>
-                                            <h4>{med.medName}</h4>
-                                            <span className="rx-status">Active</span>
-                                        </div>
-                                        <div className="rx-body">
-                                            <div className="rx-detail">
-                                                <label>Dosage</label>
-                                                <p>{med.dose}</p>
+                                    <div key={med.medId} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                        <div className="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center">
+                                                <Pill size={20} />
                                             </div>
-                                            <div className="rx-detail">
-                                                <label>Frequency</label>
-                                                <p>{med.frequency}</p>
-                                            </div>
-                                            <div className="rx-detail">
-                                                <label>Duration</label>
-                                                <p>{new Date(med.startDate).toLocaleDateString()} - {new Date(med.endDate).toLocaleDateString()}</p>
-                                            </div>
-                                            <div className="rx-detail full-width">
-                                                <label>Instructions</label>
-                                                <p>{med.description}</p>
+                                            <div>
+                                                <h4 className="font-bold text-slate-800">{med.medName}</h4>
+                                                <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200">Active</span>
                                             </div>
                                         </div>
-                                        <div className="rx-footer">
-                                            <p>Prescribed by: Dr. {med.doctor?.name}</p>
+                                        <div className="p-4 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-xs uppercase text-slate-400 font-bold tracking-wider">Dosage</label>
+                                                    <p className="font-medium text-slate-700">{med.dose}</p>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs uppercase text-slate-400 font-bold tracking-wider">Frequency</label>
+                                                    <p className="font-medium text-slate-700">{med.frequency}</p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs uppercase text-slate-400 font-bold tracking-wider">Duration</label>
+                                                <p className="font-medium text-slate-700 text-sm">
+                                                    {new Date(med.startDate).toLocaleDateString()} - {new Date(med.endDate).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs uppercase text-slate-400 font-bold tracking-wider">Instructions</label>
+                                                <p className="text-slate-600 text-sm bg-slate-50 p-2 rounded-lg mt-1">{med.description}</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 p-3 border-t border-slate-100 text-xs text-slate-500 font-medium">
+                                            Prescribed by Dr. {med.doctor?.name}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p>No prescriptions found.</p>
+                            <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+                                <Pill className="mx-auto text-slate-300 mb-3" size={48} />
+                                <p className="text-slate-500">No prescriptions found.</p>
+                            </div>
                         )}
-                    </div>
+                    </motion.div>
                 );
             case 'reports':
                 return (
-                    <div className="dashboard-section">
-                        <h3>My Reports</h3>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <h3 className="text-xl font-bold text-slate-800 mb-6">Medical Reports</h3>
                         {dashboardData?.Reports?.length > 0 ? (
-                            <div className="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Report Name</th>
-                                            <th>Date</th>
-                                            <th>Doctor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {dashboardData.Reports.map((report) => (
-                                            <tr key={report.id}>
-                                                <td>{report.reportName}</td>
-                                                <td>{new Date(report.date).toLocaleDateString()}</td>
-                                                <td>{report.doctor?.name}</td>
+                            <div className="card overflow-hidden p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
+                                            <tr>
+                                                <th className="p-4">Report Name</th>
+                                                <th className="p-4">Date</th>
+                                                <th className="p-4">Doctor</th>
+                                                <th className="p-4 text-right">Action</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {dashboardData.Reports.map((report) => (
+                                                <tr key={report.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="p-4 font-medium text-slate-900 flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded bg-orange-50 text-orange-600 flex items-center justify-center">
+                                                            <FileText size={16} />
+                                                        </div>
+                                                        {report.reportName}
+                                                    </td>
+                                                    <td className="p-4 text-slate-600 max-w-xs">{new Date(report.date).toLocaleDateString()}</td>
+                                                    <td className="p-4 text-slate-600">{report.doctor?.name}</td>
+                                                    <td className="p-4 text-right">
+                                                        <a href={report.reportUrl || '#'} className="text-primary-600 hover:text-primary-700 font-medium text-sm">View</a>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         ) : (
-                            <p>No reports found.</p>
+                            <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200">
+                                <FileText className="mx-auto text-slate-300 mb-3" size={48} />
+                                <p className="text-slate-500">No reports found.</p>
+                            </div>
                         )}
-                    </div>
+                    </motion.div>
                 );
             default:
                 return null;
@@ -311,279 +417,73 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="dashboard-container">
-            <div className="sidebar">
-                <div className="sidebar-header">
-                    <h2>Patient Portal</h2>
+        <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+            {/* Sidebar */}
+            <aside className="w-full md:w-64 bg-white border-r border-slate-200 md:h-screen sticky top-0 md:fixed z-10 flex flex-col">
+                <div className="p-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2 text-primary-600 font-bold text-xl">
+                        <LayoutDashboard size={24} />
+                        <span>Patient Portal</span>
+                    </div>
                 </div>
-                <nav className="sidebar-nav">
+                
+                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     <button
-                        className={activeTab === 'overview' ? 'active' : ''}
                         onClick={() => setActiveTab('overview')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                            activeTab === 'overview' ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Overview
+                        <LayoutDashboard size={20} /> Overview
                     </button>
                     <button
-                        className={activeTab === 'book' ? 'active' : ''}
                         onClick={() => setActiveTab('book')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                            activeTab === 'book' ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Book Appointment
+                        <Calendar size={20} /> Book Appointment
                     </button>
                     <button
-                        className={activeTab === 'appointments' ? 'active' : ''}
                         onClick={() => setActiveTab('appointments')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                            activeTab === 'appointments' ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Appointments
+                        <Clock size={20} /> My Appointments
                     </button>
                     <button
-                        className={activeTab === 'prescriptions' ? 'active' : ''}
                         onClick={() => setActiveTab('prescriptions')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                            activeTab === 'prescriptions' ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Prescriptions
+                        <Pill size={20} /> Prescriptions
                     </button>
                     <button
-                        className={activeTab === 'reports' ? 'active' : ''}
                         onClick={() => setActiveTab('reports')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                            activeTab === 'reports' ? 'bg-primary-50 text-primary-600' : 'text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
-                        Reports
-                    </button>
-                    <button onClick={handleLogout} className="logout-btn">
-                        Logout
+                        <FileText size={20} /> Medical Reports
                     </button>
                 </nav>
-            </div>
-            <div className="main-content">
+
+                <div className="p-4 border-t border-slate-100">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                        <LogOut size={20} /> Logout
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 md:ml-64 p-4 md:p-8">
                 {renderContent()}
-            </div>
-            <style>{`
-                .dashboard-container {
-                    display: flex;
-                    min-height: 100vh;
-                    background-color: #f5f7fa;
-                }
-                .sidebar {
-                    width: 250px;
-                    background-color: #ffffff;
-                    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-                    display: flex;
-                    flex-direction: column;
-                }
-                .sidebar-header {
-                    padding: 20px;
-                    border-bottom: 1px solid #eee;
-                }
-                .sidebar-nav {
-                    display: flex;
-                    flex-direction: column;
-                    padding: 20px 0;
-                }
-                .sidebar-nav button {
-                    padding: 15px 20px;
-                    text-align: left;
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    font-size: 16px;
-                    color: #555;
-                    transition: all 0.3s;
-                }
-                .sidebar-nav button:hover {
-                    background-color: #f0f4f8;
-                    color: #007bff;
-                }
-                .sidebar-nav button.active {
-                    background-color: #e3f2fd;
-                    color: #007bff;
-                    border-right: 3px solid #007bff;
-                }
-                .sidebar-nav button.logout-btn {
-                    margin-top: auto;
-                    color: #dc3545;
-                }
-                .main-content {
-                    flex: 1;
-                    padding: 30px;
-                    overflow-y: auto;
-                }
-                .stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                    gap: 20px;
-                    margin-top: 20px;
-                }
-                .stat-card {
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    text-align: center;
-                }
-                .stat-card h4 {
-                    margin: 0;
-                    color: #777;
-                }
-                .stat-card p {
-                    font-size: 32px;
-                    font-weight: bold;
-                    color: #007bff;
-                    margin: 10px 0 0;
-                }
-                .table-container {
-                    background: white;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    overflow: hidden;
-                    margin-top: 20px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                }
-                th, td {
-                    padding: 15px;
-                    text-align: left;
-                    border-bottom: 1px solid #eee;
-                }
-                th {
-                    background-color: #f8f9fa;
-                    font-weight: 600;
-                }
-                .cards-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                    gap: 20px;
-                    margin-top: 20px;
-                }
-                .card {
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                }
-                .card h4 {
-                    margin-top: 0;
-                    color: #007bff;
-                }
-                .description {
-                    color: #666;
-                    font-style: italic;
-                    margin-top: 10px;
-                }
-                .booking-form {
-                    background: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                    max-width: 500px;
-                }
-                .form-group {
-                    margin-bottom: 15px;
-                }
-                .form-group label {
-                    display: block;
-                    margin-bottom: 5px;
-                    color: #555;
-                }
-                .form-group input, .form-group select {
-                    width: 100%;
-                    padding: 10px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    font-size: 16px;
-                }
-                .submit-btn {
-                    background-color: #007bff;
-                    color: white;
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    width: 100%;
-                }
-                .submit-btn:hover {
-                    background-color: #0056b3;
-                }
-                .status-msg {
-                    margin-top: 10px;
-                    text-align: center;
-                    color: #28a745;
-                }
-                
-                /* Prescription Card Styles */
-                .prescriptions-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-                    gap: 24px;
-                    margin-top: 20px;
-                }
-                .prescription-card {
-                    background: white;
-                    border-radius: 12px;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-                    overflow: hidden;
-                    border: 1px solid #eef2f6;
-                    transition: transform 0.2s;
-                }
-                .prescription-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 12px rgba(0,0,0,0.1);
-                }
-                .rx-header {
-                    background: #f8f9fa;
-                    padding: 16px;
-                    display: flex;
-                    align-items: center;
-                    border-bottom: 1px solid #eee;
-                }
-                .rx-icon {
-                    font-size: 24px;
-                    margin-right: 12px;
-                }
-                .rx-header h4 {
-                    margin: 0;
-                    flex: 1;
-                    color: #333;
-                    font-size: 18px;
-                }
-                .rx-status {
-                    background: #e6f4ea;
-                    color: #1e7e34;
-                    padding: 4px 8px;
-                    border-radius: 12px;
-                    font-size: 12px;
-                    font-weight: 600;
-                }
-                .rx-body {
-                    padding: 20px;
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 16px;
-                }
-                .rx-detail label {
-                    display: block;
-                    font-size: 12px;
-                    color: #888;
-                    margin-bottom: 4px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                .rx-detail p {
-                    margin: 0;
-                    color: #444;
-                    font-weight: 500;
-                }
-                .rx-detail.full-width {
-                    grid-column: span 2;
-                }
-                .rx-footer {
-                    padding: 12px 20px;
-                    background: #fafbfc;
-                    border-top: 1px solid #eee;
-                    font-size: 13px;
-                    color: #666;
-                }
-            `}</style>
+            </main>
         </div>
     );
 };
