@@ -11,7 +11,7 @@ import {
     approveSlot
 } from '../../api/doctor';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, Clock, Pill, FileText, Activity, LogOut, ChevronLeft, Check, AlertCircle, Plus, Search, ChevronRight, X } from 'lucide-react';
+import { Calendar, Users, Clock, Pill, FileText, Activity, LogOut, ChevronLeft, Check, AlertCircle, Plus, Search, ChevronRight, X, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DoctorDashboard = () => {
@@ -21,6 +21,7 @@ const DoctorDashboard = () => {
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     
     const [scheduleDate, setScheduleDate] = useState('');
@@ -207,22 +208,33 @@ const DoctorDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex font-sans">
+        <div className="min-h-screen bg-slate-50 flex font-sans relative">
+             {/* Mobile Sidebar Overlay */}
+             {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+             )}
+
              {/* Sidebar */}
-             <aside className="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-all duration-300">
-                <div className="p-6 border-b border-slate-800">
+             <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="p-6 border-b border-slate-800 flex justify-between items-center">
                     <div className="flex items-center gap-3 text-white font-bold text-xl tracking-tight">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-primary-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                             <Activity size={20} className="text-white" />
                         </div>
                         MediPortal
                     </div>
-                    <p className="text-xs text-slate-500 mt-2 font-medium px-1">Dr. {user?.name}</p>
+                    {/* Close button for mobile */}
+                    <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
+                        <X size={24} />
+                    </button>
                 </div>
                 
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     <button
-                        onClick={() => { setActiveTab('appointments'); closePatientView(); }}
+                        onClick={() => { setActiveTab('appointments'); closePatientView(); setIsSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
                             activeTab === 'appointments' && !selectedPatient
                             ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
@@ -233,7 +245,7 @@ const DoctorDashboard = () => {
                         Appointments
                     </button>
                     <button
-                        onClick={() => { setActiveTab('schedule'); closePatientView(); }}
+                        onClick={() => { setActiveTab('schedule'); closePatientView(); setIsSidebarOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
                             activeTab === 'schedule' 
                             ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
@@ -255,7 +267,19 @@ const DoctorDashboard = () => {
                 </div>
             </aside>
             
-            <main className="flex-1 ml-64 p-8 max-w-7xl mx-auto w-full">
+            <main className="flex-1 lg:ml-64 p-4 lg:p-8 max-w-7xl mx-auto w-full min-w-0">
+                {/* Mobile Header */}
+                <div className="lg:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex items-center gap-2 font-bold text-slate-900">
+                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-primary-600 flex items-center justify-center">
+                            <Activity size={18} className="text-white" />
+                        </div>
+                        MediPortal
+                    </div>
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-slate-100 rounded-lg text-slate-600">
+                        <Menu size={24} />
+                    </button>
+                </div>
                 {error && (
                      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-red-50 border border-red-200 p-4 mb-6 rounded-xl flex items-center gap-3 text-red-700 shadow-sm">
                         <AlertCircle size={20} />

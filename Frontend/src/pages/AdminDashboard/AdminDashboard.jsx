@@ -330,7 +330,7 @@ const AdminDashboard = () => {
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans">
 
-            <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+            <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 <div className="p-6 border-b border-slate-800">
                     <div className="flex items-center gap-3 text-white">
                         <div className="bg-blue-600 p-2 rounded-lg">
@@ -377,15 +377,15 @@ const AdminDashboard = () => {
             {/* Mobile Overlay */}
             {isMobileMenuOpen && (
                 <div 
-                    className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
+                    className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden backdrop-blur-sm"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
 
 
-            <main className="flex-1 md:ml-64 p-4 md:p-8 min-h-screen transition-all">
+            <main className="flex-1 lg:ml-64 p-4 lg:p-8 min-h-screen transition-all">
 
-                <div className="md:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <div className="lg:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                     <div className="flex items-center gap-2">
                         <Shield className="text-blue-600" size={24} />
                         <span className="font-bold text-slate-900">Admin Portal</span>

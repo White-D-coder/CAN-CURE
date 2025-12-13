@@ -69,8 +69,8 @@ function Login() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="card"
-                style={{ width: '100%', maxWidth: '450px', padding: '40px' }}
+                className="card p-6 sm:p-10"
+                style={{ width: '100%', maxWidth: '450px' }}
             >
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>

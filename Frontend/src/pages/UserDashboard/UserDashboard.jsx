@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getDashboardData, getDoctors, bookAppointment, getDoctorAvailability } from '../../api/user';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, FileText, Pill, LogOut, User, Clock, CheckCircle, AlertCircle, Plus, Search, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Calendar, FileText, Pill, LogOut, User, Clock, CheckCircle, AlertCircle, Plus, Search, ChevronRight, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const UserDashboard = () => {
@@ -23,6 +23,7 @@ const UserDashboard = () => {
 
     const [availability, setAvailability] = useState({ isFull: false, availableSlots: [] });
     const [checkingAvailability, setCheckingAvailability] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -123,7 +124,7 @@ const UserDashboard = () => {
                         <header className="flex justify-between items-end border-b border-slate-200 pb-6">
                             <div>
                                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome back, {user?.name}</h2>
-                                <p className="text-slate-500 mt-2 text-lg">Your personal health overview for today.</p>
+                                
                             </div>
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Current Date</p>
@@ -149,7 +150,6 @@ const UserDashboard = () => {
                             ))}
                         </div>
 
-                        {/* Recent Activity Section */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
@@ -541,16 +541,28 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex font-sans">
-            {/* Sidebar */}
-            <aside className="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-all duration-300">
-                <div className="p-6 border-b border-slate-800">
+        <div className="min-h-screen bg-slate-50 flex font-sans relative">
+            
+            {/* Mobile Sidebar Overlay */}
+             {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+             )}
+
+            <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="p-6 border-b border-slate-800 flex justify-between items-center">
                     <div className="flex items-center gap-3 text-white font-bold text-xl tracking-tight">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
                             <span className="text-white text-lg font-black">C</span>
                         </div>
                         CanCure
                     </div>
+                    {/* Close button for mobile */}
+                    <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
+                        <X size={24} />
+                    </button>
                 </div>
                 
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -563,7 +575,7 @@ const UserDashboard = () => {
                     ].map((item) => (
                         <button
                             key={item.id}
-                            onClick={() => setActiveTab(item.id)}
+                            onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
                                 activeTab === item.id 
                                 ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
@@ -587,7 +599,19 @@ const UserDashboard = () => {
             </aside>
 
 
-            <main className="flex-1 ml-64 p-8 max-w-7xl mx-auto w-full">
+            <main className="flex-1 lg:ml-64 p-4 lg:p-8 max-w-7xl mx-auto w-full min-w-0">
+                {/* Mobile Header */}
+                <div className="lg:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex items-center gap-2 font-bold text-slate-900">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+                            <span className="text-white text-lg font-black">C</span>
+                        </div>
+                        CanCure
+                    </div>
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-slate-100 rounded-lg text-slate-600">
+                        <Menu size={24} />
+                    </button>
+                </div>
                 {renderContent()}
             </main>
         </div>
