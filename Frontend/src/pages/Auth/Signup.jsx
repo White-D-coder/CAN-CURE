@@ -31,14 +31,26 @@ const Signup = () => {
             navigate('/dashboard');
         } catch (err) {
             console.error("Signup Error:", err);
-            setError(err.response?.data?.error || err.response?.data?.message || 'Signup failed. Please try again.');
+            setError(
+                err.response?.data?.error ||
+                err.response?.data?.message ||
+                'Signup failed. Please try again.'
+            );
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+        <div
+            style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px'
+            }}
+        >
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -46,34 +58,54 @@ const Signup = () => {
                 className="card"
                 style={{ width: '100%', maxWidth: '450px', padding: '40px' }}
             >
+                {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 20,
+                            delay: 0.1
+                        }}
                         style={{
                             width: '64px',
                             height: '64px',
-                            background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                            background:
+                                'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
                             borderRadius: '16px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             margin: '0 auto 16px',
-                            boxShadow: '0 10px 25px -5px rgba(2, 132, 199, 0.4)'
+                            boxShadow:
+                                '0 10px 25px -5px rgba(2, 132, 199, 0.4)'
                         }}
                     >
                         <Activity size={32} color="white" />
                     </motion.div>
-                    <h2 style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>Create Account</h2>
-                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Join our medical platform today</p>
+
+                    <h2
+                        style={{
+                            fontSize: '24px',
+                            fontWeight: '700',
+                            marginBottom: '8px'
+                        }}
+                    >
+                        Create Account
+                    </h2>
+
+                    <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                        Join our medical platform today
+                    </p>
                 </div>
 
+                {/* Error */}
                 {error && (
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="error-message"
                         style={{
                             background: '#fef2f2',
                             border: '1px solid #fee2e2',
@@ -92,11 +124,20 @@ const Signup = () => {
                     </motion.div>
                 )}
 
+                {/* Form */}
                 <form onSubmit={handleSubmit}>
+                    {/* Username */}
                     <div className="input-group">
                         <label>Username</label>
                         <div style={{ position: 'relative' }}>
-                            <User className="input-icon" size={20} />
+                            <User
+                                size={20}
+                                className="input-icon"
+                                style={{
+                                    top: '50%',
+                                    transform: 'translateY(-50%)'
+                                }}
+                            />
                             <input
                                 type="text"
                                 value={username}
@@ -107,10 +148,18 @@ const Signup = () => {
                         </div>
                     </div>
 
+                    {/* Email */}
                     <div className="input-group">
                         <label>Email</label>
                         <div style={{ position: 'relative' }}>
-                            <Mail className="input-icon" size={20} />
+                            <Mail
+                                size={20}
+                                className="input-icon"
+                                style={{
+                                    top: '50%',
+                                    transform: 'translateY(-50%)'
+                                }}
+                            />
                             <input
                                 type="email"
                                 value={email}
@@ -121,10 +170,18 @@ const Signup = () => {
                         </div>
                     </div>
 
+                    {/* Password */}
                     <div className="input-group">
                         <label>Password</label>
                         <div style={{ position: 'relative' }}>
-                            <Lock className="input-icon" size={20} />
+                            <Lock
+                                size={20}
+                                className="input-icon"
+                                style={{
+                                    top: '50%',
+                                    transform: 'translateY(-50%)'
+                                }}
+                            />
                             <input
                                 type="password"
                                 value={password}
@@ -135,6 +192,7 @@ const Signup = () => {
                         </div>
                     </div>
 
+                    {/* Button */}
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -143,7 +201,9 @@ const Signup = () => {
                         style={{ width: '100%', marginTop: '8px' }}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Creating Account...' : (
+                        {isLoading ? (
+                            'Creating Account...'
+                        ) : (
                             <>
                                 Sign Up <ArrowRight size={18} />
                             </>
@@ -151,9 +211,19 @@ const Signup = () => {
                     </motion.button>
                 </form>
 
-                <p style={{ marginTop: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                {/* Footer */}
+                <p
+                    style={{
+                        marginTop: '24px',
+                        textAlign: 'center',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.95rem'
+                    }}
+                >
                     Already have an account?{' '}
-                    <Link to="/login" style={{ fontWeight: '600' }}>Sign In</Link>
+                    <Link to="/login" style={{ fontWeight: '600' }}>
+                        Sign In
+                    </Link>
                 </p>
             </motion.div>
         </div>

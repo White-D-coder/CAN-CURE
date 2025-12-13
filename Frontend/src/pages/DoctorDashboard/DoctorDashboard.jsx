@@ -11,22 +11,22 @@ import {
     approveSlot
 } from '../../api/doctor';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, Clock, Pill, FileText, Activity, LogOut, ChevronLeft, Check, AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Calendar, Users, Clock, Pill, FileText, Activity, LogOut, ChevronLeft, Check, AlertCircle, Plus, Search, ChevronRight, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const DoctorDashboard = () => {
     const { user, logout } = useAuth();
-    const [activeTab, setActiveTab] = useState('appointments'); // 'appointments' or 'schedule'
+    const [activeTab, setActiveTab] = useState('appointments'); 
     const [appointments, setAppointments] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // Schedule State
+    
     const [scheduleDate, setScheduleDate] = useState('');
     const [mySlots, setMySlots] = useState([]);
 
-    // Prescription State
+ 
     const [prescriptionForm, setPrescriptionForm] = useState({
         medName: '',
         description: '',
@@ -38,7 +38,7 @@ const DoctorDashboard = () => {
     const [editingPrescriptionId, setEditingPrescriptionId] = useState(null);
     const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
 
-    // Report State
+
     const [reportForm, setReportForm] = useState({
         reportName: '',
         reportUrl: ''
@@ -64,7 +64,7 @@ const DoctorDashboard = () => {
         }
     };
 
-    // Schedule Functions
+
     const fetchMySlots = async () => {
         if (!user.id || !scheduleDate) return;
         try {
@@ -198,203 +198,210 @@ const DoctorDashboard = () => {
     if (loading && !selectedPatient) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <div className="flex items-center gap-3 text-primary-600 font-medium text-lg">
-                    <Activity className="animate-spin" size={24} />
-                    Loading dashboard...
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                    <p className="text-slate-500 font-medium animate-pulse">Loading portal...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-12">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-primary-600 p-2 rounded-lg text-white">
-                            <Activity size={20} />
+        <div className="min-h-screen bg-slate-50 flex font-sans">
+             {/* Sidebar */}
+             <aside className="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-all duration-300">
+                <div className="p-6 border-b border-slate-800">
+                    <div className="flex items-center gap-3 text-white font-bold text-xl tracking-tight">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-primary-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                            <Activity size={20} className="text-white" />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 leading-none">Doctor Portal</h1>
-                            <p className="text-xs text-slate-500 font-medium mt-1">Dr. {user?.name}</p>
-                        </div>
+                        MediPortal
                     </div>
+                    <p className="text-xs text-slate-500 mt-2 font-medium px-1">Dr. {user?.name}</p>
+                </div>
+                
+                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+                    <button
+                        onClick={() => { setActiveTab('appointments'); closePatientView(); }}
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
+                            activeTab === 'appointments' && !selectedPatient
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
+                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        }`}
+                    >
+                        <Users size={20} className={activeTab === 'appointments' && !selectedPatient ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
+                        Appointments
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab('schedule'); closePatientView(); }}
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
+                            activeTab === 'schedule' 
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
+                            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        }`}
+                    >
+                        <Calendar size={20} className={activeTab === 'schedule' ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
+                        My Schedule
+                    </button>
+                </nav>
+
+                <div className="p-4 border-t border-slate-800">
                     <button
                         onClick={logout}
-                        className="flex items-center gap-2 text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                     >
-                        <LogOut size={16} />
-                        Logout
+                        <LogOut size={20} /> Logout
                     </button>
                 </div>
-            </header>
-
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            </aside>
+            
+            <main className="flex-1 ml-64 p-8 max-w-7xl mx-auto w-full">
                 {error && (
-                    <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center gap-3">
-                        <AlertCircle className="text-red-500" size={20} />
-                        <p className="text-red-700 font-medium">{error}</p>
-                    </div>
+                     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-red-50 border border-red-200 p-4 mb-6 rounded-xl flex items-center gap-3 text-red-700 shadow-sm">
+                        <AlertCircle size={20} />
+                        <p className="font-medium">{error}</p>
+                    </motion.div>
                 )}
 
                 {!selectedPatient ? (
-                    <>
-                        <div className="flex gap-4 mb-8 border-b border-slate-200">
-                            <button
-                                onClick={() => setActiveTab('appointments')}
-                                className={`pb-4 px-4 font-medium text-sm flex items-center gap-2 transition-all relative ${
-                                    activeTab === 'appointments' ? 'text-primary-600' : 'text-slate-500 hover:text-slate-700'
-                                }`}
-                            >
-                                <Users size={18} />
-                                Appointments
-                                {activeTab === 'appointments' && (
-                                    <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
-                                )}
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('schedule')}
-                                className={`pb-4 px-4 font-medium text-sm flex items-center gap-2 transition-all relative ${
-                                    activeTab === 'schedule' ? 'text-primary-600' : 'text-slate-500 hover:text-slate-700'
-                                }`}
-                            >
-                                <Calendar size={18} />
-                                My Schedule
-                                {activeTab === 'schedule' && (
-                                    <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
-                                )}
-                            </button>
-                        </div>
-
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                         {activeTab === 'appointments' ? (
-                            <div className="card overflow-hidden">
-                                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                                    <h2 className="text-lg font-bold text-slate-800">Your Appointments</h2>
-                                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
-                                        Total: {appointments.length}
-                                    </span>
-                                </div>
+                            <>
+                                <header className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-900">Appointments</h2>
+                                        <p className="text-slate-500 mt-1">Manage your patient visits for today.</p>
+                                    </div>
+                                    <div className="bg-white border border-slate-200 px-4 py-2 rounded-lg shadow-sm font-medium text-slate-600 flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                        Today: {appointments.length}
+                                    </div>
+                                </header>
                                 
-                                {appointments.length === 0 ? (
-                                    <div className="text-center py-16">
-                                        <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <Users className="text-slate-400" size={32} />
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    {appointments.length === 0 ? (
+                                        <div className="text-center py-24 bg-white">
+                                            <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                                <Users className="text-slate-300" size={40} />
+                                            </div>
+                                            <h3 className="text-lg font-bold text-slate-900 mb-1">No appointments yet</h3>
+                                            <p className="text-slate-500">Your schedule for upcoming appointments will appear here.</p>
                                         </div>
-                                        <h3 className="text-slate-900 font-medium mb-1">No appointments yet</h3>
-                                        <p className="text-slate-500 text-sm">You don't have any appointments scheduled.</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
-                                                <tr>
-                                                    <th className="p-4">Date & Time</th>
-                                                    <th className="p-4">Patient Name</th>
-                                                    <th className="p-4">Status</th>
-                                                    <th className="p-4 text-right">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100">
-                                                {appointments.map((apt) => (
-                                                    <tr key={apt.id} className="hover:bg-slate-50 transition-colors">
-                                                        <td className="p-4">
-                                                            <div className="flex flex-col">
-                                                                <span className="font-medium text-slate-900 flex items-center gap-2">
-                                                                    <Calendar size={14} className="text-slate-400" />
-                                                                    {new Date(apt.date).toLocaleDateString()}
-                                                                </span>
-                                                                <span className="text-slate-500 text-sm flex items-center gap-2 mt-1">
-                                                                    <Clock size={14} className="text-slate-400" />
-                                                                    {apt.time}
-                                                                </span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-sm">
-                                                                    {apt.user.name.charAt(0)}
-                                                                </div>
-                                                                <span className="font-medium text-slate-900">{apt.user.name}</span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-4">
-                                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-semibold border border-green-200">
-                                                                Confirmed
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-4 text-right">
-                                                            <button
-                                                                onClick={() => handleViewPatient(apt.userId)}
-                                                                className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                                                            >
-                                                                View Records
-                                                            </button>
-                                                        </td>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-slate-50 border-b border-slate-200">
+                                                    <tr>
+                                                        <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Patient Details</th>
+                                                        <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Date & Time</th>
+                                                        <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                                        <th className="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                            </div>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100">
+                                                    {appointments.map((apt) => (
+                                                        <tr key={apt.id} className="hover:bg-slate-50 transition-colors group">
+                                                            <td className="p-5">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex items-center justify-center font-bold shadow-sm">
+                                                                        {apt.user.name.charAt(0)}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="font-bold text-slate-900">{apt.user.name}</p>
+                                                                        <p className="text-xs text-slate-500">ID: #{apt.userId}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-5">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <span className="text-sm font-medium text-slate-900 flex items-center gap-2">
+                                                                        <Calendar size={14} className="text-slate-400" />
+                                                                        {new Date(apt.date).toLocaleDateString()}
+                                                                    </span>
+                                                                    <span className="text-xs text-slate-500 flex items-center gap-2">
+                                                                        <Clock size={14} className="text-slate-400" />
+                                                                        {apt.time}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-5">
+                                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                                    Confirmed
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-5 text-right">
+                                                                <button
+                                                                    onClick={() => handleViewPatient(apt.userId)}
+                                                                    className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center gap-1 ml-auto group-hover:underline decoration-primary-300 underline-offset-4 decoration-2"
+                                                                >
+                                                                    Open Record <ChevronRight size={16} />
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
                         ) : (
-                            <div className="card p-8">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-lg font-bold text-slate-800">Manage Schedule</h2>
-                                    <div className="flex items-center gap-3 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                            <div className="space-y-6">
+                                <header className="flex justify-between items-center mb-8">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-slate-900">Manage Schedule</h2>
+                                        <p className="text-slate-500 mt-1">Set your availability for patient bookings.</p>
+                                    </div>
+                                    <div className="bg-white p-1 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2">
                                         <input
                                             type="date"
                                             value={scheduleDate}
                                             onChange={(e) => setScheduleDate(e.target.value)}
                                             min={new Date().toISOString().split('T')[0]}
-                                            className="bg-transparent border-none text-sm font-medium text-slate-700 focus:ring-0"
+                                            className="bg-transparent border-none text-sm font-semibold text-slate-700 focus:ring-0 py-2 px-3"
                                         />
                                     </div>
-                                </div>
+                                </header>
 
                                 {!scheduleDate ? (
-                                    <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                                        <Calendar className="text-slate-300 mx-auto mb-3" size={48} />
-                                        <p className="text-slate-500 font-medium">Select a date to view or manage your time slots.</p>
+                                    <div className="text-center py-24 bg-white rounded-2xl border border-dashed border-slate-200">
+                                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                            <Calendar className="text-slate-300" size={40} />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-slate-900 mb-1">Select a Date</h3>
+                                        <p className="text-slate-500">Choose a date from the picker to view or manage your time slots.</p>
                                     </div>
                                 ) : (
-                                    <div>
+                                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                                         {mySlots.length === 0 ? (
                                             <div className="text-center py-12">
-                                                <p className="text-slate-500">No slots assigned for this date.</p>
+                                                <p className="text-slate-500 font-medium">No slots found for this date. Use the admin panel to generate slots.</p>
                                             </div>
                                         ) : (
-                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                                                 {mySlots.map(slot => (
                                                     <div
                                                         key={slot.id}
-                                                        className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${
-                                                            slot.status === 'PENDING' ? 'bg-orange-50 border-orange-200 text-orange-700' :
+                                                        className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
+                                                            slot.status === 'PENDING' ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm' :
                                                             slot.status === 'AVAILABLE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
                                                             slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200 text-blue-700' : 
-                                                            'bg-gray-50 border-gray-200 text-gray-500'
+                                                            'bg-slate-50 border-slate-200 text-slate-400'
                                                         }`}
                                                     >
                                                         <span className="font-bold text-lg">{slot.time}</span>
-                                                        <span className="text-[10px] uppercase tracking-wider font-bold">
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold opacity-80">
                                                             {slot.status}
                                                         </span>
 
-                                                        {slot.status === 'PENDING' ? (
+                                                        {slot.status === 'PENDING' && (
                                                             <button
                                                                 onClick={() => handleApproveSlot(slot.id)}
-                                                                className="w-full mt-2 bg-white border border-orange-200 text-orange-700 hover:bg-orange-100 text-xs py-1.5 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1"
+                                                                className="w-full mt-2 bg-white border border-orange-200 text-orange-700 hover:bg-orange-600 hover:text-white hover:border-orange-600 text-xs py-1.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-1 shadow-sm"
                                                             >
-                                                                <Check size={12} />
-                                                                Approve
+                                                                <Check size={12} /> Approve
                                                             </button>
-                                                        ) : slot.status === 'FROZEN' ? (
-                                                            <span className="text-xs text-red-500 font-medium mt-1">Frozen by Admin</span>
-                                                        ) : (
-                                                            <span className="text-xs opacity-75 mt-1">
-                                                                {slot.status === 'BOOKED' ? 'Booked' : 'Active'}
-                                                            </span>
                                                         )}
                                                     </div>
                                                 ))}
@@ -404,147 +411,165 @@ const DoctorDashboard = () => {
                                 )}
                             </div>
                         )}
-                    </>
+                    </motion.div>
                 ) : (
-                    <div>
+                    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                         <button
                             onClick={closePatientView}
-                            className="mb-6 text-slate-500 hover:text-slate-800 flex items-center gap-2 text-sm font-medium transition-colors"
+                            className="mb-8 group flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors font-medium px-4 py-2 rounded-lg hover:bg-white"
                         >
-                            <ChevronLeft size={16} />
-                            Back to Appointments
+                            <div className="bg-white p-1 rounded-md border border-slate-200 shadow-sm group-hover:border-slate-300 transition-colors">
+                                <ChevronLeft size={16} />
+                            </div>
+                            Back to Dashboard
                         </button>
 
-                        <div className="card p-6 mb-8 flex items-center gap-6">
-                            <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
-                                <Users size={40} />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-900">{selectedPatient.name}</h2>
-                                <p className="text-slate-500 font-medium">{selectedPatient.email}</p>
-                                <div className="flex gap-2 mt-3">
-                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-semibold">
-                                        Patient ID: {selectedPatient.id}
-                                    </span>
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8">
+                            <div className="flex flex-col md:flex-row gap-8 items-start">
+                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400 border border-slate-200 shadow-inner">
+                                    <Users size={40} />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h2 className="text-3xl font-bold text-slate-900 mb-2">{selectedPatient.name}</h2>
+                                            <div className="flex items-center gap-4 text-slate-500">
+                                                <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-full text-sm border border-slate-100">
+                                                    📧 {selectedPatient.email}
+                                                </span>
+                                                <span className="flex items-center gap-1.5 bg-slate-50 px-3 py-1 rounded-full text-sm border border-slate-100">
+                                                    🆔 #{selectedPatient.id}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            {/* Action buttons could go here */}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* Medical History Section */}
+                            {/* Prescriptions */}
                             <div className="space-y-6">
-                                <div className="card p-6">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[500px]">
                                     <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                            <Pill className="text-primary-500" size={20} />
+                                        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                                <Pill size={20} />
+                                            </div>
                                             Prescriptions
                                         </h3>
                                         <button
                                             onClick={() => setShowPrescriptionForm(!showPrescriptionForm)}
-                                            className="btn btn-primary text-sm py-2 px-4 shadow-sm"
+                                            className="btn btn-primary text-sm py-2 px-4 shadow-md shadow-primary-200"
                                         >
-                                            {showPrescriptionForm ? 'Cancel' : '+ New Prescription'}
+                                            {showPrescriptionForm ? <X size={18} /> : <Plus size={18} />}
+                                            {showPrescriptionForm ? ' Cancel' : ' Add New'}
                                         </button>
                                     </div>
 
-                                    {showPrescriptionForm && (
-                                        <motion.form
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6 space-y-4"
-                                            onSubmit={handlePrescriptionSubmit}
-                                        >
-                                            <div className="input-group">
-                                                <label className="input-label">Medicine Name</label>
-                                                <input
-                                                    type="text"
-                                                    value={prescriptionForm.medName}
-                                                    onChange={(e) => setPrescriptionForm({ ...prescriptionForm, medName: e.target.value })}
-                                                    required
-                                                    className="input-field"
-                                                    placeholder="e.g. Amoxicillin"
-                                                />
-                                            </div>
-                                            <div className="input-group">
-                                                <label className="input-label">Description</label>
-                                                <input
-                                                    type="text"
-                                                    value={prescriptionForm.description}
-                                                    onChange={(e) => setPrescriptionForm({ ...prescriptionForm, description: e.target.value })}
-                                                    required
-                                                    className="input-field"
-                                                    placeholder="e.g. Take after meals"
-                                                />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
+                                    <AnimatePresence>
+                                        {showPrescriptionForm && (
+                                            <motion.form
+                                                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                                                animate={{ opacity: 1, height: 'auto', overflow: 'visible' }}
+                                                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                                                className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6 space-y-4 shadow-inner"
+                                                onSubmit={handlePrescriptionSubmit}
+                                            >
                                                 <div className="input-group">
-                                                    <label className="input-label">Dose</label>
+                                                    <label className="input-label">Medicine Name</label>
                                                     <input
                                                         type="text"
-                                                        value={prescriptionForm.dose}
-                                                        onChange={(e) => setPrescriptionForm({ ...prescriptionForm, dose: e.target.value })}
+                                                        value={prescriptionForm.medName}
+                                                        onChange={(e) => setPrescriptionForm({ ...prescriptionForm, medName: e.target.value })}
                                                         required
-                                                        className="input-field"
-                                                        placeholder="e.g. 500mg"
+                                                        className="input-field bg-white"
+                                                        placeholder="e.g. Amoxicillin"
                                                     />
                                                 </div>
                                                 <div className="input-group">
-                                                    <label className="input-label">Frequency</label>
-                                                    <input
-                                                        type="text"
-                                                        value={prescriptionForm.frequency}
-                                                        onChange={(e) => setPrescriptionForm({ ...prescriptionForm, frequency: e.target.value })}
+                                                    <label className="input-label">Description / Instructions</label>
+                                                    <textarea
+                                                        value={prescriptionForm.description}
+                                                        onChange={(e) => setPrescriptionForm({ ...prescriptionForm, description: e.target.value })}
                                                         required
-                                                        className="input-field"
-                                                        placeholder="e.g. Twice Daily"
+                                                        className="input-field bg-white min-h-[80px] py-3"
+                                                        placeholder="e.g. Take one tablet after meals with water."
                                                     />
                                                 </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="input-group">
-                                                    <label className="input-label">Start Date</label>
-                                                    <input
-                                                        type="date"
-                                                        value={prescriptionForm.startDate}
-                                                        onChange={(e) => setPrescriptionForm({ ...prescriptionForm, startDate: e.target.value })}
-                                                        required
-                                                        className="input-field"
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="input-group">
+                                                        <label className="input-label">Dose</label>
+                                                        <input
+                                                            type="text"
+                                                            value={prescriptionForm.dose}
+                                                            onChange={(e) => setPrescriptionForm({ ...prescriptionForm, dose: e.target.value })}
+                                                            required
+                                                            className="input-field bg-white"
+                                                            placeholder="e.g. 500mg"
+                                                        />
+                                                    </div>
+                                                    <div className="input-group">
+                                                        <label className="input-label">Frequency</label>
+                                                        <input
+                                                            type="text"
+                                                            value={prescriptionForm.frequency}
+                                                            onChange={(e) => setPrescriptionForm({ ...prescriptionForm, frequency: e.target.value })}
+                                                            required
+                                                            className="input-field bg-white"
+                                                            placeholder="e.g. Twice Daily"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="input-group">
-                                                    <label className="input-label">End Date</label>
-                                                    <input
-                                                        type="date"
-                                                        value={prescriptionForm.endDate}
-                                                        onChange={(e) => setPrescriptionForm({ ...prescriptionForm, endDate: e.target.value })}
-                                                        required
-                                                        className="input-field"
-                                                    />
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="input-group">
+                                                        <label className="input-label">Start Date</label>
+                                                        <input
+                                                            type="date"
+                                                            value={prescriptionForm.startDate}
+                                                            onChange={(e) => setPrescriptionForm({ ...prescriptionForm, startDate: e.target.value })}
+                                                            required
+                                                            className="input-field bg-white"
+                                                        />
+                                                    </div>
+                                                    <div className="input-group">
+                                                        <label className="input-label">End Date</label>
+                                                        <input
+                                                            type="date"
+                                                            value={prescriptionForm.endDate}
+                                                            onChange={(e) => setPrescriptionForm({ ...prescriptionForm, endDate: e.target.value })}
+                                                            required
+                                                            className="input-field bg-white"
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <button type="submit" className="btn btn-primary w-full shadow-md">
-                                                {editingPrescriptionId ? 'Update Prescription' : 'Add Prescription'}
-                                            </button>
-                                        </motion.form>
-                                    )}
+                                                <button type="submit" className="btn btn-primary w-full shadow-lg">
+                                                    {editingPrescriptionId ? 'Update' : 'Save Prescription'}
+                                                </button>
+                                            </motion.form>
+                                        )}
+                                    </AnimatePresence>
 
                                     <div className="space-y-4">
                                         {selectedPatient.medicines && selectedPatient.medicines.length > 0 ? (
                                             selectedPatient.medicines.map((med) => (
-                                                <div key={med.medId} className="p-4 border border-slate-100 rounded-xl hover:shadow-md transition-all bg-white group">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <h4 className="font-bold text-slate-800">{med.medName} <span className="text-slate-400 font-normal text-sm">| {med.dose}</span></h4>
-                                                            <p className="text-sm text-slate-500 mt-1 font-medium">{med.frequency}</p>
-                                                            <p className="text-sm text-slate-600 mt-2 bg-slate-50 p-2 rounded-lg inline-block">{med.description}</p>
-                                                            <p className="text-xs text-slate-400 mt-3 flex items-center gap-1">
-                                                                <Calendar size={12} />
-                                                                {new Date(med.startDate).toLocaleDateString()} - {new Date(med.endDate).toLocaleDateString()}
-                                                            </p>
-                                                        </div>
+                                                <div key={med.medId} className="p-5 border border-slate-100 rounded-xl hover:shadow-lg hover:border-primary-100 transition-all bg-white group relative">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <h4 className="font-bold text-slate-800 text-lg">{med.medName}</h4>
+                                                        <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold">{med.dose}</span>
+                                                    </div>
+                                                    <p className="text-primary-600 font-medium text-sm mb-3">{med.frequency}</p>
+                                                    <p className="text-slate-600 text-sm bg-slate-50 p-3 rounded-lg leading-relaxed">{med.description}</p>
+                                                    <div className="flex justify-between items-center mt-4 pt-3 border-t border-slate-50">
+                                                        <p className="text-xs text-slate-400 font-medium">
+                                                            {new Date(med.startDate).toLocaleDateString()} - {new Date(med.endDate).toLocaleDateString()}
+                                                        </p>
                                                         <button
                                                             onClick={() => handleEditPrescription(med)}
-                                                            className="text-primary-600 hover:text-primary-700 font-medium text-xs opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1 bg-primary-50 rounded-lg"
+                                                            className="text-primary-600 hover:text-primary-700 font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity bg-primary-50 px-3 py-1.5 rounded-lg"
                                                         >
                                                             Edit
                                                         </button>
@@ -552,126 +577,135 @@ const DoctorDashboard = () => {
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                                <Pill className="mx-auto mb-2 opacity-50" size={24} />
-                                                <p className="text-sm">No prescriptions added yet.</p>
+                                            <div className="text-center py-16 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                                <Pill className="mx-auto mb-3 opacity-30" size={32} />
+                                                <p className="text-sm font-medium">No active prescriptions.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+                            <div className="space-y-8">
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[300px]">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                                                <FileText size={20} />
+                                            </div>
+                                            Lab Reports
+                                        </h3>
+                                        <button
+                                            onClick={() => setShowReportForm(!showReportForm)}
+                                            className="btn btn-secondary text-sm py-2 px-4 shadow-sm"
+                                        >
+                                            {showReportForm ? <X size={18} /> : <Plus size={18} />}
+                                            {showReportForm ? ' Cancel' : ' Add'}
+                                        </button>
+                                    </div>
+
+                                    <AnimatePresence>
+                                        {showReportForm && (
+                                            <motion.form
+                                                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                                                animate={{ opacity: 1, height: 'auto', overflow: 'visible' }}
+                                                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                                                className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6 space-y-4 shadow-inner"
+                                                onSubmit={handleReportSubmit}
+                                            >
+                                                <div className="input-group">
+                                                    <label className="input-label">Report Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={reportForm.reportName}
+                                                        onChange={(e) => setReportForm({ ...reportForm, reportName: e.target.value })}
+                                                        required
+                                                        className="input-field bg-white"
+                                                        placeholder="e.g. Blood Test Result"
+                                                    />
+                                                </div>
+                                                <div className="input-group">
+                                                    <label className="input-label">Report URL</label>
+                                                    <input
+                                                        type="url"
+                                                        value={reportForm.reportUrl}
+                                                        onChange={(e) => setReportForm({ ...reportForm, reportUrl: e.target.value })}
+                                                        required
+                                                        className="input-field bg-white"
+                                                        placeholder="https://..."
+                                                    />
+                                                </div>
+                                                <button type="submit" className="btn btn-primary w-full shadow-lg">
+                                                    {editingReportId ? 'Update Report' : 'Save Report'}
+                                                </button>
+                                            </motion.form>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <div className="space-y-3">
+                                        {selectedPatient.Reports && selectedPatient.Reports.length > 0 ? (
+                                            selectedPatient.Reports.map((report) => (
+                                                <div key={report.reportId} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:shadow-md hover:border-emerald-100 transition-all group">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                                                            DOC
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-slate-800 text-sm">{report.reportName}</h4>
+                                                            <p className="text-xs text-slate-500 mt-0.5">{new Date(report.date).toLocaleDateString()}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <a
+                                                            href={report.reportUrl}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="p-2 text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
+                                                            title="View Report"
+                                                        >
+                                                            <FileText size={16} />
+                                                        </a>
+                                                        <button
+                                                            onClick={() => handleEditReport(report)}
+                                                            className="p-2 text-slate-500 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors opacity-0 group-hover:opacity-100"
+                                                            title="Edit"
+                                                        >
+                                                            <Activity size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-12 text-slate-400">
+                                                <p className="text-sm">No reports available.</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
                                 {selectedPatient.CancerType && selectedPatient.CancerType.length > 0 && (
-                                    <div className="card p-6 bg-red-50 border-red-100">
-                                        <h4 className="font-bold text-red-800 mb-4 flex items-center gap-2">
-                                            <Activity size={18} />
+                                    <div className="bg-red-50 rounded-2xl border border-red-100 p-6">
+                                        <h4 className="font-bold text-red-800 mb-4 flex items-center gap-2 text-lg">
+                                            <Activity size={20} />
                                             Diagnosis History
                                         </h4>
-                                        {selectedPatient.CancerType.map((cancer) => (
-                                            <div key={cancer.cancerId} className="bg-white p-4 rounded-xl border border-red-100 shadow-sm mb-3 last:mb-0">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <strong className="text-slate-800">{cancer.name}</strong>
-                                                        <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-bold">Stage {cancer.stage}</span>
+                                        <div className="space-y-3">
+                                            {selectedPatient.CancerType.map((cancer) => (
+                                                <div key={cancer.cancerId} className="bg-white p-4 rounded-xl border border-red-100 shadow-sm">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <strong className="text-slate-900">{cancer.name}</strong>
+                                                        <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-bold uppercase tracking-wider">Stage {cancer.stage}</span>
                                                     </div>
+                                                    <p className="text-slate-600 text-sm">{cancer.description}</p>
                                                 </div>
-                                                <p className="text-slate-600 text-sm mt-2">{cancer.description}</p>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Lab Reports Section */}
-                            <div className="card p-6 h-fit">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                        <FileText className="text-emerald-500" size={20} />
-                                        Lab Reports
-                                    </h3>
-                                    <button
-                                        onClick={() => setShowReportForm(!showReportForm)}
-                                        className="btn btn-secondary text-sm py-2 px-4 shadow-sm"
-                                    >
-                                        {showReportForm ? 'Cancel' : '+ Add Report'}
-                                    </button>
-                                </div>
-
-                                {showReportForm && (
-                                    <motion.form
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        className="bg-slate-50 p-6 rounded-xl border border-slate-200 mb-6 space-y-4"
-                                        onSubmit={handleReportSubmit}
-                                    >
-                                        <div className="input-group">
-                                            <label className="input-label">Report Name</label>
-                                            <input
-                                                type="text"
-                                                value={reportForm.reportName}
-                                                onChange={(e) => setReportForm({ ...reportForm, reportName: e.target.value })}
-                                                required
-                                                className="input-field"
-                                                placeholder="e.g. Blood Test Result"
-                                            />
-                                        </div>
-                                        <div className="input-group">
-                                            <label className="input-label">Report URL</label>
-                                            <input
-                                                type="url"
-                                                value={reportForm.reportUrl}
-                                                onChange={(e) => setReportForm({ ...reportForm, reportUrl: e.target.value })}
-                                                required
-                                                className="input-field"
-                                                placeholder="https://..."
-                                            />
-                                        </div>
-                                        <button type="submit" className="btn btn-primary w-full shadow-md">
-                                            {editingReportId ? 'Update Report' : 'Add Report'}
-                                        </button>
-                                    </motion.form>
-                                )}
-
-                                <div className="space-y-3">
-                                    {selectedPatient.Reports && selectedPatient.Reports.length > 0 ? (
-                                        selectedPatient.Reports.map((report) => (
-                                            <div key={report.reportId} className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all group">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                                                        <FileText size={20} />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-semibold text-slate-800 text-sm">{report.reportName}</h4>
-                                                        <p className="text-xs text-slate-500">{new Date(report.date).toLocaleDateString()}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <a
-                                                        href={report.reportUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
-                                                    >
-                                                        View
-                                                    </a>
-                                                    <button
-                                                        onClick={() => handleEditReport(report)}
-                                                        className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors opacity-0 group-hover:opacity-100"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-8 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                            <FileText className="mx-auto mb-2 opacity-50" size={24} />
-                                            <p className="text-sm">No reports available.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
                         </div>
-                    </div>
+                    </motion.div>
                 )}
             </main>
         </div>

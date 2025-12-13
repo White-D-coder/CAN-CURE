@@ -29,17 +29,24 @@ import {
     Stethoscope,
     Clock,
     Lock,
-    Unlock
+    Unlock,
+    LayoutDashboard,
+    Search,
+    ChevronRight,
+    X,
+    Menu
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const AdminDashboard = () => {
+    const { logout } = useAuth();
     const [doctors, setDoctors] = useState([]);
     const [patients, setPatients] = useState([]);
     const [stats, setStats] = useState({ doctors: 0, patients: 0, appointments: 0 });
-    const [activeTab, setActiveTab] = useState('doctors');
+    const [activeTab, setActiveTab] = useState('overview');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Doctor Form Data
+   
     const [doctorFormData, setDoctorFormData] = useState({
         name: '',
         specialist: '',
@@ -48,16 +55,18 @@ const AdminDashboard = () => {
         password: 'password123'
     });
     const [editingDoctorId, setEditingDoctorId] = useState(null);
+    const [isDoctorFormOpen, setIsDoctorFormOpen] = useState(false);
 
-    // Patient Form Data
+
     const [patientFormData, setPatientFormData] = useState({
         name: '',
         email: '',
         password: 'password123'
     });
     const [editingPatientId, setEditingPatientId] = useState(null);
+    const [isPatientFormOpen, setIsPatientFormOpen] = useState(false);
 
-    // Schedule Management Data
+
     const [scheduleData, setScheduleData] = useState({
         doctorId: '',
         date: '',
@@ -68,7 +77,6 @@ const AdminDashboard = () => {
 
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
-    const { logout } = useAuth();
 
     useEffect(() => {
         fetchInitialData();
@@ -129,6 +137,7 @@ const AdminDashboard = () => {
 
             setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
             setEditingDoctorId(null);
+            setIsDoctorFormOpen(false);
             setError('');
             setSuccessMsg('Doctor saved successfully');
             fetchDoctors();
@@ -150,6 +159,7 @@ const AdminDashboard = () => {
 
             setPatientFormData({ name: '', email: '', password: 'password123' });
             setEditingPatientId(null);
+            setIsPatientFormOpen(false);
             setError('');
             setSuccessMsg('Patient saved successfully');
             fetchPatients();
@@ -160,7 +170,7 @@ const AdminDashboard = () => {
         }
     };
 
-    // Schedule Management Functions
+
     const handleFetchSlots = async () => {
         if (!scheduleData.doctorId || !scheduleData.date) return;
         try {
@@ -216,8 +226,7 @@ const AdminDashboard = () => {
             password: ''
         });
         setEditingDoctorId(doctor.doctorId);
-        setActiveTab('doctors');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsDoctorFormOpen(true);
     };
 
     const handleEditPatient = (patient) => {
@@ -227,8 +236,7 @@ const AdminDashboard = () => {
             password: ''
         });
         setEditingPatientId(patient.id);
-        setActiveTab('patients');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsPatientFormOpen(true);
     };
 
     const handleDeleteDoctor = async (id) => {
@@ -255,415 +263,592 @@ const AdminDashboard = () => {
         }
     };
 
-    return (
-        <div className="min-h-screen bg-slate-50 pb-12">
-            {/* Header */}
-            <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-primary-600 p-2 rounded-lg text-white">
-                            <Shield size={20} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold text-slate-900 leading-none">Admin Portal</h1>
-                            <p className="text-xs text-slate-500 font-medium mt-1">System Management Dashboard</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={logout}
-                        className="flex items-center gap-2 text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors text-sm font-medium"
-                    >
-                        <LogOut size={16} />
-                        Logout
-                    </button>
-                </div>
-            </header>
+    const menuItems = [
+        { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+        { id: 'doctors', label: 'Doctors', icon: Stethoscope },
+        { id: 'patients', label: 'Patients', icon: Users },
+        { id: 'schedule', label: 'Schedule', icon: Calendar },
+    ];
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+    const renderOverview = () => (
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+        >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                             <Stethoscope size={24} />
                         </div>
                         <div>
-                            <p className="text-slate-500 text-sm font-medium uppercase tracking-wide">Total Doctors</p>
-                            <p className="text-2xl font-bold text-slate-900">{stats.doctors}</p>
+                            <p className="text-slate-500 text-sm font-medium">Total Doctors</p>
+                            <p className="text-3xl font-bold text-slate-900">{stats.doctors}</p>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                </div>
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                             <Users size={24} />
                         </div>
                         <div>
-                            <p className="text-slate-500 text-sm font-medium uppercase tracking-wide">Total Patients</p>
-                            <p className="text-2xl font-bold text-slate-900">{stats.patients}</p>
+                            <p className="text-slate-500 text-sm font-medium">Total Patients</p>
+                            <p className="text-3xl font-bold text-slate-900">{stats.patients}</p>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm flex items-center gap-4">
-                        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">
+                </div>
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
                             <Calendar size={24} />
                         </div>
                         <div>
-                            <p className="text-slate-500 text-sm font-medium uppercase tracking-wide">Total Appointments</p>
-                            <p className="text-2xl font-bold text-slate-900">{stats.appointments}</p>
+                            <p className="text-slate-500 text-sm font-medium">Appointments</p>
+                            <p className="text-3xl font-bold text-slate-900">{stats.appointments}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <Shield size={120} />
+                </div>
+                <div className="relative z-10">
+                    <h2 className="text-2xl font-bold mb-2">System Administration</h2>
+                    <p className="text-slate-300 max-w-xl">
+                        Manage your medical staff, patient records, and scheduling system efficiently from this central dashboard.
+                    </p>
+                </div>
+            </div>
+        </motion.div>
+    );
+
+    return (
+        <div className="min-h-screen bg-slate-50 flex font-sans">
+
+            <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+                <div className="p-6 border-b border-slate-800">
+                    <div className="flex items-center gap-3 text-white">
+                        <div className="bg-blue-600 p-2 rounded-lg">
+                            <Shield size={24} className="text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-bold leading-none">Admin</h1>
+                            <p className="text-slate-400 text-xs mt-1">Portal</p>
                         </div>
                     </div>
                 </div>
 
-                {error && (
-                    <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg flex items-center gap-3">
-                        <AlertCircle className="text-red-500" size={20} />
-                        <p className="text-red-700 font-medium">{error}</p>
-                    </div>
-                )}
-                {successMsg && (
-                    <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg flex items-center gap-3">
-                        <CheckCircle className="text-emerald-500" size={20} />
-                        <p className="text-emerald-700 font-medium">{successMsg}</p>
-                    </div>
-                )}
+                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+                    {menuItems.map((item) => (
+                        <button
+                            key={item.id}
+                            onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                                activeTab === item.id 
+                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
+                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <item.icon size={20} className={activeTab === item.id ? 'animate-pulse-slow' : ''} />
+                            <span className="font-medium">{item.label}</span>
+                            {activeTab === item.id && (
+                                <ChevronRight size={16} className="ml-auto opacity-50" />
+                            )}
+                        </button>
+                    ))}
+                </nav>
 
-                {/* Tabs */}
-                <div className="flex gap-4 mb-8 border-b border-slate-200">
-                    <button
-                        onClick={() => setActiveTab('doctors')}
-                        className={`pb-4 px-4 font-medium text-sm flex items-center gap-2 transition-all relative ${
-                            activeTab === 'doctors' ? 'text-primary-600' : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                <div className="p-4 border-t border-slate-800">
+                    <button 
+                        onClick={logout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                     >
-                        <Stethoscope size={18} />
-                        Manage Doctors
+                        <LogOut size={20} />
+                        <span className="font-medium">Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* Mobile Overlay */}
+            {isMobileMenuOpen && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
+
+            <main className="flex-1 md:ml-64 p-4 md:p-8 min-h-screen transition-all">
+
+                <div className="md:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <Shield className="text-blue-600" size={24} />
+                        <span className="font-bold text-slate-900">Admin Portal</span>
+                    </div>
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg"
+                    >
+                        <Menu size={24} />
+                    </button>
+                </div>
+
+
+                <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                            {menuItems.find(i => i.id === activeTab)?.label}
+                        </h2>
+                        <p className="text-slate-500 text-sm mt-1">Welcome back, Admin</p>
+                    </div>
+                    
+                    <div className="flex gap-3">
                         {activeTab === 'doctors' && (
-                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+                            <button
+                                onClick={() => {
+                                    setEditingDoctorId(null);
+                                    setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
+                                    setIsDoctorFormOpen(true);
+                                }}
+                                className="btn btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <Plus size={18} />
+                                Add Doctor
+                            </button>
                         )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('patients')}
-                        className={`pb-4 px-4 font-medium text-sm flex items-center gap-2 transition-all relative ${
-                            activeTab === 'patients' ? 'text-primary-600' : 'text-slate-500 hover:text-slate-700'
-                        }`}
-                    >
-                        <Users size={18} />
-                        Manage Patients
                         {activeTab === 'patients' && (
-                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+                            <button
+                                onClick={() => {
+                                    setEditingPatientId(null);
+                                    setPatientFormData({ name: '', email: '', password: 'password123' });
+                                    setIsPatientFormOpen(true);
+                                }}
+                                className="btn btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <UserPlus size={18} />
+                                Add Patient
+                            </button>
                         )}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('schedule')}
-                        className={`pb-4 px-4 font-medium text-sm flex items-center gap-2 transition-all relative ${
-                            activeTab === 'schedule' ? 'text-primary-600' : 'text-slate-500 hover:text-slate-700'
-                        }`}
+                    </div>
+                </header>
+
+                <AnimatePresence mode='wait'>
+                    <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
                     >
-                        <Clock size={18} />
-                        Manage Schedule
-                        {activeTab === 'schedule' && (
-                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600" />
+                        {error && (
+                            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-xl flex items-center gap-3 shadow-sm">
+                                <AlertCircle className="text-red-500" size={20} />
+                                <p className="text-red-700 font-medium">{error}</p>
+                            </div>
                         )}
-                    </button>
-                </div>
-
-                {/* Content */}
-                {activeTab === 'doctors' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Doctor Form */}
-                        <div className="card h-fit">
-                            <div className="p-6 border-b border-slate-100">
-                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                    {editingDoctorId ? <Edit size={18} /> : <Plus size={18} />}
-                                    {editingDoctorId ? 'Edit Doctor' : 'Add New Doctor'}
-                                </h3>
+                        {successMsg && (
+                            <div className="bg-emerald-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-xl flex items-center gap-3 shadow-sm">
+                                <CheckCircle className="text-emerald-500" size={20} />
+                                <p className="text-emerald-700 font-medium">{successMsg}</p>
                             </div>
-                            <form onSubmit={handleDoctorSubmit} className="p-6 space-y-4">
-                                <div className="input-group">
-                                    <label className="input-label">Name</label>
-                                    <input type="text" value={doctorFormData.name} onChange={(e) => setDoctorFormData({ ...doctorFormData, name: e.target.value })} required placeholder="Dr. John Doe" className="input-field" />
-                                </div>
-                                <div className="input-group">
-                                    <label className="input-label">Specialist</label>
-                                    <input type="text" value={doctorFormData.specialist} onChange={(e) => setDoctorFormData({ ...doctorFormData, specialist: e.target.value })} required placeholder="Cardiologist" className="input-field" />
-                                </div>
-                                <div className="input-group">
-                                    <label className="input-label">Experience (Years)</label>
-                                    <input type="number" value={doctorFormData.experience} onChange={(e) => setDoctorFormData({ ...doctorFormData, experience: e.target.value })} required placeholder="5" min="0" className="input-field" />
-                                </div>
-                                <div className="input-group">
-                                    <label className="input-label">Email</label>
-                                    <input type="email" value={doctorFormData.email} onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })} required placeholder="doctor@example.com" className="input-field" />
-                                </div>
-                                <div className="input-group">
-                                    <label className="input-label">Password</label>
-                                    <input type="text" value={doctorFormData.password} onChange={(e) => setDoctorFormData({ ...doctorFormData, password: e.target.value })} required={!editingDoctorId} placeholder={editingDoctorId ? "Leave blank to keep" : "password123"} className="input-field" />
-                                </div>
-                                <div className="flex gap-3 mt-6 pt-4">
-                                    <button type="submit" className="flex-1 btn btn-primary flex justify-center items-center gap-2">
-                                        {editingDoctorId ? 'Update' : 'Add Doctor'}
-                                    </button>
-                                    {editingDoctorId && (
-                                        <button 
-                                            type="button" 
-                                            className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors"
-                                            onClick={() => { setEditingDoctorId(null); setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' }); }}
+                        )}
+
+                     
+                        {activeTab === 'overview' && renderOverview()}
+
+                        
+                        {activeTab === 'doctors' && (
+                            <>
+                          
+                                {isDoctorFormOpen && (
+                                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
+                                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsDoctorFormOpen(false)} />
+                                        <motion.div 
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden"
                                         >
-                                            Cancel
-                                        </button>
-                                    )}
-                                </div>
-                            </form>
-                        </div>
-
-                        {/* Doctors List */}
-                        <div className="card lg:col-span-2 overflow-hidden">
-                            <div className="p-6 border-b border-slate-100 mb-0">
-                                <h3 className="text-lg font-bold text-slate-800">Doctors Directory</h3>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
-                                        <tr>
-                                            <th className="p-4">Name</th>
-                                            <th className="p-4">Specialist</th>
-                                            <th className="p-4">Exp</th>
-                                            <th className="p-4">Email</th>
-                                            <th className="p-4 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {doctors.map((doctor) => (
-                                            <tr key={doctor.doctorId} className="hover:bg-slate-50 transition-colors">
-                                                <td className="p-4 font-medium text-slate-900">{doctor.name}</td>
-                                                <td className="p-4 text-slate-600">{doctor.specialist}</td>
-                                                <td className="p-4 text-slate-600">{doctor.experience}y</td>
-                                                <td className="p-4 text-slate-600">{doctor.email}</td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <button 
-                                                            onClick={() => handleEditDoctor(doctor)} 
-                                                            className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                                                            title="Edit"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDeleteDoctor(doctor.doctorId)} 
-                                                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
+                                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                                    {editingDoctorId ? <Edit size={18} className="text-blue-500" /> : <Plus size={18} className="text-blue-500" />}
+                                                    {editingDoctorId ? 'Edit Doctor' : 'Add New Doctor'}
+                                                </h3>
+                                                <button onClick={() => setIsDoctorFormOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                                    <X size={20} />
+                                                </button>
+                                            </div>
+                                            <form onSubmit={handleDoctorSubmit} className="p-6 space-y-5">
+                                                <div className="input-group">
+                                                    <label className="input-label">Name</label>
+                                                    <input type="text" value={doctorFormData.name} onChange={(e) => setDoctorFormData({ ...doctorFormData, name: e.target.value })} required placeholder="Dr. John Doe" className="input-field" />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="input-group">
+                                                        <label className="input-label">Specialist</label>
+                                                        <input type="text" value={doctorFormData.specialist} onChange={(e) => setDoctorFormData({ ...doctorFormData, specialist: e.target.value })} required placeholder="Cardiologist" className="input-field" />
                                                     </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                                                    <div className="input-group">
+                                                        <label className="input-label">Exp (Years)</label>
+                                                        <input type="number" value={doctorFormData.experience} onChange={(e) => setDoctorFormData({ ...doctorFormData, experience: e.target.value })} required placeholder="5" min="0" className="input-field" />
+                                                    </div>
+                                                </div>
+                                                <div className="input-group">
+                                                    <label className="input-label">Email</label>
+                                                    <input type="email" value={doctorFormData.email} onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })} required placeholder="doctor@example.com" className="input-field" />
+                                                </div>
+                                                <div className="input-group">
+                                                    <label className="input-label">Password</label>
+                                                    <input type="text" value={doctorFormData.password} onChange={(e) => setDoctorFormData({ ...doctorFormData, password: e.target.value })} required={!editingDoctorId} placeholder={editingDoctorId ? "Leave blank to keep" : "password123"} className="input-field" />
+                                                </div>
+                                                <div className="flex gap-3 pt-2">
+                                                    <button type="submit" className="flex-1 btn btn-primary flex justify-center items-center gap-2">
+                                                        {editingDoctorId ? 'Update Doctor' : 'Save Doctor'}
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+                                                        onClick={() => setIsDoctorFormOpen(false)}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </motion.div>
+                                    </div>
+                                )}
 
-                {activeTab === 'patients' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Patient Form */}
-                        <div className="card h-fit">
-                            <div className="p-6 border-b border-slate-100">
-                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                    {editingPatientId ? <Edit size={18} /> : <UserPlus size={18} />}
-                                    {editingPatientId ? 'Edit Patient' : 'Add New Patient'}
-                                </h3>
-                            </div>
-                            <form onSubmit={handlePatientSubmit} className="p-6 space-y-4">
-                                <div className="input-group">
-                                    <label className="input-label">Name</label>
-                                    <input type="text" value={patientFormData.name} onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })} required placeholder="John Doe" className="input-field" />
+                                <div className="card overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold border-b border-slate-200">
+                                                <tr>
+                                                    <th className="p-4 px-6">Doctor Name</th>
+                                                    <th className="p-4">Specialization</th>
+                                                    <th className="p-4">Experience</th>
+                                                    <th className="p-4">Contact</th>
+                                                    <th className="p-4 px-6 text-right">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {doctors.length === 0 ? (
+                                                     <tr>
+                                                        <td colSpan="5" className="p-8 text-center text-slate-500">
+                                                            No doctors found. Add one to get started.
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    doctors.map((doctor) => (
+                                                        <tr key={doctor.doctorId} className="hover:bg-slate-50/80 transition-colors group">
+                                                            <td className="p-4 px-6">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                                                                        {doctor.name.charAt(0)}
+                                                                    </div>
+                                                                    <span className="font-semibold text-slate-900">{doctor.name}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-4">
+                                                                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium border border-blue-100">
+                                                                    {doctor.specialist}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-4 text-slate-600">{doctor.experience} Years</td>
+                                                            <td className="p-4 text-slate-600">{doctor.email}</td>
+                                                            <td className="p-4 px-6 text-right">
+                                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button 
+                                                                        onClick={() => handleEditDoctor(doctor)} 
+                                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                        title="Edit"
+                                                                    >
+                                                                        <Edit size={16} />
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleDeleteDoctor(doctor.doctorId)} 
+                                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                <div className="input-group">
-                                    <label className="input-label">Email</label>
-                                    <input type="email" value={patientFormData.email} onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })} required placeholder="patient@example.com" className="input-field" />
-                                </div>
-                                <div className="input-group">
-                                    <label className="input-label">Password</label>
-                                    <input type="text" value={patientFormData.password} onChange={(e) => setPatientFormData({ ...patientFormData, password: e.target.value })} required={!editingPatientId} placeholder={editingPatientId ? "Leave blank to keep" : "password123"} className="input-field" />
-                                </div>
-                                <div className="flex gap-3 mt-6 pt-4">
-                                    <button type="submit" className="flex-1 btn btn-primary flex justify-center items-center gap-2">
-                                        {editingPatientId ? 'Update' : 'Add Patient'}
-                                    </button>
-                                    {editingPatientId && (
-                                        <button 
-                                            type="button" 
-                                            className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg font-medium hover:bg-slate-50 transition-colors"
-                                            onClick={() => { setEditingPatientId(null); setPatientFormData({ name: '', email: '', password: 'password123' }); }}
+                            </>
+                        )}
+
+
+                        
+                        {activeTab === 'patients' && (
+                            <>
+                          
+                                {isPatientFormOpen && (
+                                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
+                                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsPatientFormOpen(false)} />
+                                        <motion.div 
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden"
                                         >
-                                            Cancel
-                                        </button>
-                                    )}
+                                            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                                    {editingPatientId ? <Edit size={18} className="text-blue-500" /> : <UserPlus size={18} className="text-blue-500" />}
+                                                    {editingPatientId ? 'Edit Patient' : 'Add New Patient'}
+                                                </h3>
+                                                <button onClick={() => setIsPatientFormOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                                    <X size={20} />
+                                                </button>
+                                            </div>
+                                            <form onSubmit={handlePatientSubmit} className="p-6 space-y-5">
+                                                <div className="input-group">
+                                                    <label className="input-label">Name</label>
+                                                    <input type="text" value={patientFormData.name} onChange={(e) => setPatientFormData({ ...patientFormData, name: e.target.value })} required placeholder="John Doe" className="input-field" />
+                                                </div>
+                                                <div className="input-group">
+                                                    <label className="input-label">Email</label>
+                                                    <input type="email" value={patientFormData.email} onChange={(e) => setPatientFormData({ ...patientFormData, email: e.target.value })} required placeholder="patient@example.com" className="input-field" />
+                                                </div>
+                                                <div className="input-group">
+                                                    <label className="input-label">Password</label>
+                                                    <input type="text" value={patientFormData.password} onChange={(e) => setPatientFormData({ ...patientFormData, password: e.target.value })} required={!editingPatientId} placeholder={editingPatientId ? "Leave blank to keep" : "password123"} className="input-field" />
+                                                </div>
+                                                <div className="flex gap-3 pt-2">
+                                                    <button type="submit" className="flex-1 btn btn-primary flex justify-center items-center gap-2">
+                                                        {editingPatientId ? 'Update Patient' : 'Save Patient'}
+                                                    </button>
+                                                    <button 
+                                                        type="button" 
+                                                        className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+                                                        onClick={() => setIsPatientFormOpen(false)}
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </motion.div>
+                                    </div>
+                                )}
+
+                                <div className="card overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold border-b border-slate-200">
+                                                <tr>
+                                                    <th className="p-4 px-6">Patient ID</th>
+                                                    <th className="p-4">Name</th>
+                                                    <th className="p-4">Email</th>
+                                                    <th className="p-4">Active Appts</th>
+                                                    <th className="p-4 px-6 text-right">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {patients.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="5" className="p-8 text-center text-slate-500">
+                                                            No patients found.
+                                                        </td>
+                                                    </tr>
+                                                ) : (
+                                                    patients.map((patient) => (
+                                                        <tr key={patient.id} className="hover:bg-slate-50/80 transition-colors group">
+                                                            <td className="p-4 px-6">
+                                                                <span className="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded">#{patient.id}</span>
+                                                            </td>
+                                                            <td className="p-4 font-semibold text-slate-900">{patient.name}</td>
+                                                            <td className="p-4 text-slate-600">{patient.email}</td>
+                                                            <td className="p-4">
+                                                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold border border-indigo-100">
+                                                                    {patient._count?.Appointments || 0}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-4 px-6 text-right">
+                                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                    <button 
+                                                                        onClick={() => handleEditPatient(patient)} 
+                                                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                        title="Edit"
+                                                                    >
+                                                                        <Edit size={16} />
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleDeletePatient(patient.id)} 
+                                                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </form>
-                        </div>
+                            </>
+                        )}
 
-                        {/* Patients List */}
-                        <div className="card lg:col-span-2 overflow-hidden">
-                            <div className="p-6 border-b border-slate-100 mb-0">
-                                <h3 className="text-lg font-bold text-slate-800">Registered Patients</h3>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
-                                        <tr>
-                                            <th className="p-4">ID</th>
-                                            <th className="p-4">Name</th>
-                                            <th className="p-4">Email</th>
-                                            <th className="p-4">Appointments</th>
-                                            <th className="p-4 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {patients.map((patient) => (
-                                            <tr key={patient.id} className="hover:bg-slate-50 transition-colors">
-                                                <td className="p-4 text-slate-400 font-mono text-xs">#{patient.id}</td>
-                                                <td className="p-4 font-medium text-slate-900">{patient.name}</td>
-                                                <td className="p-4 text-slate-600">{patient.email}</td>
-                                                <td className="p-4">
-                                                    <span className="bg-indigo-50 text-indigo-600 px-2 py-1 rounded-full text-xs font-semibold">
-                                                        {patient._count?.Appointments || 0}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <button 
-                                                            onClick={() => handleEditPatient(patient)} 
-                                                            className="p-1.5 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
-                                                            title="Edit"
-                                                        >
-                                                            <Edit size={16} />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDeletePatient(patient.id)} 
-                                                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
-                {activeTab === 'schedule' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="card h-fit p-6 space-y-6">
-                            <h3 className="text-lg font-bold text-slate-800 mb-4">Manage Schedule</h3>
-                            <div className="input-group">
-                                <label className="input-label">Select Doctor</label>
-                                <select
-                                    value={scheduleData.doctorId}
-                                    onChange={(e) => setScheduleData({ ...scheduleData, doctorId: e.target.value })}
-                                    className="input-field"
-                                >
-                                    <option value="">-- Select Doctor --</option>
-                                    {doctors.map(doc => (
-                                        <option key={doc.doctorId} value={doc.doctorId}>{doc.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="input-group">
-                                <label className="input-label">Select Date</label>
-                                <input
-                                    type="date"
-                                    value={scheduleData.date}
-                                    onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    className="input-field"
-                                />
-                            </div>
+              
+                        {activeTab === 'schedule' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                <div className="card h-fit p-6 space-y-6">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-800 mb-1">Manage Schedule</h3>
+                                        <p className="text-slate-500 text-sm">Create and manage doctor availability.</p>
+                                    </div>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="input-group">
+                                            <label className="input-label">Select Doctor</label>
+                                            <select
+                                                value={scheduleData.doctorId}
+                                                onChange={(e) => setScheduleData({ ...scheduleData, doctorId: e.target.value })}
+                                                className="input-field"
+                                            >
+                                                <option value="">-- Select Doctor --</option>
+                                                {doctors.map(doc => (
+                                                    <option key={doc.doctorId} value={doc.doctorId}>{doc.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="input-group">
+                                            <label className="input-label">Select Date</label>
+                                            <input
+                                                type="date"
+                                                value={scheduleData.date}
+                                                onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                                                min={new Date().toISOString().split('T')[0]}
+                                                className="input-field"
+                                            />
+                                        </div>
+                                    </div>
 
-                            <div className="pt-6 border-t border-slate-100">
-                                <h4 className="text-sm font-semibold text-slate-700 mb-3">Add Time Slot</h4>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="time"
-                                        value={newSlotTime}
-                                        onChange={(e) => setNewSlotTime(e.target.value)}
-                                        className="input-field"
-                                    />
-                                    <button
-                                        onClick={handleCreateSlot}
-                                        className="btn btn-primary px-6"
-                                        disabled={!scheduleData.doctorId || !scheduleData.date || !newSlotTime}
-                                    >
-                                        Add
-                                    </button>
+                                    <div className="pt-6 border-t border-slate-100">
+                                        <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                            <Plus size={16} className="text-blue-500"/> Add Time Slot
+                                        </h4>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="time"
+                                                value={newSlotTime}
+                                                onChange={(e) => setNewSlotTime(e.target.value)}
+                                                className="input-field"
+                                            />
+                                            <button
+                                                onClick={handleCreateSlot}
+                                                className="btn btn-primary px-6"
+                                                disabled={!scheduleData.doctorId || !scheduleData.date || !newSlotTime}
+                                            >
+                                                Add
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div className="card lg:col-span-2 p-6">
-                            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center justify-between">
-                                <span>Time Slots</span>
-                                {scheduleData.date && <span className="text-sm font-normal text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{scheduleData.date}</span>}
-                            </h3>
+                                <div className="card lg:col-span-2 p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-lg font-bold text-slate-800">
+                                            Available Slots
+                                        </h3>
+                                        {scheduleData.date && (
+                                            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                                {scheduleData.date}
+                                            </span>
+                                        )}
+                                    </div>
 
-                            {!scheduleData.doctorId || !scheduleData.date ? (
-                                <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
-                                    <Clock className="text-slate-300 mx-auto mb-3" size={48} />
-                                    <p className="text-slate-500 font-medium">Select a doctor and date to view slots.</p>
-                                </div>
-                            ) : (
-                                <div>
-                                    {doctorSlots.length === 0 ? (
-                                        <div className="text-center py-12">
-                                            <p className="text-slate-500">No slots created yet.</p>
+                                    {!scheduleData.doctorId || !scheduleData.date ? (
+                                        <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/50">
+                                            <div className="bg-white p-4 rounded-full shadow-sm mb-4">
+                                                <Clock className="text-slate-300" size={32} />
+                                            </div>
+                                            <p className="text-slate-500 font-medium">Select a doctor and date to view slots.</p>
                                         </div>
                                     ) : (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                            {doctorSlots.map(slot => (
-                                                <div
-                                                    key={slot.id}
-                                                    className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all ${
-                                                        slot.status === 'FROZEN' ? 'bg-red-50 border-red-200 text-red-700 opacity-80' :
-                                                        slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-                                                        slot.status === 'AVAILABLE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 
-                                                        'bg-white border-slate-200'
-                                                    }`}
-                                                >
-                                                    <span className="font-bold text-lg">{slot.time}</span>
-                                                    <span className="text-[10px] uppercase tracking-wider font-bold">
-                                                        {slot.status}
-                                                    </span>
-                                                    
-                                                    {slot.status !== 'BOOKED' && (
-                                                        <button
-                                                            onClick={() => handleToggleFreeze(slot)}
-                                                            className={`w-full text-xs py-1.5 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1 ${
-                                                                slot.status === 'FROZEN' 
-                                                                    ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                                                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                                        <div>
+                                            {doctorSlots.length === 0 ? (
+                                                <div className="text-center py-12">
+                                                    <p className="text-slate-500">No slots created yet for this date.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                                                    {doctorSlots.map(slot => (
+                                                        <motion.div
+                                                            layout
+                                                            initial={{ opacity: 0, scale: 0.9 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            key={slot.id}
+                                                            className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all relative overflow-hidden group ${
+                                                                slot.status === 'FROZEN' ? 'bg-red-50 border-red-200' :
+                                                                slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200' :
+                                                                'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-md'
                                                             }`}
                                                         >
-                                                            {slot.status === 'FROZEN' ? (
-                                                                <><Unlock size={12} /> Unfreeze</>
-                                                            ) : (
-                                                                <><Lock size={12} /> Freeze</>
+                                                            <div className={`absolute top-0 right-0 p-1 rounded-bl-lg ${
+                                                                 slot.status === 'FROZEN' ? 'bg-red-100 text-red-600' :
+                                                                 slot.status === 'BOOKED' ? 'bg-blue-100 text-blue-600' :
+                                                                 'bg-emerald-100 text-emerald-600'
+                                                            }`}>
+                                                                {slot.status === 'FROZEN' && <Lock size={12} />}
+                                                                {slot.status === 'BOOKED' && <CheckCircle size={12} />}
+                                                                {slot.status === 'AVAILABLE' && <CheckCircle size={12} />}
+                                                            </div>
+
+                                                            <span className={`font-bold text-lg ${
+                                                                slot.status === 'FROZEN' ? 'text-red-700' :
+                                                                slot.status === 'BOOKED' ? 'text-blue-700' :
+                                                                'text-slate-700'
+                                                            }`}>
+                                                                {slot.time}
+                                                            </span>
+                                                            
+                                                            <span className={`text-[10px] uppercase tracking-wider font-bold ${
+                                                                slot.status === 'FROZEN' ? 'text-red-600' :
+                                                                slot.status === 'BOOKED' ? 'text-blue-600' :
+                                                                'text-emerald-600'
+                                                            }`}>
+                                                                {slot.status}
+                                                            </span>
+                                                            
+                                                            {slot.status !== 'BOOKED' && (
+                                                                <button
+                                                                    onClick={() => handleToggleFreeze(slot)}
+                                                                    className={`w-full text-xs py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                                                                        slot.status === 'FROZEN' 
+                                                                            ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50' 
+                                                                            : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-white hover:shadow-sm'
+                                                                    }`}
+                                                                >
+                                                                    {slot.status === 'FROZEN' ? (
+                                                                        <><Unlock size={12} /> Unlock</>
+                                                                    ) : (
+                                                                        <><Lock size={12} /> Freeze</>
+                                                                    )}
+                                                                </button>
                                                             )}
-                                                        </button>
-                                                    )}
+                                                        </motion.div>
+                                                    ))}
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     )}
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                )}
+                            </div>
+                        )}
+                    </motion.div>
+                </AnimatePresence>
             </main>
         </div>
     );
