@@ -15,5 +15,8 @@
     "dev": "nodemon src/service/service.js",
     "start": "node src/service/service.js"
   },
-  "type": "module"
+  "type": "module",
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
 }
