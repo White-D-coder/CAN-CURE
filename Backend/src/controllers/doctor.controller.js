@@ -49,7 +49,7 @@ export const getPatientDetails = async (req, res) => {
     try {
         const { doctorId, patientId } = req.params;
 
-        // Verify appointment exists between doctor and patient
+
         const appointment = await prisma.appointment.findFirst({
             where: {
                 doctorId: doctorId,

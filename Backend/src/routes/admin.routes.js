@@ -30,7 +30,7 @@ router.post('/patients', createPatient);
 router.put('/patients/:id', updatePatient);
 router.delete('/patients/:id', deletePatient);
 
-// Schedule Management
+
 router.post('/schedule/create', createTimeSlots);
 router.put('/schedule/status', updateSlotStatus);
 router.get('/schedule', getDoctorSlots);

@@ -14,17 +14,17 @@ import {
     updateSlotStatus,
     getDoctorSlots
 } from '../../api/admin';
-import { 
-    Users, 
-    UserPlus, 
-    Calendar, 
-    Activity, 
-    Trash2, 
-    Edit, 
-    Plus, 
-    LogOut, 
-    CheckCircle, 
-    AlertCircle, 
+import {
+    Users,
+    UserPlus,
+    Calendar,
+    Activity,
+    Trash2,
+    Edit,
+    Plus,
+    LogOut,
+    CheckCircle,
+    AlertCircle,
     Shield,
     Stethoscope,
     Clock,
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-   
+
     const [doctorFormData, setDoctorFormData] = useState({
         name: '',
         specialist: '',
@@ -271,7 +271,7 @@ const AdminDashboard = () => {
     ];
 
     const renderOverview = () => (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
@@ -348,11 +348,10 @@ const AdminDashboard = () => {
                         <button
                             key={item.id}
                             onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                                activeTab === item.id 
-                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === item.id
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                }`}
                         >
                             <item.icon size={20} className={activeTab === item.id ? 'animate-pulse-slow' : ''} />
                             <span className="font-medium">{item.label}</span>
@@ -364,7 +363,7 @@ const AdminDashboard = () => {
                 </nav>
 
                 <div className="p-4 border-t border-slate-800">
-                    <button 
+                    <button
                         onClick={logout}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                     >
@@ -374,9 +373,9 @@ const AdminDashboard = () => {
                 </div>
             </aside>
 
-            {/* Mobile Overlay */}
+
             {isMobileMenuOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden backdrop-blur-sm"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
@@ -390,7 +389,7 @@ const AdminDashboard = () => {
                         <Shield className="text-blue-600" size={24} />
                         <span className="font-bold text-slate-900">Admin Portal</span>
                     </div>
-                    <button 
+                    <button
                         onClick={() => setIsMobileMenuOpen(true)}
                         className="p-2 text-slate-600 hover:bg-slate-50 rounded-lg"
                     >
@@ -406,7 +405,7 @@ const AdminDashboard = () => {
                         </h2>
                         <p className="text-slate-500 text-sm mt-1">Welcome back, Admin</p>
                     </div>
-                    
+
                     <div className="flex gap-3">
                         {activeTab === 'doctors' && (
                             <button
@@ -458,17 +457,17 @@ const AdminDashboard = () => {
                             </div>
                         )}
 
-                     
+
                         {activeTab === 'overview' && renderOverview()}
 
-                        
+
                         {activeTab === 'doctors' && (
                             <>
-                          
+
                                 {isDoctorFormOpen && (
                                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
                                         <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsDoctorFormOpen(false)} />
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden"
@@ -509,8 +508,8 @@ const AdminDashboard = () => {
                                                     <button type="submit" className="flex-1 btn btn-primary flex justify-center items-center gap-2">
                                                         {editingDoctorId ? 'Update Doctor' : 'Save Doctor'}
                                                     </button>
-                                                    <button 
-                                                        type="button" 
+                                                    <button
+                                                        type="button"
                                                         className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition-colors"
                                                         onClick={() => setIsDoctorFormOpen(false)}
                                                     >
@@ -536,7 +535,7 @@ const AdminDashboard = () => {
                                             </thead>
                                             <tbody className="divide-y divide-slate-100">
                                                 {doctors.length === 0 ? (
-                                                     <tr>
+                                                    <tr>
                                                         <td colSpan="5" className="p-8 text-center text-slate-500">
                                                             No doctors found. Add one to get started.
                                                         </td>
@@ -561,15 +560,15 @@ const AdminDashboard = () => {
                                                             <td className="p-4 text-slate-600">{doctor.email}</td>
                                                             <td className="p-4 px-6 text-right">
                                                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <button 
-                                                                        onClick={() => handleEditDoctor(doctor)} 
+                                                                    <button
+                                                                        onClick={() => handleEditDoctor(doctor)}
                                                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                                         title="Edit"
                                                                     >
                                                                         <Edit size={16} />
                                                                     </button>
-                                                                    <button 
-                                                                        onClick={() => handleDeleteDoctor(doctor.doctorId)} 
+                                                                    <button
+                                                                        onClick={() => handleDeleteDoctor(doctor.doctorId)}
                                                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                                         title="Delete"
                                                                     >
@@ -588,14 +587,14 @@ const AdminDashboard = () => {
                         )}
 
 
-                        
+
                         {activeTab === 'patients' && (
                             <>
-                          
+
                                 {isPatientFormOpen && (
                                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
                                         <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsPatientFormOpen(false)} />
-                                        <motion.div 
+                                        <motion.div
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden"
@@ -626,8 +625,8 @@ const AdminDashboard = () => {
                                                     <button type="submit" className="flex-1 btn btn-primary flex justify-center items-center gap-2">
                                                         {editingPatientId ? 'Update Patient' : 'Save Patient'}
                                                     </button>
-                                                    <button 
-                                                        type="button" 
+                                                    <button
+                                                        type="button"
                                                         className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl font-medium hover:bg-slate-50 transition-colors"
                                                         onClick={() => setIsPatientFormOpen(false)}
                                                     >
@@ -673,15 +672,15 @@ const AdminDashboard = () => {
                                                             </td>
                                                             <td className="p-4 px-6 text-right">
                                                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <button 
-                                                                        onClick={() => handleEditPatient(patient)} 
+                                                                    <button
+                                                                        onClick={() => handleEditPatient(patient)}
                                                                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                                                         title="Edit"
                                                                     >
                                                                         <Edit size={16} />
                                                                     </button>
-                                                                    <button 
-                                                                        onClick={() => handleDeletePatient(patient.id)} 
+                                                                    <button
+                                                                        onClick={() => handleDeletePatient(patient.id)}
                                                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                                                         title="Delete"
                                                                     >
@@ -700,7 +699,7 @@ const AdminDashboard = () => {
                         )}
 
 
-              
+
                         {activeTab === 'schedule' && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                 <div className="card h-fit p-6 space-y-6">
@@ -708,7 +707,7 @@ const AdminDashboard = () => {
                                         <h3 className="text-lg font-bold text-slate-800 mb-1">Manage Schedule</h3>
                                         <p className="text-slate-500 text-sm">Create and manage doctor availability.</p>
                                     </div>
-                                    
+
                                     <div className="space-y-4">
                                         <div className="input-group">
                                             <label className="input-label">Select Doctor</label>
@@ -737,7 +736,7 @@ const AdminDashboard = () => {
 
                                     <div className="pt-6 border-t border-slate-100">
                                         <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                                            <Plus size={16} className="text-blue-500"/> Add Time Slot
+                                            <Plus size={16} className="text-blue-500" /> Add Time Slot
                                         </h4>
                                         <div className="flex gap-2">
                                             <input
@@ -790,46 +789,41 @@ const AdminDashboard = () => {
                                                             initial={{ opacity: 0, scale: 0.9 }}
                                                             animate={{ opacity: 1, scale: 1 }}
                                                             key={slot.id}
-                                                            className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all relative overflow-hidden group ${
-                                                                slot.status === 'FROZEN' ? 'bg-red-50 border-red-200' :
-                                                                slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200' :
-                                                                'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-md'
-                                                            }`}
+                                                            className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all relative overflow-hidden group ${slot.status === 'FROZEN' ? 'bg-red-50 border-red-200' :
+                                                                    slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200' :
+                                                                        'bg-white border-slate-200 hover:border-emerald-300 hover:shadow-md'
+                                                                }`}
                                                         >
-                                                            <div className={`absolute top-0 right-0 p-1 rounded-bl-lg ${
-                                                                 slot.status === 'FROZEN' ? 'bg-red-100 text-red-600' :
-                                                                 slot.status === 'BOOKED' ? 'bg-blue-100 text-blue-600' :
-                                                                 'bg-emerald-100 text-emerald-600'
-                                                            }`}>
+                                                            <div className={`absolute top-0 right-0 p-1 rounded-bl-lg ${slot.status === 'FROZEN' ? 'bg-red-100 text-red-600' :
+                                                                    slot.status === 'BOOKED' ? 'bg-blue-100 text-blue-600' :
+                                                                        'bg-emerald-100 text-emerald-600'
+                                                                }`}>
                                                                 {slot.status === 'FROZEN' && <Lock size={12} />}
                                                                 {slot.status === 'BOOKED' && <CheckCircle size={12} />}
                                                                 {slot.status === 'AVAILABLE' && <CheckCircle size={12} />}
                                                             </div>
 
-                                                            <span className={`font-bold text-lg ${
-                                                                slot.status === 'FROZEN' ? 'text-red-700' :
-                                                                slot.status === 'BOOKED' ? 'text-blue-700' :
-                                                                'text-slate-700'
-                                                            }`}>
+                                                            <span className={`font-bold text-lg ${slot.status === 'FROZEN' ? 'text-red-700' :
+                                                                    slot.status === 'BOOKED' ? 'text-blue-700' :
+                                                                        'text-slate-700'
+                                                                }`}>
                                                                 {slot.time}
                                                             </span>
-                                                            
-                                                            <span className={`text-[10px] uppercase tracking-wider font-bold ${
-                                                                slot.status === 'FROZEN' ? 'text-red-600' :
-                                                                slot.status === 'BOOKED' ? 'text-blue-600' :
-                                                                'text-emerald-600'
-                                                            }`}>
+
+                                                            <span className={`text-[10px] uppercase tracking-wider font-bold ${slot.status === 'FROZEN' ? 'text-red-600' :
+                                                                    slot.status === 'BOOKED' ? 'text-blue-600' :
+                                                                        'text-emerald-600'
+                                                                }`}>
                                                                 {slot.status}
                                                             </span>
-                                                            
+
                                                             {slot.status !== 'BOOKED' && (
                                                                 <button
                                                                     onClick={() => handleToggleFreeze(slot)}
-                                                                    className={`w-full text-xs py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1.5 ${
-                                                                        slot.status === 'FROZEN' 
-                                                                            ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50' 
+                                                                    className={`w-full text-xs py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-1.5 ${slot.status === 'FROZEN'
+                                                                            ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50'
                                                                             : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-white hover:shadow-sm'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     {slot.status === 'FROZEN' ? (
                                                                         <><Unlock size={12} /> Unlock</>

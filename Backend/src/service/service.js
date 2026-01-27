@@ -46,7 +46,7 @@ app.post('/signup', signupMiddleware, async (req, res) => {
         const newUser = await prisma.user.create({
             data: {
                 username: username,
-                name: username, // Fallback for name
+                name: username,
                 email: email,
                 password: newpassword
             }

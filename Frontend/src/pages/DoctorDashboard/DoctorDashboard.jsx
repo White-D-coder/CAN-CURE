@@ -16,18 +16,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const DoctorDashboard = () => {
     const { user, logout } = useAuth();
-    const [activeTab, setActiveTab] = useState('appointments'); 
+    const [activeTab, setActiveTab] = useState('appointments');
     const [appointments, setAppointments] = useState([]);
     const [selectedPatient, setSelectedPatient] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    
+
     const [scheduleDate, setScheduleDate] = useState('');
     const [mySlots, setMySlots] = useState([]);
 
- 
+
     const [prescriptionForm, setPrescriptionForm] = useState({
         medName: '',
         description: '',
@@ -209,16 +209,16 @@ const DoctorDashboard = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans relative">
-             {/* Mobile Sidebar Overlay */}
-             {isSidebarOpen && (
-                <div 
+
+            {isSidebarOpen && (
+                <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
-             )}
+            )}
 
-             {/* Sidebar */}
-             <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+
+            <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 border-b border-slate-800 flex justify-between items-center">
                     <div className="flex items-center gap-3 text-white font-bold text-xl tracking-tight">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-primary-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -226,31 +226,29 @@ const DoctorDashboard = () => {
                         </div>
                         MediPortal
                     </div>
-                    {/* Close button for mobile */}
+
                     <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
                         <X size={24} />
                     </button>
                 </div>
-                
+
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     <button
                         onClick={() => { setActiveTab('appointments'); closePatientView(); setIsSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
-                            activeTab === 'appointments' && !selectedPatient
-                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${activeTab === 'appointments' && !selectedPatient
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50'
                             : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                        }`}
+                            }`}
                     >
                         <Users size={20} className={activeTab === 'appointments' && !selectedPatient ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
                         Appointments
                     </button>
                     <button
                         onClick={() => { setActiveTab('schedule'); closePatientView(); setIsSidebarOpen(false); }}
-                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
-                            activeTab === 'schedule' 
-                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
+                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${activeTab === 'schedule'
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50'
                             : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                        }`}
+                            }`}
                     >
                         <Calendar size={20} className={activeTab === 'schedule' ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
                         My Schedule
@@ -266,12 +264,12 @@ const DoctorDashboard = () => {
                     </button>
                 </div>
             </aside>
-            
+
             <main className="flex-1 lg:ml-64 p-4 lg:p-8 max-w-7xl mx-auto w-full min-w-0">
-                {/* Mobile Header */}
+
                 <div className="lg:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <div className="flex items-center gap-2 font-bold text-slate-900">
-                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-primary-600 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-primary-600 flex items-center justify-center">
                             <Activity size={18} className="text-white" />
                         </div>
                         MediPortal
@@ -281,7 +279,7 @@ const DoctorDashboard = () => {
                     </button>
                 </div>
                 {error && (
-                     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-red-50 border border-red-200 p-4 mb-6 rounded-xl flex items-center gap-3 text-red-700 shadow-sm">
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="bg-red-50 border border-red-200 p-4 mb-6 rounded-xl flex items-center gap-3 text-red-700 shadow-sm">
                         <AlertCircle size={20} />
                         <p className="font-medium">{error}</p>
                     </motion.div>
@@ -301,7 +299,7 @@ const DoctorDashboard = () => {
                                         Today: {appointments.length}
                                     </div>
                                 </header>
-                                
+
                                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                                     {appointments.length === 0 ? (
                                         <div className="text-center py-24 bg-white">
@@ -407,12 +405,11 @@ const DoctorDashboard = () => {
                                                 {mySlots.map(slot => (
                                                     <div
                                                         key={slot.id}
-                                                        className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
-                                                            slot.status === 'PENDING' ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm' :
+                                                        className={`p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-300 ${slot.status === 'PENDING' ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm' :
                                                             slot.status === 'AVAILABLE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                                                            slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200 text-blue-700' : 
-                                                            'bg-slate-50 border-slate-200 text-slate-400'
-                                                        }`}
+                                                                slot.status === 'BOOKED' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                                                                    'bg-slate-50 border-slate-200 text-slate-400'
+                                                            }`}
                                                     >
                                                         <span className="font-bold text-lg">{slot.time}</span>
                                                         <span className="text-[10px] uppercase tracking-wider font-bold opacity-80">
@@ -467,7 +464,7 @@ const DoctorDashboard = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            {/* Action buttons could go here */}
+
                                         </div>
                                     </div>
                                 </div>
@@ -475,7 +472,7 @@ const DoctorDashboard = () => {
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            {/* Prescriptions */}
+
                             <div className="space-y-6">
                                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[500px]">
                                     <div className="flex justify-between items-center mb-6">
@@ -610,7 +607,7 @@ const DoctorDashboard = () => {
                                 </div>
                             </div>
 
-                            
+
                             <div className="space-y-8">
                                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 min-h-[300px]">
                                     <div className="flex justify-between items-center mb-6">

@@ -22,7 +22,7 @@ router.get('/:doctorId/patient/:patientId', getPatientDetails);
 router.post('/:id/patient/:patientId/prescription', addPrescription);
 router.put('/:id/patient/:patientId/prescription/:medId', updatePrescription);
 
-// Schedule Management
+
 router.get('/schedule', getDoctorSlots);
 router.put('/schedule/approve', approveSlot);
 

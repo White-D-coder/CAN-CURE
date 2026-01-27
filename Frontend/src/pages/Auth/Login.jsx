@@ -72,7 +72,7 @@ function Login() {
                 className="card p-6 sm:p-10"
                 style={{ width: '100%', maxWidth: '450px' }}
             >
-                {/* Header */}
+
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                     <motion.div
                         initial={{ scale: 0 }}
@@ -115,7 +115,7 @@ function Login() {
                     </p>
                 </div>
 
-                {/* Error Message */}
+
                 {error && (
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -138,9 +138,9 @@ function Login() {
                     </motion.div>
                 )}
 
-                {/* Form */}
+
                 <form onSubmit={handleLogin}>
-                    {/* Email */}
+
                     <div className="input-group">
                         <label>Email or Username</label>
 
@@ -163,7 +163,7 @@ function Login() {
                         </div>
                     </div>
 
-                    {/* Password */}
+
                     <div className="input-group">
                         <label>Password</label>
 
@@ -186,7 +186,7 @@ function Login() {
                         </div>
                     </div>
 
-                    {/* Button */}
+
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -205,7 +205,7 @@ function Login() {
                     </motion.button>
                 </form>
 
-                {/* Footer */}
+
                 <p
                     style={{
                         marginTop: '24px',

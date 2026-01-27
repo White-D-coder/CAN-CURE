@@ -25,13 +25,13 @@ export const bookAppointment = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        // Find the specific time slot
+
         const timeSlot = await prisma.timeSlot.findFirst({
             where: {
                 doctorId,
                 date,
                 time,
-                status: 'AVAILABLE' // Must be approved and available
+                status: 'AVAILABLE'
             }
         });
 
@@ -39,7 +39,7 @@ export const bookAppointment = async (req, res) => {
             return res.status(400).json({ message: "This time slot is not available" });
         }
 
-        // Create appointment and update slot status transactionally
+
         const result = await prisma.$transaction(async (prisma) => {
             const appointment = await prisma.appointment.create({
                 data: {
@@ -74,7 +74,7 @@ export const getDoctorAvailability = async (req, res) => {
             return res.status(400).json({ message: "Doctor ID and Date are required" });
         }
 
-        // Get all slots for this doctor/date
+
         const slots = await prisma.timeSlot.findMany({
             where: {
                 doctorId: doctorId,
@@ -86,26 +86,11 @@ export const getDoctorAvailability = async (req, res) => {
             }
         });
 
-        // "bookedSlots" for frontend are any slots that are NOT 'AVAILABLE'
-        // This effectively hides PENDING, FROZEN, and BOOKED slots from being selectable
-        // Or we can send the raw status and let frontend decide.
-        // For backward compatibility with frontend logic:
-        // Frontend expects "bookedSlots" to disable them.
-        // So we return times of all slots that are NOT 'AVAILABLE'.
 
-        // Actually, better logic:
-        // Frontend shows specific slots. If we only have "Time Slot" dropdown, we should only show AVAILABLE slots.
-        // But current frontend has hardcoded slots and disables booked ones.
-        // To support the new "Admin defines slots" model, the frontend should fetch *available* slots instead of hardcoded ones.
-        // For now, let's stick to the contract: return "bookedSlots" as those not available.
-
-        // However, the requirement is "Admin assigns time slot".
-        // So the doctor might not have 9-5 slots anymore.
-        // We should return the list of AVAILABLE slots to the frontend to populate the dropdown.
 
         const availableSlots = slots.filter(s => s.status === 'AVAILABLE').map(s => s.time);
 
-        // We can also return "isFull" if no slots are available
+
         const isFull = availableSlots.length === 0;
 
         res.status(200).json({ isFull, availableSlots, allSlots: slots });
@@ -116,7 +101,7 @@ export const getDoctorAvailability = async (req, res) => {
 
 export const getPatientDashboard = async (req, res) => {
     try {
-        const userId = req.user.id; // From verifyToken middleware
+        const userId = req.user.id;
 
         const patient = await prisma.user.findUnique({
             where: { id: userId },

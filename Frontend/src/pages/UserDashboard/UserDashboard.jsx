@@ -102,7 +102,7 @@ const UserDashboard = () => {
             </div>
         </div>
     );
-    
+
     if (error) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
             <div className="bg-white p-8 rounded-2xl shadow-xl border border-red-100 max-w-md w-full text-center">
@@ -124,14 +124,14 @@ const UserDashboard = () => {
                         <header className="flex justify-between items-end border-b border-slate-200 pb-6">
                             <div>
                                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome back, {user?.name}</h2>
-                                
+
                             </div>
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Current Date</p>
                                 <p className="text-lg font-medium text-slate-700">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
                             </div>
                         </header>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[
                                 { title: 'Appointments', count: dashboardData?.Appointments?.length || 0, icon: Calendar, color: 'blue' },
@@ -283,7 +283,7 @@ const UserDashboard = () => {
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
                         <h3 className="text-2xl font-bold text-slate-900 mb-2">Book an Appointment</h3>
                         <p className="text-slate-500 mb-8">Fill in the details below to schedule your visit.</p>
-                        
+
                         <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col md:flex-row">
                             <div className="p-8 md:w-2/3">
                                 <form onSubmit={handleBookingSubmit} className="space-y-6">
@@ -321,7 +321,7 @@ const UserDashboard = () => {
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     {availability.isFull && (
                                         <div className="bg-red-50 text-red-700 p-4 rounded-xl text-sm font-medium flex items-center gap-2 animate-pulse">
                                             <AlertCircle size={18} />
@@ -337,12 +337,11 @@ const UserDashboard = () => {
                                                     <button
                                                         key={slot}
                                                         type="button"
-                                                        onClick={() => setBookingData({...bookingData, time: slot})}
-                                                        className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
-                                                            bookingData.time === slot 
-                                                            ? 'bg-primary-600 text-white border-primary-600 shadow-md ring-2 ring-primary-100' 
-                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:bg-slate-50'
-                                                        }`}
+                                                        onClick={() => setBookingData({ ...bookingData, time: slot })}
+                                                        className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${bookingData.time === slot
+                                                                ? 'bg-primary-600 text-white border-primary-600 shadow-md ring-2 ring-primary-100'
+                                                                : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                                                            }`}
                                                     >
                                                         {slot}
                                                     </button>
@@ -509,8 +508,8 @@ const UserDashboard = () => {
                                                     <td className="p-5 text-slate-600 font-medium">{new Date(report.date).toLocaleDateString()}</td>
                                                     <td className="p-5 text-slate-600">Dr. {report.doctor?.name}</td>
                                                     <td className="p-5 text-right">
-                                                        <a 
-                                                            href={report.reportUrl || '#'} 
+                                                        <a
+                                                            href={report.reportUrl || '#'}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold text-sm bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors"
@@ -542,14 +541,14 @@ const UserDashboard = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 flex font-sans relative">
-            
-            {/* Mobile Sidebar Overlay */}
-             {isSidebarOpen && (
-                <div 
+
+
+            {isSidebarOpen && (
+                <div
                     className="fixed inset-0 bg-black/50 z-40 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
-             )}
+            )}
 
             <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="p-6 border-b border-slate-800 flex justify-between items-center">
@@ -559,12 +558,12 @@ const UserDashboard = () => {
                         </div>
                         CanCure
                     </div>
-                    {/* Close button for mobile */}
+
                     <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
                         <X size={24} />
                     </button>
                 </div>
-                
+
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                     {[
                         { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
@@ -576,11 +575,10 @@ const UserDashboard = () => {
                         <button
                             key={item.id}
                             onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${
-                                activeTab === item.id 
-                                ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50' 
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${activeTab === item.id
+                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                }`}
                         >
                             <item.icon size={20} className={activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
                             {item.label}
@@ -600,7 +598,7 @@ const UserDashboard = () => {
 
 
             <main className="flex-1 lg:ml-64 p-4 lg:p-8 max-w-7xl mx-auto w-full min-w-0">
-                {/* Mobile Header */}
+
                 <div className="lg:hidden flex items-center justify-between mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <div className="flex items-center gap-2 font-bold text-slate-900">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">

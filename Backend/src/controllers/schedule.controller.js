@@ -1,9 +1,9 @@
 import { prisma } from '../db/prisma.js';
 
-// Admin: Create time slots for a doctor
+
 export const createTimeSlots = async (req, res) => {
     try {
-        const { doctorId, date, slots } = req.body; // slots is array of times ["09:00", "10:00"]
+        const { doctorId, date, slots } = req.body;
 
         if (!doctorId || !date || !slots || !Array.isArray(slots)) {
             return res.status(400).json({ message: "Doctor ID, Date, and Slots array are required" });
@@ -11,7 +11,7 @@ export const createTimeSlots = async (req, res) => {
 
         const createdSlots = [];
         for (const time of slots) {
-            // Check if slot already exists
+
             const existing = await prisma.timeSlot.findFirst({
                 where: { doctorId, date, time }
             });
@@ -22,7 +22,7 @@ export const createTimeSlots = async (req, res) => {
                         doctorId,
                         date,
                         time,
-                        status: 'PENDING' // Default status
+                        status: 'PENDING'
                     }
                 });
                 createdSlots.push(slot);
@@ -35,10 +35,10 @@ export const createTimeSlots = async (req, res) => {
     }
 };
 
-// Admin: Freeze or Unfreeze a slot
+
 export const updateSlotStatus = async (req, res) => {
     try {
-        const { slotId, status } = req.body; // status: 'FROZEN' or 'PENDING' (if unfreezing)
+        const { slotId, status } = req.body;
 
         if (!slotId || !status) {
             return res.status(400).json({ message: "Slot ID and Status are required" });
@@ -55,7 +55,7 @@ export const updateSlotStatus = async (req, res) => {
     }
 };
 
-// Doctor/Admin: Get slots for a doctor
+
 export const getDoctorSlots = async (req, res) => {
     try {
         const { doctorId, date } = req.query;
@@ -78,11 +78,11 @@ export const getDoctorSlots = async (req, res) => {
     }
 };
 
-// Doctor: Approve a slot
+
 export const approveSlot = async (req, res) => {
     try {
         const { slotId } = req.body;
-        const doctorId = req.user.id; // From verifyDoctor middleware
+        const doctorId = req.user.id;
 
         const slot = await prisma.timeSlot.findUnique({
             where: { id: slotId }

@@ -58,7 +58,7 @@ const Signup = () => {
                 className="card p-6 sm:p-10"
                 style={{ width: '100%', maxWidth: '450px' }}
             >
-                {/* Header */}
+
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                     <motion.div
                         initial={{ scale: 0 }}
@@ -101,7 +101,7 @@ const Signup = () => {
                     </p>
                 </div>
 
-                {/* Error */}
+
                 {error && (
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -124,9 +124,9 @@ const Signup = () => {
                     </motion.div>
                 )}
 
-                {/* Form */}
+
                 <form onSubmit={handleSubmit}>
-                    {/* Username */}
+
                     <div className="input-group">
                         <label>Username</label>
                         <div style={{ position: 'relative' }}>
@@ -148,7 +148,7 @@ const Signup = () => {
                         </div>
                     </div>
 
-                    {/* Email */}
+
                     <div className="input-group">
                         <label>Email</label>
                         <div style={{ position: 'relative' }}>
@@ -170,7 +170,7 @@ const Signup = () => {
                         </div>
                     </div>
 
-                    {/* Password */}
+
                     <div className="input-group">
                         <label>Password</label>
                         <div style={{ position: 'relative' }}>
@@ -192,7 +192,7 @@ const Signup = () => {
                         </div>
                     </div>
 
-                    {/* Button */}
+
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
@@ -211,7 +211,7 @@ const Signup = () => {
                     </motion.button>
                 </form>
 
-                {/* Footer */}
+
                 <p
                     style={{
                         marginTop: '24px',
