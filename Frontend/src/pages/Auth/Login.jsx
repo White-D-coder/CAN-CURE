@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { User, Lock, Activity, ArrowRight, AlertCircle } from 'lucide-react';
 
 function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('sarah.wilson@medcan.com');
+    const [password, setPassword] = useState('password123');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
