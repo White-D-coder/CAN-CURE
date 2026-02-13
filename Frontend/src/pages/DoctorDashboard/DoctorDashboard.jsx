@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Users, Clock, Pill, FileText, Activity, LogOut, ChevronLeft, Check, AlertCircle, Plus, Search, ChevronRight, X, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import SOSButton from '../../components/SOSButton';
+
 const DoctorDashboard = () => {
     const { user, logout } = useAuth();
     const [activeTab, setActiveTab] = useState('appointments');
@@ -729,6 +731,7 @@ const DoctorDashboard = () => {
                     </motion.div>
                 )}
             </main>
+            <SOSButton />
         </div>
     );
 };

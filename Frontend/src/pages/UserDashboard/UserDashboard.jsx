@@ -5,7 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Calendar, FileText, Pill, LogOut, User, Clock, CheckCircle, AlertCircle, Plus, Search, ChevronRight, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import SOSButton from '../../components/SOSButton';
+
 const UserDashboard = () => {
+
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
@@ -339,8 +342,8 @@ const UserDashboard = () => {
                                                         type="button"
                                                         onClick={() => setBookingData({ ...bookingData, time: slot })}
                                                         className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${bookingData.time === slot
-                                                                ? 'bg-primary-600 text-white border-primary-600 shadow-md ring-2 ring-primary-100'
-                                                                : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:bg-slate-50'
+                                                            ? 'bg-primary-600 text-white border-primary-600 shadow-md ring-2 ring-primary-100'
+                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:bg-slate-50'
                                                             }`}
                                                     >
                                                         {slot}
@@ -576,8 +579,8 @@ const UserDashboard = () => {
                             key={item.id}
                             onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-200 group ${activeTab === item.id
-                                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                ? 'bg-primary-600 text-white shadow-lg shadow-primary-900/50'
+                                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                                 }`}
                         >
                             <item.icon size={20} className={activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
@@ -612,6 +615,7 @@ const UserDashboard = () => {
                 </div>
                 {renderContent()}
             </main>
+            <SOSButton />
         </div>
     );
 };
