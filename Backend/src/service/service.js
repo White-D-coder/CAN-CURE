@@ -11,6 +11,7 @@ import doctorRoutes from '../routes/doctor.routes.js';
 import adminRoutes from '../routes/admin.routes.js';
 import reportRoutes from '../routes/report.routes.js';
 import userRoutes from '../routes/user.routes.js';
+import medicinalRoutes from '../routes/medicinal.routes.js';
 
 import cors from 'cors';
 const app = express()
@@ -22,6 +23,7 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/medicinal', medicinalRoutes);
 
 app.get('/', (req, res) => {
     res.send("Welcome to CAN-CURE Backend Service")

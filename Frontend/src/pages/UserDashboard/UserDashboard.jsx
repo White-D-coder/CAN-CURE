@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getDashboardData, getDoctors, bookAppointment, getDoctorAvailability } from '../../api/user';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, FileText, Pill, LogOut, User, Clock, CheckCircle, AlertCircle, Plus, Search, ChevronRight, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, FileText, Pill, LogOut, User, Clock, CheckCircle, AlertCircle, Plus, Search, ChevronRight, Menu, X, Scan } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import SOSButton from '../../components/SOSButton';
+import MedicinalRecord from '../../components/MedicinalRecord';
 
 const UserDashboard = () => {
 
@@ -537,6 +538,8 @@ const UserDashboard = () => {
                         )}
                     </motion.div>
                 );
+            case 'medicinal':
+                return <MedicinalRecord user={user} />;
             default:
                 return null;
         }
@@ -573,7 +576,8 @@ const UserDashboard = () => {
                         { id: 'book', icon: Plus, label: 'Book Appointment' },
                         { id: 'appointments', icon: Calendar, label: 'My Appointments' },
                         { id: 'prescriptions', icon: Pill, label: 'Prescriptions' },
-                        { id: 'reports', icon: FileText, label: 'Medical Reports' }
+                        { id: 'reports', icon: FileText, label: 'Medical Reports' },
+                        { id: 'medicinal', icon: Scan, label: 'Smart Scans' }
                     ].map((item) => (
                         <button
                             key={item.id}
