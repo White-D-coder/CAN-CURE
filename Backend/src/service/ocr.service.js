@@ -1,4 +1,7 @@
 import Tesseract from 'tesseract.js';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 
 export const extractTextFromImage = async (imageBuffer) => {
     try {
@@ -9,6 +12,18 @@ export const extractTextFromImage = async (imageBuffer) => {
     } catch (error) {
         console.error("OCR Error:", error);
         throw new Error("Failed to extract text from image");
+    }
+};
+
+export const extractTextFromPdf = async (pdfBuffer) => {
+    try {
+        console.log("Starting PDF text extraction...");
+        const data = await pdfParse(pdfBuffer);
+        console.log("PDF extraction complete.");
+        return data.text;
+    } catch (error) {
+        console.error("PDF Parsing Error:", error);
+        throw new Error("Failed to extract text from PDF");
     }
 };
 

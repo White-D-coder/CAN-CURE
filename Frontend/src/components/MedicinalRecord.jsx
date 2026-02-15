@@ -79,7 +79,7 @@ const MedicinalRecord = ({ user }) => {
                         <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-primary-500 transition-colors">
                             <input
                                 type="file"
-                                accept="image/*"
+                                accept="image/*,.pdf"
                                 onChange={handleFileChange}
                                 className="hidden"
                                 id="report-upload"
@@ -90,7 +90,7 @@ const MedicinalRecord = ({ user }) => {
                                 </div>
                                 <div>
                                     <p className="font-medium text-gray-900">Click to upload report</p>
-                                    <p className="text-sm text-gray-500">JPG, PNG usually work best</p>
+                                    <p className="text-sm text-gray-500">JPG, PNG, PDF</p>
                                 </div>
                             </label>
                         </div>
@@ -151,8 +151,8 @@ const MedicinalRecord = ({ user }) => {
                                 onClick={handleSync}
                                 disabled={loading || syncStatus === 'success'}
                                 className={`mt-4 w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors ${syncStatus === 'success'
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-gray-900 text-white hover:bg-gray-800'
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-900 text-white hover:bg-gray-800'
                                     }`}
                             >
                                 {syncStatus === 'success' ? (

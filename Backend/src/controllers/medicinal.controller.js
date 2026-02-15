@@ -1,4 +1,4 @@
-import { extractTextFromImage, parseMedicines } from '../service/ocr.service.js';
+import { extractTextFromImage, extractTextFromPdf, parseMedicines } from '../service/ocr.service.js';
 import { createMedicineEvents } from '../service/calendar.service.js';
 
 export const uploadReport = async (req, res) => {
@@ -7,9 +7,16 @@ export const uploadReport = async (req, res) => {
             return res.status(400).json({ message: "No file uploaded" });
         }
 
-        console.log("Received file for OCR");
-        const text = await extractTextFromImage(req.file.buffer);
-        console.log("Extracted Text:", text.substring(0, 100) + "...");
+        console.log(`Received file: ${req.file.originalname}, Type: ${req.file.mimetype}`);
+
+        let text = '';
+        if (req.file.mimetype === 'application/pdf') {
+            text = await extractTextFromPdf(req.file.buffer);
+        } else {
+            text = await extractTextFromImage(req.file.buffer);
+        }
+
+        console.log("Extracted Text Length:", text.length);
 
         const medicines = parseMedicines(text);
 
