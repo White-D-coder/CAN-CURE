@@ -32,7 +32,6 @@ const LandingPage = () => {
 
     return (
         <div className="min-h-screen flex flex-col font-['Plus_Jakarta_Sans']">
-            {/* Navigation */}
             <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
                 <div className="container mx-auto px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -44,8 +43,6 @@ const LandingPage = () => {
                         </span>
                     </div>
 
-
-                    {/* Mobile Menu Button */}
                     <button
                         className="md:hidden p-2 text-gray-600 hover:text-primary-600 transition-colors"
                         onClick={() => setIsOpen(!isOpen)}
@@ -53,7 +50,6 @@ const LandingPage = () => {
                         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </button>
 
-                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-8">
                         <a href="#home" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Home</a>
                         <a href="#doctors" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Specialists</a>
@@ -76,7 +72,6 @@ const LandingPage = () => {
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
@@ -126,7 +121,6 @@ const LandingPage = () => {
                 </AnimatePresence>
             </nav>
 
-            {/* Hero Section */}
             <header id="home" className="relative pt-20 pb-32 overflow-hidden">
                 <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-50 via-white to-white" />
 
@@ -174,7 +168,6 @@ const LandingPage = () => {
                 </div>
             </header>
 
-            {/* Top Doctors Section */}
             <section id="doctors" className="py-20 bg-gray-50">
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
@@ -200,7 +193,6 @@ const LandingPage = () => {
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
 
-                                {/* Overlay Gradient */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
                                     <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                         <h3 className="text-2xl font-bold text-white mb-1">{doctor.name}</h3>
@@ -213,7 +205,6 @@ const LandingPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Always visible name tag (fades out on hover) */}
                                 <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg transition-opacity duration-300 group-hover:opacity-0">
                                     <h3 className="text-lg font-bold text-gray-900">{doctor.name}</h3>
                                     <p className="text-primary-600 text-sm">{doctor.specialization}</p>
@@ -224,9 +215,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Features Section */}
             <section id="features" className="py-24 bg-white relative overflow-hidden">
-                {/* Decorative elements */}
                 <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
                 <div className="container mx-auto px-6">
@@ -260,7 +249,6 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Footer */}
             <footer className="bg-gray-50 py-12 mt-auto border-t border-gray-100">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-6">

@@ -2,32 +2,34 @@
 usecaseDiagram
     actor Patient
     actor Doctor
-    actor Admin
+    actor System
 
-    package "CAN-CURE System" {
-        usecase "Register/Login" as UC1
-        usecase "Search Doctors" as UC2
-        usecase "Book Appointment" as UC3
-        usecase "Upload Medical Reports" as UC4
-        usecase "View Prescriptions" as UC5
-        usecase "Manage Time Slots" as UC6
-        usecase "Prescribe Medicine" as UC7
-        usecase "View Processed Reports (OCR)" as UC8
-        usecase "Manage Users" as UC9
+    package "CAN-CURE: AI-Powered Bilingual Platform" {
+        
+        usecase "Register & Login" as Auth
+        usecase "Upload Medical Reports (PDF/Image)" as Upload
+        usecase "View Organized Reports" as ViewReports
+        usecase "View Patient Profile" as ViewProfile
+        usecase "Manage Medical History" as ManageHistory
+        
+        usecase "View Bilingual Summaries (Future AI)" as AI
+        
+        usecase "Store Reports Securely" as Store
+        usecase "Authenticate Users" as SysAuth
     }
 
-    Patient --> UC1
-    Patient --> UC2
-    Patient --> UC3
-    Patient --> UC4
-    Patient --> UC5
+    Patient --> Auth
+    Patient --> Upload
+    Patient --> ViewReports
+    Patient --> ViewProfile
+    Patient --> ManageHistory
+    Patient --> AI
 
-    Doctor --> UC1
-    Doctor --> UC6
-    Doctor --> UC7
-    Doctor --> UC8
-    Doctor --> UC3
+    Doctor --> Auth
+    Doctor --> ViewProfile
+    Doctor --> ViewReports
+    Doctor --> ManageHistory
 
-    Admin --> UC1
-    Admin --> UC9
+    System --> SysAuth
+    System --> Store
 ```

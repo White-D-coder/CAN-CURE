@@ -8,7 +8,7 @@ const MedicinalRecord = ({ user }) => {
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const [ocrResult, setOcrResult] = useState(null);
-    const [syncStatus, setSyncStatus] = useState(null); // 'success', 'error'
+    const [syncStatus, setSyncStatus] = useState(null);
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
@@ -28,7 +28,6 @@ const MedicinalRecord = ({ user }) => {
         formData.append('report', file);
 
         try {
-            // Adjust URL if needed based on Vite proxy or direct URL
             const response = await axios.post('http://localhost:3000/api/medicinal/upload', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -74,7 +73,6 @@ const MedicinalRecord = ({ user }) => {
                 </h2>
 
                 <div className="grid md:grid-cols-2 gap-8">
-                    {/* Upload Section */}
                     <div className="space-y-4">
                         <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-primary-500 transition-colors">
                             <input
@@ -110,7 +108,6 @@ const MedicinalRecord = ({ user }) => {
                         </button>
                     </div>
 
-                    {/* Results Section */}
                     <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 h-full flex flex-col">
                         <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 text-primary-600" />

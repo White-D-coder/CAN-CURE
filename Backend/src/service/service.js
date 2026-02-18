@@ -133,9 +133,7 @@ app.listen(3000, '0.0.0.0', () => {
     console.log("Server started on port 3000 - SERVER UPDATED");
 });
 
-// Keep the process alive explicitly
 setInterval(() => {
-    // This is a heartbeat to keep the event loop active
 }, 10000);
 
 process.on('exit', (code) => {
