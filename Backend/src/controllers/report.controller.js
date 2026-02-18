@@ -1,47 +1,38 @@
-import { prisma } from '../db/prisma.js';
+import { BaseController } from './BaseController.js';
+import { ReportService } from '../services/report.service.js';
 
-export const createReport = async (req, res) => {
-    try {
-        const { reportName, reportUrl, userId, doctorId } = req.body;
-        const report = await prisma.report.create({
-            data: {
-                reportName,
-                reportUrl,
-                userId: parseInt(userId),
-                doctorId: doctorId ? parseInt(doctorId) : null
-            }
-        });
-        res.status(201).json(report);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
+export class ReportController extends BaseController {
+    constructor() {
+        super();
+        this.reportService = new ReportService();
     }
-};
 
-export const getReportsByPatient = async (req, res) => {
-    try {
-        const userId = req.params.userId;
-        const reports = await prisma.report.findMany({
-            where: { userId: parseInt(userId) }
-        });
-        res.status(200).json(reports);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
+    createReport = async (req, res) => {
+        try {
+            const report = await this.reportService.createReport(req.body);
+            return this.success(res, report, "Report created successfully", 201);
+        } catch (err) {
+            return this.error(res, "Failed to create report", 500, err);
+        }
+    };
 
-export const updateReport = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { reportName, reportUrl } = req.body;
-        const report = await prisma.report.update({
-            where: { reportId: parseInt(id) },
-            data: {
-                reportName,
-                reportUrl
-            }
-        });
-        res.status(200).json(report);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
+    getReportsByPatient = async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const reports = await this.reportService.getReportsByPatient(userId);
+            return this.success(res, reports);
+        } catch (err) {
+            return this.error(res, "Failed to fetch reports", 500, err);
+        }
+    };
+
+    updateReport = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const report = await this.reportService.updateReport(id, req.body);
+            return this.success(res, report);
+        } catch (err) {
+            return this.error(res, "Failed to update report", 500, err);
+        }
+    };
+}

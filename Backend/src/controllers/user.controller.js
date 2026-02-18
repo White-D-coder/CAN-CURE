@@ -1,149 +1,81 @@
-import { prisma } from '../db/prisma.js';
+import { BaseController } from './BaseController.js';
+import { UserService } from '../services/user.service.js';
 
-export const getAllDoctors = async (req, res) => {
-    try {
-        const doctors = await prisma.doctor.findMany({
-            select: {
-                doctorId: true,
-                name: true,
-                specialist: true,
-                experience: true
-            }
-        });
-        res.status(200).json(doctors);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
+export class UserController extends BaseController {
+    constructor() {
+        super();
+        this.userService = new UserService();
     }
-};
 
-export const bookAppointment = async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const { doctorId, date, time, patientName } = req.body;
-
-        if (!doctorId || !date || !time || !patientName) {
-            return res.status(400).json({ message: "All fields are required" });
+    getAllDoctors = async (req, res) => {
+        try {
+            const doctors = await this.userService.getAllDoctors();
+            return this.success(res, doctors);
+        } catch (err) {
+            return this.error(res, "Failed to fetch doctors", 500, err);
         }
+    };
 
+    bookAppointment = async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const { doctorId, date, time, patientName } = req.body;
 
-        const timeSlot = await prisma.timeSlot.findFirst({
-            where: {
+            if (!doctorId || !date || !time || !patientName) {
+                return this.error(res, "All fields are required", 400);
+            }
+
+            const timeSlot = await this.userService.getAvailableTimeSlot(doctorId, date, time);
+
+            if (!timeSlot) {
+                return this.error(res, "This time slot is not available", 400);
+            }
+
+            const appointment = await this.userService.bookAppointment(
                 doctorId,
+                userId,
                 date,
                 time,
-                status: 'AVAILABLE'
-            }
-        });
+                patientName,
+                timeSlot.id
+            );
 
-        if (!timeSlot) {
-            return res.status(400).json({ message: "This time slot is not available" });
+            return this.success(res, { message: "Appointment booked successfully", appointment }, "Success", 201);
+        } catch (err) {
+            return this.error(res, "Failed to book appointment", 500, err);
         }
+    };
 
+    getDoctorAvailability = async (req, res) => {
+        try {
+            const { doctorId, date } = req.query;
 
-        const result = await prisma.$transaction(async (prisma) => {
-            const appointment = await prisma.appointment.create({
-                data: {
-                    date,
-                    time,
-                    patientName,
-                    doctorId,
-                    userId,
-                    timeSlotId: timeSlot.id
-                }
-            });
-
-            await prisma.timeSlot.update({
-                where: { id: timeSlot.id },
-                data: { status: 'BOOKED' }
-            });
-
-            return appointment;
-        });
-
-        res.status(201).json({ message: "Appointment booked successfully", appointment: result });
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const getDoctorAvailability = async (req, res) => {
-    try {
-        const { doctorId, date } = req.query;
-
-        if (!doctorId || !date) {
-            return res.status(400).json({ message: "Doctor ID and Date are required" });
-        }
-
-
-        const slots = await prisma.timeSlot.findMany({
-            where: {
-                doctorId: doctorId,
-                date: date
-            },
-            select: {
-                time: true,
-                status: true
+            if (!doctorId || !date) {
+                return this.error(res, "Doctor ID and Date are required", 400);
             }
-        });
 
+            const slots = await this.userService.getDoctorSlots(doctorId, date);
+            const availableSlots = slots.filter(s => s.status === 'AVAILABLE').map(s => s.time);
+            const isFull = availableSlots.length === 0;
 
-
-        const availableSlots = slots.filter(s => s.status === 'AVAILABLE').map(s => s.time);
-
-
-        const isFull = availableSlots.length === 0;
-
-        res.status(200).json({ isFull, availableSlots, allSlots: slots });
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const getPatientDashboard = async (req, res) => {
-    try {
-        const userId = req.user.id;
-
-        const patient = await prisma.user.findUnique({
-            where: { id: userId },
-            include: {
-                Appointments: {
-                    include: {
-                        doctor: {
-                            select: {
-                                name: true,
-                                specialist: true
-                            }
-                        }
-                    }
-                },
-                medicines: {
-                    include: {
-                        doctor: {
-                            select: {
-                                name: true
-                            }
-                        }
-                    }
-                },
-                Reports: {
-                    include: {
-                        doctor: {
-                            select: {
-                                name: true
-                            }
-                        }
-                    }
-                },
-                CancerType: true
-            }
-        });
-
-        if (!patient) {
-            return res.status(404).json({ message: "Patient not found" });
+            return this.success(res, { isFull, availableSlots, allSlots: slots });
+        } catch (err) {
+            return this.error(res, "Failed to fetch availability", 500, err);
         }
+    };
 
-        res.status(200).json(patient);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
+    getPatientDashboard = async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const patient = await this.userService.getPatientDashboard(userId);
+
+            if (!patient) {
+                return this.error(res, "Patient not found", 404);
+            }
+
+            return this.success(res, patient);
+        } catch (err) {
+            return this.error(res, "Failed to fetch dashboard", 500, err);
+        }
+    };
+}

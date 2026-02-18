@@ -1,157 +1,94 @@
-import { prisma } from '../db/prisma.js';
-import bcrypt from 'bcryptjs';
+import { BaseController } from './BaseController.js';
+import { AdminService } from '../services/admin.service.js';
 
-export const getStats = async (req, res) => {
-    try {
-        const doctorCount = await prisma.doctor.count();
-        const userCount = await prisma.user.count();
-        const appointmentCount = await prisma.appointment.count();
-
-        res.status(200).json({
-            doctors: doctorCount,
-            patients: userCount,
-            appointments: appointmentCount
-        });
-    } catch (err) {
-        res.status(500).json({ err: err.message });
+export class AdminController extends BaseController {
+    constructor() {
+        super();
+        this.adminService = new AdminService();
     }
-};
 
-export const getAllUsers = async (req, res) => {
-    try {
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                _count: {
-                    select: { Appointments: true }
-                }
-            }
-        });
-        res.status(200).json(users);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const getAllDoctors = async (req, res) => {
-    try {
-        const doctors = await prisma.doctor.findMany({
-            select: {
-                doctorId: true,
-                name: true,
-                specialist: true,
-                experience: true,
-                email: true,
-                _count: {
-                    select: { appointments: true }
-                }
-            }
-        });
-        res.status(200).json(doctors);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const createDoctor = async (req, res) => {
-    try {
-        const { name, specialist, experience, email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const doctor = await prisma.doctor.create({
-            data: {
-                name,
-                specialist,
-                experience: parseInt(experience),
-                email,
-                password: hashedPassword
-            }
-        });
-        res.status(201).json(doctor);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const updateDoctor = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, specialist, experience, email, password } = req.body;
-        const data = {
-            name,
-            specialist,
-            experience: parseInt(experience),
-            email
-        };
-        if (password) {
-            data.password = await bcrypt.hash(password, 10);
+    getStats = async (req, res) => {
+        try {
+            const stats = await this.adminService.getStats();
+            return this.success(res, stats);
+        } catch (err) {
+            return this.error(res, "Failed to fetch stats", 500, err);
         }
-        const doctor = await prisma.doctor.update({
-            where: { doctorId: id },
-            data
-        });
-        res.status(200).json(doctor);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
+    };
 
-export const deleteDoctor = async (req, res) => {
-    try {
-        const { id } = req.params;
-        await prisma.doctor.delete({
-            where: { doctorId: id }
-        });
-        res.status(200).json({ message: 'Doctor deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const createPatient = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword
-            }
-        });
-        res.status(201).json(user);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
-
-export const updatePatient = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, email, password } = req.body;
-        const data = { name, email };
-        if (password) {
-            data.password = await bcrypt.hash(password, 10);
+    getAllUsers = async (req, res) => {
+        try {
+            const users = await this.adminService.getAllUsers();
+            return this.success(res, users);
+        } catch (err) {
+            return this.error(res, "Failed to fetch users", 500, err);
         }
-        const user = await prisma.user.update({
-            where: { id: id },
-            data
-        });
-        res.status(200).json(user);
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
+    };
 
-export const deletePatient = async (req, res) => {
-    try {
-        const { id } = req.params;
-        await prisma.user.delete({
-            where: { id: id }
-        });
-        res.status(200).json({ message: 'Patient deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ err: err.message });
-    }
-};
+    getAllDoctors = async (req, res) => {
+        try {
+            const doctors = await this.adminService.getAllDoctors();
+            return this.success(res, doctors);
+        } catch (err) {
+            return this.error(res, "Failed to fetch doctors", 500, err);
+        }
+    };
+
+    createDoctor = async (req, res) => {
+        try {
+            const doctor = await this.adminService.createDoctor(req.body);
+            return this.success(res, doctor, "Doctor created successfully", 201);
+        } catch (err) {
+            return this.error(res, "Failed to create doctor", 500, err);
+        }
+    };
+
+    updateDoctor = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const doctor = await this.adminService.updateDoctor(id, req.body);
+            return this.success(res, doctor);
+        } catch (err) {
+            return this.error(res, "Failed to update doctor", 500, err);
+        }
+    };
+
+    deleteDoctor = async (req, res) => {
+        try {
+            const { id } = req.params;
+            await this.adminService.deleteDoctor(id);
+            return this.success(res, { message: 'Doctor deleted successfully' });
+        } catch (err) {
+            return this.error(res, "Failed to delete doctor", 500, err);
+        }
+    };
+
+    createPatient = async (req, res) => {
+        try {
+            const user = await this.adminService.createPatient(req.body);
+            return this.success(res, user, "Patient created successfully", 201);
+        } catch (err) {
+            return this.error(res, "Failed to create patient", 500, err);
+        }
+    };
+
+    updatePatient = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const user = await this.adminService.updatePatient(id, req.body);
+            return this.success(res, user);
+        } catch (err) {
+            return this.error(res, "Failed to update patient", 500, err);
+        }
+    };
+
+    deletePatient = async (req, res) => {
+        try {
+            const { id } = req.params;
+            await this.adminService.deletePatient(id);
+            return this.success(res, { message: 'Patient deleted successfully' });
+        } catch (err) {
+            return this.error(res, "Failed to delete patient", 500, err);
+        }
+    };
+}
