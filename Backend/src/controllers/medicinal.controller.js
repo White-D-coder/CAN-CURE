@@ -45,4 +45,27 @@ export class MedicinalController extends BaseController {
             return this.error(res, "Sync failed", 500, error);
         }
     };
+
+    predictRisk = async (req, res) => {
+        try {
+            const result = await fetch('http://localhost:8000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(req.body)
+            });
+
+            if (!result.ok) {
+                const err = await result.text();
+                throw new Error(err);
+            }
+
+            const data = await result.json();
+            return this.success(res, data);
+        } catch (error) {
+            console.error("Risk Prediction Error:", error);
+            return this.error(res, "Failed to predict risk", 500, error);
+        }
+    };
 }

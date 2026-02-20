@@ -9,5 +9,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload', upload.single('report'), medicinalController.uploadReport);
 router.post('/sync', medicinalController.syncCalendar);
+router.post('/risk', medicinalController.predictRisk);
 
 export default router;
