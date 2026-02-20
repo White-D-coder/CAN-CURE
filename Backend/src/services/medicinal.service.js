@@ -2,13 +2,17 @@ import { BaseService } from './BaseService.js';
 import { extractTextFromImage, extractTextFromPdf, parseMedicines } from '../service/ocr.service.js';
 import { createMedicineEvents } from '../service/calendar.service.js';
 
+import fs from 'fs';
+
 export class MedicinalService extends BaseService {
     async processReport(file) {
         let text = '';
+        const fileBuffer = fs.readFileSync(file.path);
+
         if (file.mimetype === 'application/pdf') {
-            text = await extractTextFromPdf(file.buffer);
+            text = await extractTextFromPdf(fileBuffer);
         } else {
-            text = await extractTextFromImage(file.buffer);
+            text = await extractTextFromImage(fileBuffer);
         }
 
         const medicines = parseMedicines(text);

@@ -35,7 +35,7 @@ const MedicinalRecord = ({ user }) => {
 
         setLoading(true);
         const formData = new FormData();
-        formData.append('report', file);
+        formData.append('file', file); // changed from 'report' to 'file' based on Part 2 instructions
 
         try {
             const response = await axios.post('http://localhost:3000/api/medicinal/upload', formData, {
@@ -43,9 +43,12 @@ const MedicinalRecord = ({ user }) => {
                     'Content-Type': 'multipart/form-data'
                 }
             });
+
+            // The user wanted us to log this exact object
+            console.log('Upload success:', response.data);
             setOcrResult(response.data);
         } catch (error) {
-            console.error("Upload failed", error);
+            console.error('Upload failed:', error.response?.data || error.message);
             alert("Failed to process report. Please try again.");
         } finally {
             setLoading(false);

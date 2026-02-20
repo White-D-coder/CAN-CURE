@@ -7,28 +7,37 @@ export class MedicinalController extends BaseController {
         this.medicinalService = new MedicinalService();
     }
 
-    uploadReport = async (req, res) => {
-        try {
-            if (!req.file) {
-                return this.error(res, "No file uploaded", 400);
+    uploadReport = (upload) => async (req, res) => {
+        upload.single('file')(req, res, async (err) => {
+            if (err) {
+                console.error('Multer Error / Unknown Error:', err);
+                return res.status(500).json({ success: false, message: err.message || 'Unknown error occurred' });
             }
 
-            console.log(`Received file: ${req.file.originalname}, Type: ${req.file.mimetype}`);
+            if (!req.file) {
+                return res.status(400).json({ success: false, message: 'No file uploaded' });
+            }
 
-            const result = await this.medicinalService.processReport(req.file);
+            console.log('req.file:', req.file);
+            console.log('req.body:', req.body);
 
-            console.log("Extracted Text Length:", result.text.length);
+            try {
+                // Keep the exact business logic for processing OCR if it was there
+                const result = await this.medicinalService.processReport(req.file);
 
-            return this.success(res, {
-                message: "Report processed successfully",
-                text: result.text,
-                medicines: result.medicines
-            });
-
-        } catch (error) {
-            console.error("Upload Error:", error);
-            return this.error(res, "Failed to process report", 500, error);
-        }
+                return res.status(200).json({
+                    success: true,
+                    filename: req.file.filename,
+                    filepath: req.file.path,
+                    size: req.file.size,
+                    text: result.text,
+                    medicines: result.medicines
+                });
+            } catch (serviceError) {
+                console.error("Service Error:", serviceError);
+                return res.status(500).json({ success: false, message: "Failed to process report" });
+            }
+        });
     };
 
     syncCalendar = async (req, res) => {
