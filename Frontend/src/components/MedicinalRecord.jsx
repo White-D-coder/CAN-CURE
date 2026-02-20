@@ -118,13 +118,26 @@ const MedicinalRecord = ({ user }) => {
                             {ocrResult ? (
                                 ocrResult.medicines.length > 0 ? (
                                     ocrResult.medicines.map((med, idx) => (
-                                        <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex justify-between items-center">
-                                            <div>
-                                                <p className="font-medium text-gray-900">{med.name}</p>
-                                                <p className="text-xs text-gray-500">{med.dosage} • {med.timing}</p>
+                                        <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-2">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="font-medium text-gray-900">{med.name}</p>
+                                                    <p className="text-xs text-gray-500">{med.dosage} • {med.timing}</p>
+                                                </div>
+                                                <div className="bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-medium shrink-0">
+                                                    Detected
+                                                </div>
                                             </div>
-                                            <div className="bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-medium">
-                                                Detected
+                                            <div className="pt-2 border-t border-gray-100 mt-1">
+                                                <a
+                                                    href={`https://www.google.com/search?q=${encodeURIComponent(med.name + ' medicine uses side effects alternatives')}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors w-max"
+                                                >
+                                                    <AlertCircle className="w-4 h-4" />
+                                                    Search info & alternatives
+                                                </a>
                                             </div>
                                         </div>
                                     ))
