@@ -8,3 +8,141 @@
 [33m[nodemon] watching extensions: js,mjs,cjs,json[39m
 [32m[nodemon] starting `node src/service/service.js`[39m
 Server started on port 3000 - SERVER UPDATED
+Failed to create report PrismaClientValidationError: 
+Invalid `prisma.report.create()` invocation:
+
+{
+  data: {
+    reportName: "sadsx",
+    reportUrl: "http://localhost:5173/doctors",
+    userId: 693,
+            ~~~
+    doctorId: 693
+  }
+}
+
+Argument `userId`: Invalid value provided. Expected String, provided Int.
+    at Nn (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async ReportService.createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/services/report.service.js:5:16)
+    at async createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/controllers/report.controller.js:12:28) {
+  clientVersion: '6.19.2'
+}
+Failed to create report PrismaClientValidationError: 
+Invalid `prisma.report.create()` invocation:
+
+{
+  data: {
+    reportName: "sadsx",
+    reportUrl: "http://localhost:5173/doctors",
+    userId: 693,
+            ~~~
+    doctorId: 693
+  }
+}
+
+Argument `userId`: Invalid value provided. Expected String, provided Int.
+    at Nn (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async ReportService.createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/services/report.service.js:5:16)
+    at async createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/controllers/report.controller.js:12:28) {
+  clientVersion: '6.19.2'
+}
+Failed to create report PrismaClientValidationError: 
+Invalid `prisma.report.create()` invocation:
+
+{
+  data: {
+    reportName: "sadsx",
+    reportUrl: "http://localhost:5173/doctors",
+    userId: 693,
+            ~~~
+    doctorId: 693
+  }
+}
+
+Argument `userId`: Invalid value provided. Expected String, provided Int.
+    at Nn (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async ReportService.createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/services/report.service.js:5:16)
+    at async createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/controllers/report.controller.js:12:28) {
+  clientVersion: '6.19.2'
+}
+Failed to create report PrismaClientValidationError: 
+Invalid `prisma.report.create()` invocation:
+
+{
+  data: {
+    reportName: "sadsx",
+    reportUrl: "http://localhost:5173/doctors",
+    userId: 693,
+            ~~~
+    doctorId: 693
+  }
+}
+
+Argument `userId`: Invalid value provided. Expected String, provided Int.
+    at Nn (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async ReportService.createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/services/report.service.js:5:16)
+    at async createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/controllers/report.controller.js:12:28) {
+  clientVersion: '6.19.2'
+}
+Failed to create report PrismaClientValidationError: 
+Invalid `prisma.report.create()` invocation:
+
+{
+  data: {
+    reportName: "sadsx",
+    reportUrl: "http://localhost:5173/doctors",
+    userId: 693,
+            ~~~
+    doctorId: 693
+  }
+}
+
+Argument `userId`: Invalid value provided. Expected String, provided Int.
+    at Nn (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async ReportService.createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/services/report.service.js:5:16)
+    at async createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/controllers/report.controller.js:12:28) {
+  clientVersion: '6.19.2'
+}
+Failed to create report PrismaClientValidationError: 
+Invalid `prisma.report.create()` invocation:
+
+{
+  data: {
+    reportName: "sadsx",
+    reportUrl: "http://localhost:5173/doctors",
+    userId: 693,
+            ~~~
+    doctorId: 693
+  }
+}
+
+Argument `userId`: Invalid value provided. Expected String, provided Int.
+    at Nn (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:29:1363)
+    at ei.handleRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6911)
+    at ei.handleAndLogRequestError (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6593)
+    at ei.request (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:121:6300)
+    at async a (/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/node_modules/@prisma/client/runtime/library.js:130:9551)
+    at async ReportService.createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/services/report.service.js:5:16)
+    at async createReport (file:///Users/deeptanubhunia/Desktop/CAN-CURE/Backend/src/controllers/report.controller.js:12:28) {
+  clientVersion: '6.19.2'
+}
