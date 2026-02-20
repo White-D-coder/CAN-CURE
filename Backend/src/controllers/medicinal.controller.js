@@ -7,37 +7,30 @@ export class MedicinalController extends BaseController {
         this.medicinalService = new MedicinalService();
     }
 
-    uploadReport = (upload) => async (req, res) => {
-        upload.single('file')(req, res, async (err) => {
-            if (err) {
-                console.error('Multer Error / Unknown Error:', err);
-                return res.status(500).json({ success: false, message: err.message || 'Unknown error occurred' });
-            }
-
+    uploadReport = async (req, res) => {
+        try {
             if (!req.file) {
-                return res.status(400).json({ success: false, message: 'No file uploaded' });
+                return this.error(res, "No file uploaded", 400);
             }
 
-            console.log('req.file:', req.file);
+            console.log(`Received file: ${req.file.originalname}, Type: ${req.file.mimetype}`);
             console.log('req.body:', req.body);
 
-            try {
-                // Keep the exact business logic for processing OCR if it was there
-                const result = await this.medicinalService.processReport(req.file);
+            const result = await this.medicinalService.processReport(req.file);
 
-                return res.status(200).json({
-                    success: true,
-                    filename: req.file.filename,
-                    filepath: req.file.path,
-                    size: req.file.size,
-                    text: result.text,
-                    medicines: result.medicines
-                });
-            } catch (serviceError) {
-                console.error("Service Error:", serviceError);
-                return res.status(500).json({ success: false, message: "Failed to process report" });
-            }
-        });
+            return this.success(res, {
+                message: "Report processed successfully",
+                filename: req.file.filename,
+                filepath: req.file.path,
+                size: req.file.size,
+                text: result.text,
+                medicines: result.medicines
+            });
+
+        } catch (error) {
+            console.error("Upload Error:", error);
+            return this.error(res, "Failed to process report", 500, error);
+        }
     };
 
     syncCalendar = async (req, res) => {

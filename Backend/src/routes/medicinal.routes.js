@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/upload', medicinalController.uploadReport(upload));
+router.post('/upload', upload.single('file'), medicinalController.uploadReport);
 router.post('/sync', medicinalController.syncCalendar);
 router.post('/risk', medicinalController.predictRisk);
 
