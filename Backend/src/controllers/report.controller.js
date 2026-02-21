@@ -1,5 +1,7 @@
 import { BaseController } from './BaseController.js';
 import { ReportService } from '../services/report.service.js';
+import { extractTextFromImage, extractTextFromPdf, parseMedicines, uploadToDrive } from '../service/ocr.service.js';
+import fs from 'fs';
 
 export class ReportController extends BaseController {
     constructor() {
@@ -9,10 +11,51 @@ export class ReportController extends BaseController {
 
     createReport = async (req, res) => {
         try {
-            const report = await this.reportService.createReport(req.body);
-            return this.success(res, report, "Report created successfully", 201);
+            const { userId, reportName } = req.body;
+            const file = req.file;
+
+            if (!file) {
+                return this.error(res, "No file uploaded", 400);
+            }
+
+            // 1. Extract Text (OCR)
+            let extractedText = "";
+            const fileBuffer = fs.readFileSync(file.path);
+            
+            if (file.mimetype === 'application/pdf') {
+                extractedText = await extractTextFromPdf(fileBuffer);
+            } else {
+                extractedText = await extractTextFromImage(fileBuffer);
+            }
+
+            // 2. Parse Medicines
+            const medicines = parseMedicines(extractedText);
+
+            // 3. Upload to Google Drive (Mocked URL if no config)
+            let fileUrl = await uploadToDrive(file.path, reportName || file.originalname);
+            if (!fileUrl) {
+                fileUrl = "https://drive.google.com/file/d/mock-url"; // Fallback
+            }
+
+            // 4. Save to Database
+            const reportData = {
+                userId,
+                reportName: reportName || file.originalname,
+                reportUrl: fileUrl,
+                parsedText: extractedText,
+                extractedMedicines: medicines,
+                status: 'PROCESSED'
+            };
+
+            const report = await this.reportService.createReport(reportData);
+
+            // Cleanup local file
+            fs.unlinkSync(file.path);
+
+            return this.success(res, report, "Report processed successfully", 201);
         } catch (err) {
-            return this.error(res, "Failed to create report", 500, err);
+            console.error("Report Processing Error:", err);
+            return this.error(res, "Failed to process report", 500, err);
         }
     };
 

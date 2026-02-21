@@ -6,6 +6,8 @@ import LandingPage from './pages/LandingPage/LandingPage';
 import DoctorDashboard from './pages/DoctorDashboard/DoctorDashboard';
 import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import UserDashboard from './pages/UserDashboard/UserDashboard';
+import RiskAssessment from './pages/RiskAssessment/RiskAssessment';
+import ReportHistory from './pages/ReportHistory/ReportHistory';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -38,6 +40,24 @@ function App() {
                     element={
                         <ProtectedRoute allowedRoles={['patient', 'admin']}>
                             <UserDashboard />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/risk-assessment"
+                    element={
+                        <ProtectedRoute allowedRoles={['patient', 'admin']}>
+                            <RiskAssessment />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/vault"
+                    element={
+                        <ProtectedRoute allowedRoles={['patient', 'admin']}>
+                            <ReportHistory />
                         </ProtectedRoute>
                     }
                 />

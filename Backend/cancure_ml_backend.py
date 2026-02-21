@@ -157,6 +157,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class SummarizeRequest(BaseModel):
+    transcript: str
+
+@app.post("/summarize")
+async def summarize_consultation(request: SummarizeRequest):
+    # In a real scenario, this would use a fine-tuned medical LLM.
+    # For MVP, we use structured extraction from the transcript.
+    transcript = request.transcript.lower()
+    
+    # Heuristic-based summary generation
+    summary = "CLINICAL SUMMARY:\n"
+    if "biopsy" in transcript:
+        summary += "- Discussed biopsy results and malignancy markers.\n"
+    if "chemotherapy" in transcript:
+        summary += "- Chemotherapy protocol discussed for next cycle.\n"
+    if "chest pain" in transcript or "pain" in transcript:
+        summary += "- Patient reports recurring pain; symptomatic management prescribed.\n"
+    
+    summary += "\nIMPRESSION:\nPatient is stable but requires close monitoring of lab markers. Treatment plan adjusted for optimized adherence."
+    
+    # Generate Roadmap
+    roadmap = []
+    if "medication" in transcript or "prescribing" in transcript:
+        roadmap.append("Start new medication as per the dosage instruction.")
+    if "diet" in transcript:
+        roadmap.append("Follow the prescribed high-protein, low-sodium diet.")
+    if "next week" in transcript or "follow-up" in transcript:
+        roadmap.append("Schedule follow-up scan for next week.")
+    
+    if not roadmap:
+        roadmap = ["Continue current medication", "Monitor symptoms daily", "Next review in 2 weeks"]
+
+    return {
+        "summary": summary,
+        "roadmap": roadmap
+    }
+
 @app.on_event("startup")
 def startup_event():
     # Attempt to load the model on startup, if not present, train it

@@ -6,24 +6,29 @@ export class ReportService extends BaseService {
             data: {
                 reportName: data.reportName,
                 reportUrl: data.reportUrl,
-                userId: parseInt(data.userId),
-                doctorId: data.doctorId ? parseInt(data.doctorId) : null
+                parsedText: data.parsedText || null,
+                extractedMedicines: data.extractedMedicines || null,
+                status: data.status || 'PROCESSED',
+                userId: data.userId,
+                doctorId: data.doctorId || null
             }
         });
     }
 
     async getReportsByPatient(userId) {
         return await this.prisma.report.findMany({
-            where: { userId: parseInt(userId) }
+            where: { userId: userId },
+            orderBy: { date: 'desc' }
         });
     }
 
     async updateReport(id, data) {
         return await this.prisma.report.update({
-            where: { reportId: parseInt(id) },
+            where: { reportId: id },
             data: {
                 reportName: data.reportName,
-                reportUrl: data.reportUrl
+                reportUrl: data.reportUrl,
+                status: data.status
             }
         });
     }

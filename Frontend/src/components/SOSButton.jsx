@@ -2,13 +2,38 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Phone } from 'lucide-react';
 
+import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
+
 const SOSButton = () => {
+    const { user } = useAuth();
+
+    const handleSOS = async () => {
+        // 1. Primary Action: Emergency Services
+        window.location.href = 'tel:112';
+
+        // 2. Secondary Action: Clinical Escalation (if user is logged in)
+        if (user && user.id) {
+            try {
+                // Find current scheduled appointment
+                const apts = await api.get(`/user/${user.id}/appointments`);
+                const activeApt = apts.data.find(a => a.status === 'SCHEDULED');
+                
+                if (activeApt) {
+                    await api.post(`/consultations/${activeApt.id}/emergency-escalate`);
+                }
+            } catch (err) {
+                console.error("Clinical SOS failed:", err);
+            }
+        }
+    };
+
     return (
         <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="fixed bottom-8 right-8 z-50 bg-red-600 text-white p-4 rounded-full shadow-lg shadow-red-600/40 animate-bounce flex items-center justify-center group"
-            onClick={() => window.location.href = 'tel:112'}
+            onClick={handleSOS}
             title="Emergency SOS"
         >
             <div className="absolute inset-0 bg-red-600 rounded-full animate-ping opacity-75"></div>

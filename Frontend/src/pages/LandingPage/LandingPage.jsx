@@ -39,7 +39,7 @@ const LandingPage = () => {
                             <Activity className="w-6 h-6 text-primary-600" />
                         </div>
                         <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                            CAN-CURE
+                            CANCURE
                         </span>
                     </div>
 
@@ -134,7 +134,6 @@ const LandingPage = () => {
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-50 text-primary-700 font-medium text-sm mb-8 border border-primary-100">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
                             </span>
                         </div>
 

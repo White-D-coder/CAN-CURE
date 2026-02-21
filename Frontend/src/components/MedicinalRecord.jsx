@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, FileText, Calendar, Check, AlertCircle, Loader, Activity, HeartPulse } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../api/axios';
 
 const MedicinalRecord = ({ user }) => {
     const [activeTab, setActiveTab] = useState('prescription');
@@ -35,17 +35,15 @@ const MedicinalRecord = ({ user }) => {
 
         setLoading(true);
         const formData = new FormData();
-        formData.append('file', file); // changed from 'report' to 'file' based on Part 2 instructions
+        formData.append('file', file);
 
         try {
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            const response = await axios.post(`${API_BASE_URL}/api/medicinal/upload`, formData, {
+            const response = await api.post('/reports', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
 
-            // The user wanted us to log this exact object
             console.log('Upload success:', response.data);
             setOcrResult(response.data);
         } catch (error) {
@@ -57,13 +55,12 @@ const MedicinalRecord = ({ user }) => {
     };
 
     const handleSync = async () => {
-        if (!ocrResult?.medicines) return;
+        if (!ocrResult?.extractedMedicines) return;
 
         setLoading(true);
         try {
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            const response = await axios.post(`${API_BASE_URL}/api/medicinal/sync`, {
-                medicines: ocrResult.medicines,
+            const response = await api.post('/medicinal/sync', {
+                medicines: ocrResult.extractedMedicines,
                 userEmail: user?.email
             });
             if (response.data.success) {
@@ -82,10 +79,8 @@ const MedicinalRecord = ({ user }) => {
     const handleRiskPredict = async () => {
         setRiskLoading(true);
         try {
-            // Ensuring numbers are correctly typed
             const payload = { ...riskData, age: Number(riskData.age), hemoglobin: Number(riskData.hemoglobin), wbc: Number(riskData.wbc), platelets: Number(riskData.platelets), tumor_size: Number(riskData.tumor_size), lymph_nodes_affected: Number(riskData.lymph_nodes_affected) };
-            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            const response = await axios.post(`${API_BASE_URL}/api/medicinal/risk`, payload);
+            const response = await api.post('/risk-assessment', payload);
             setRiskPrediction(response.data);
         } catch (error) {
             console.error("Prediction failed", error);
@@ -127,7 +122,6 @@ const MedicinalRecord = ({ user }) => {
 
                 {activeTab === 'prescription' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-8">
-                        {/* Prescription Scan View */}
                         <div className="space-y-4">
                             <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-primary-500 transition-colors">
                                 <input
@@ -171,28 +165,14 @@ const MedicinalRecord = ({ user }) => {
 
                             <div className="flex-1 overflow-y-auto space-y-3">
                                 {ocrResult ? (
-                                    ocrResult.medicines.length > 0 ? (
-                                        ocrResult.medicines.map((med, idx) => (
+                                    ocrResult.extractedMedicines?.length > 0 ? (
+                                        ocrResult.extractedMedicines.map((med, idx) => (
                                             <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex flex-col gap-2">
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <p className="font-medium text-gray-900">{med.name}</p>
-                                                        <p className="text-xs text-gray-500">{med.dosage} • {med.timing}</p>
+                                                        <p className="text-xs text-gray-500">{med.dosage} • {med.frequency}</p>
                                                     </div>
-                                                    <div className="bg-green-50 text-green-700 px-2 py-1 rounded text-xs font-medium shrink-0">
-                                                        Detected
-                                                    </div>
-                                                </div>
-                                                <div className="pt-2 border-t border-gray-100 mt-1">
-                                                    <a
-                                                        href={`https://www.google.com/search?q=${encodeURIComponent(med.name + ' medicine uses side effects alternatives')}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors w-max"
-                                                    >
-                                                        <AlertCircle className="w-4 h-4" />
-                                                        Search info & alternatives
-                                                    </a>
                                                 </div>
                                             </div>
                                         ))
@@ -208,44 +188,13 @@ const MedicinalRecord = ({ user }) => {
                                     </div>
                                 )}
                             </div>
-
-                            {ocrResult && ocrResult.medicines.length > 0 && (
-                                <motion.button
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    onClick={handleSync}
-                                    disabled={loading || syncStatus === 'success'}
-                                    className={`mt-4 w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors ${syncStatus === 'success'
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-gray-900 text-white hover:bg-gray-800'
-                                        }`}
-                                >
-                                    {syncStatus === 'success' ? (
-                                        <>
-                                            <Check className="w-5 h-5" />
-                                            Synced to Calendar
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Calendar className="w-5 h-5" />
-                                            Sync to Google Calendar
-                                        </>
-                                    )}
-                                </motion.button>
-                            )}
                         </div>
                     </motion.div>
                 )}
 
                 {activeTab === 'risk' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid md:grid-cols-2 gap-8">
-                        {/* ML Form View */}
                         <div className="space-y-6">
-                            <p className="text-gray-600 text-sm">
-                                Enter clinical parameters to predict survival risk using our advanced Machine Learning model.
-                                In a real scenario, this data is extracted directly from aggregated blood and biopsy reports.
-                            </p>
-
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-xs font-semibold text-gray-700">Age</label>
@@ -271,49 +220,18 @@ const MedicinalRecord = ({ user }) => {
                                     <label className="text-xs font-semibold text-gray-700">Lymph Nodes</label>
                                     <input type="number" name="lymph_nodes_affected" value={riskData.lymph_nodes_affected} onChange={handleRiskInputChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 text-sm" />
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-gray-700">Cancer Type</label>
-                                    <select name="cancer_type" value={riskData.cancer_type} onChange={handleRiskInputChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
-                                        <option value="Breast">Breast</option>
-                                        <option value="Lung">Lung</option>
-                                        <option value="Leukemia">Leukemia</option>
-                                        <option value="Colon">Colon</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-gray-700">Cancer Stage</label>
-                                    <select name="cancer_stage" value={riskData.cancer_stage} onChange={handleRiskInputChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
-                                        <option value="Stage I">Stage I</option>
-                                        <option value="Stage II">Stage II</option>
-                                        <option value="Stage III">Stage III</option>
-                                        <option value="Stage IV">Stage IV</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-1 col-span-2">
-                                    <label className="text-xs font-semibold text-gray-700">Treatment Type</label>
-                                    <select name="treatment_type" value={riskData.treatment_type} onChange={handleRiskInputChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 text-sm">
-                                        <option value="Surgery">Surgery</option>
-                                        <option value="Chemotherapy">Chemotherapy</option>
-                                        <option value="Radiation">Radiation</option>
-                                        <option value="Immunotherapy">Immunotherapy</option>
-                                    </select>
-                                </div>
                             </div>
 
                             <button
                                 onClick={handleRiskPredict}
                                 disabled={riskLoading}
-                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium disabled:opacity-50 hover:shadow-lg transition-all"
+                                className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
                             >
                                 {riskLoading ? <Loader className="w-5 h-5 animate-spin mx-auto" /> : 'Run ML Prediction Model'}
                             </button>
                         </div>
 
-                        {/* ML Results View */}
                         <div className="bg-gray-50 rounded-xl p-6 border border-indigo-100 h-full flex flex-col justify-center relative overflow-hidden">
-                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50 rounded-full blur-3xl opacity-50"></div>
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
-
                             <div className="z-10 flex flex-col h-full">
                                 <h3 className="font-semibold text-gray-900 mb-8 flex items-center gap-2">
                                     <HeartPulse className="w-5 h-5 text-indigo-600" />

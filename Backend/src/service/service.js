@@ -4,32 +4,50 @@ import express from 'express';
 import { signupMiddleware } from '../middleware/middleware.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv'
-dotenv.config()
-const JWT_SECRET = process.env.JWT_SECRET
-
 import doctorRoutes from '../routes/doctor.routes.js';
 import adminRoutes from '../routes/admin.routes.js';
 import reportRoutes from '../routes/report.routes.js';
 import userRoutes from '../routes/user.routes.js';
 import medicinalRoutes from '../routes/medicinal.routes.js';
-
+import consultationRoutes from '../routes/consultation.routes.js';
+import hospitalRoutes from '../routes/hospital.routes.js';
+import axios from 'axios';
 import cors from 'cors';
+
+dotenv.config()
+const JWT_SECRET = process.env.JWT_SECRET
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+
 const app = express()
 app.use(cors());
 app.use(express.json())
 
+const apiRouter = express.Router();
+app.use('/api', apiRouter);
 
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/medicinal', medicinalRoutes);
+apiRouter.use('/doctors', doctorRoutes);
+apiRouter.use('/admin', adminRoutes);
+apiRouter.use('/reports', reportRoutes);
+apiRouter.use('/user', userRoutes);
+apiRouter.use('/medicinal', medicinalRoutes);
+apiRouter.use('/consultations', consultationRoutes);
+apiRouter.use('/hospitals', hospitalRoutes);
 
-app.get('/', (req, res) => {
-    res.send("Welcome to CAN-CURE Backend Service")
-})
+// ML Risk Assessment Proxy Route
+apiRouter.post('/risk-assessment', async (req, res) => {
+    try {
+        const response = await axios.post(`${ML_SERVICE_URL}/predict`, req.body);
+        res.json(response.data);
+    } catch (error) {
+        console.error("ML Service Error:", error.message);
+        res.status(500).json({ 
+            message: "Risk assessment service unavailable", 
+            error: error.message 
+        });
+    }
+});
 
-app.post('/signup', signupMiddleware, async (req, res) => {
+apiRouter.post('/signup', signupMiddleware, async (req, res) => {
     try {
         const { username, email, password } = req.body
         const user = await prisma.user.findFirst({
@@ -43,14 +61,14 @@ app.post('/signup', signupMiddleware, async (req, res) => {
         if (user) {
             return res.status(409).json({ message: "User or Email already exists" })
         }
-        const newpassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10)
 
         const newUser = await prisma.user.create({
             data: {
                 username: username,
                 name: username,
                 email: email,
-                password: newpassword
+                password: hashedPassword
             }
         })
         const token = jwt.sign({ id: newUser.id, role: 'patient' }, JWT_SECRET, { expiresIn: '1h' })
@@ -66,23 +84,19 @@ app.post('/signup', signupMiddleware, async (req, res) => {
                 role: 'patient'
             }
         })
-
-
-    }
-
-    catch (error) {
+    } catch (error) {
         console.error("Signup Error:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
 })
-app.post('/login', async (req, res) => {
+
+apiRouter.post('/login', async (req, res) => {
     try {
         const { identifier, password } = req.body;
 
         const admin = await prisma.admin.findUnique({ where: { username: identifier } });
         if (admin) {
             const isMatch = password === admin.password || await bcrypt.compare(password, admin.password);
-
             if (isMatch) {
                 const token = jwt.sign({ id: admin.adminId, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
                 return res.status(200).json({ message: "Login successful", token, role: 'admin', user: { id: admin.adminId, username: admin.username, role: 'admin' } });
@@ -90,12 +104,7 @@ app.post('/login', async (req, res) => {
         }
 
         const doctor = await prisma.doctor.findFirst({
-            where: {
-                OR: [
-                    { email: identifier },
-                    { username: identifier }
-                ]
-            }
+            where: { OR: [{ email: identifier }, { username: identifier }] }
         });
         if (doctor) {
             const isMatch = await bcrypt.compare(password, doctor.password);
@@ -106,12 +115,7 @@ app.post('/login', async (req, res) => {
         }
 
         const user = await prisma.user.findFirst({
-            where: {
-                OR: [
-                    { email: identifier },
-                    { username: identifier }
-                ]
-            }
+            where: { OR: [{ email: identifier }, { username: identifier }] }
         });
         if (user) {
             const isMatch = await bcrypt.compare(password, user.password);
@@ -122,30 +126,18 @@ app.post('/login', async (req, res) => {
         }
 
         return res.status(401).json({ message: "Invalid credentials" });
-
     } catch (error) {
         console.error("Login Error:", error);
         return res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
-
 })
+
+app.get('/', (req, res) => {
+    res.send("Welcome to CAN-CURE Backend Service")
+})
+
 app.listen(3000, () => {
-    console.log("Server started on port 3000 - SERVER UPDATED");
-});
-
-setInterval(() => {
-}, 10000);
-
-process.on('exit', (code) => {
-    console.log(`About to exit with code: ${code}`);
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    console.log("Server started on port 3000 - API V1 Standardized");
 });
 
 export default app;

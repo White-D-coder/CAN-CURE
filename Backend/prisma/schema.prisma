@@ -19,6 +19,18 @@ model User {
   Reports      Report[]
 }
 
+model Hospital {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  address      String
+  city         String
+  contact      String
+  email        String?
+  doctors      Doctor[]
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+}
+
 model Doctor {
   doctorId     String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String
@@ -27,6 +39,10 @@ model Doctor {
   experience   Int
   email        String        @unique
   password     String        @default("password123")
+  rating       Float         @default(4.5)
+  consultations Int          @default(0)
+  hospitalId   String?       @db.ObjectId
+  hospital     Hospital?     @relation(fields: [hospitalId], references: [id])
   appointments Appointment[]
   Reports      Report[]
   medicines    Medicine[]
@@ -42,8 +58,16 @@ model Appointment {
   user        User      @relation(fields: [userId], references: [id])
   userId      String    @db.ObjectId
   doctorId    String    @db.ObjectId
+  hospitalId  String?   @db.ObjectId
+  hospital    Hospital? @relation(fields: [hospitalId], references: [id])
   timeSlot    TimeSlot? @relation(fields: [timeSlotId], references: [id])
   timeSlotId  String?   @unique @db.ObjectId
+  transcript        String?
+  aiSummary         String?
+  patientRoadmap    Json?     // Instructions, medications, follow-up
+  status            String    @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED, REROUTED
+  actualStartTime   DateTime?
+  urgencyLevel      String    @default("NORMAL") // NORMAL, URGENT, EMERGENCY
 }
 
 model TimeSlot {
@@ -88,12 +112,15 @@ model CancerType {
 }
 
 model Report {
-  reportId   String   @id @default(auto()) @map("_id") @db.ObjectId
-  reportName String
-  reportUrl  String
-  date       DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String   @db.ObjectId
-  doctor     Doctor?  @relation(fields: [doctorId], references: [doctorId])
-  doctorId   String?  @db.ObjectId
+  reportId           String   @id @default(auto()) @map("_id") @db.ObjectId
+  reportName         String
+  reportUrl          String   // Cloud storage URL (Google Drive)
+  parsedText         String?  // Full extracted text
+  extractedMedicines Json?    // Structured medicine data
+  status             String   @default("PROCESSED")
+  date               DateTime @default(now())
+  user               User     @relation(fields: [userId], references: [id])
+  userId             String   @db.ObjectId
+  doctor             Doctor?  @relation(fields: [doctorId], references: [doctorId])
+  doctorId           String?  @db.ObjectId
 }

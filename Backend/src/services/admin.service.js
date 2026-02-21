@@ -35,6 +35,9 @@ export class AdminService extends BaseService {
                 specialist: true,
                 experience: true,
                 email: true,
+                hospital: {
+                    select: { name: true }
+                },
                 _count: {
                     select: { appointments: true }
                 }
@@ -58,7 +61,8 @@ export class AdminService extends BaseService {
             name: data.name,
             specialist: data.specialist,
             experience: parseInt(data.experience),
-            email: data.email
+            email: data.email,
+            hospitalId: data.hospitalId || null
         };
         if (data.password) {
             updateData.password = await bcrypt.hash(data.password, 10);

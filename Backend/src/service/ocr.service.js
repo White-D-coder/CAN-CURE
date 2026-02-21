@@ -1,5 +1,48 @@
 import Tesseract from 'tesseract.js';
+<<<<<<< HEAD
 import { PDFParse } from 'pdf-parse';
+=======
+import { createRequire } from 'module';
+import { google } from 'googleapis';
+import fs from 'fs';
+import { prisma } from '../db/prisma.js';
+
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
+>>>>>>> 892150e (Update: Backend/src/service/ocr.service.js, Frontend/src/components/MedicinalRecord.jsx and 1 others)
+
+// --- GOOGLE DRIVE CONFIGURATION ---
+// Note: This requires a service_account_key.json file in the root/config
+const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+
+const auth = new google.auth.GoogleAuth({
+    keyFile: './config/service_account_key.json', // Path to your service account key
+    scopes: SCOPES,
+});
+
+const drive = google.drive({ version: 'v3', auth });
+
+export const uploadToDrive = async (filePath, fileName) => {
+    try {
+        const fileMetadata = {
+            name: fileName,
+            parents: [process.env.GOOGLE_DRIVE_FOLDER_ID], // Ensure this is in .env
+        };
+        const media = {
+            mimeType: 'application/pdf',
+            body: fs.createReadStream(filePath),
+        };
+        const res = await drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id, webViewLink',
+        });
+        return res.data.webViewLink;
+    } catch (error) {
+        console.error("Google Drive Upload Error:", error);
+        return null; // Fallback or handle accordingly
+    }
+};
 
 export const extractTextFromImage = async (imageBuffer) => {
     try {
@@ -31,6 +74,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 dotenv.config();
 
+<<<<<<< HEAD
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'dummy' });
 
 export const parseMedicines = async (text) => {
@@ -109,6 +153,71 @@ ${text}`;
             fs.writeFileSync('debug_gemini.txt', response.text);
         } catch (e) {
             console.error("Failed to write log", e);
+=======
+    // Expanded Regex Patterns
+    const DOSE_REGEX = /\b\d+(\.\d+)?\s*(mg|g|ml|mcg|iu|unit|%|units)\b/i;
+    const FREQ_REGEX = /\b(\d+-\d+-\d+|od|bd|bid|tds|tid|qid|sos|hs|prn|stat|daily|weekly|once|twice|thrice|every\s+\d+\s+hours?|thrice\s+daily|twice\s+daily)\b/i;
+    const FORM_REGEX = /\b(tab|cap|inj|syp|syrup|sol|susp|drop|oint|crm|gel|neb|pill|capsule|tablet|injection|strip)\b/i;
+    const ROUTE_REGEX = /\b(oral|iv|im|sc|po|topical|local|sublingual)\b/i;
+    const STRIP_QTY_REGEX = /[\d×x*]\s*(\d+)\b/; // Matches "x 10" or "× 10"
+    const IGNORE_KEYWORDS = /(test|hemoglobin|rbc|wbc|platelet|count|examination|date|diagnosis|patient|age|sex|ref|dr\.|doctor|report|clinic|hospital)/i;
+
+    lines.forEach((line, index) => {
+        let trimmed = line.trim();
+        if (!trimmed || trimmed.length < 4 || IGNORE_KEYWORDS.test(trimmed)) return;
+
+        // Cleanup: Normalization
+        trimmed = trimmed.replace(/^[\d\.\-\)\>]+\s*/, '') // Remove bullets/numbers
+                        .replace(/[^\w\s\-\.\(\)\/]/g, ' ') // Remove weird symbols but keep basics
+                        .replace(/\s+/g, ' ')
+                        .trim();
+
+        const hasForm = FORM_REGEX.test(trimmed);
+        const hasDose = DOSE_REGEX.test(trimmed);
+        const hasFreq = FREQ_REGEX.test(trimmed);
+        const hasQty = STRIP_QTY_REGEX.test(trimmed);
+
+        // Core logic: If it has at least two medicine markers, it's likely a medicine
+        if (hasForm || (hasDose && hasFreq)) {
+            const doseMatch = trimmed.match(DOSE_REGEX);
+            const freqMatch = trimmed.match(FREQ_REGEX);
+            const routeMatch = trimmed.match(ROUTE_REGEX);
+            const formMatch = trimmed.match(FORM_REGEX);
+            const qtyMatch = trimmed.match(STRIP_QTY_REGEX);
+
+            let splitIndex = trimmed.length;
+            if (doseMatch && doseMatch.index < splitIndex) splitIndex = doseMatch.index;
+            if (formMatch && formMatch.index < splitIndex) splitIndex = formMatch.index;
+
+            let nameCandidate = trimmed.substring(0, splitIndex).trim();
+            
+            // Further clean name
+            nameCandidate = nameCandidate
+                .replace(/rx\s*:?/i, '')
+                .replace(/\.*$/, '') // Remove trailing dots
+                .trim();
+
+            if (nameCandidate.length > 2 && !seenNames.has(nameCandidate.toLowerCase())) {
+                seenNames.add(nameCandidate.toLowerCase());
+                
+                // Confidence Scoring
+                let confidence = 0.5;
+                if (hasForm) confidence += 0.2;
+                if (hasDose) confidence += 0.2;
+                if (hasFreq) confidence += 0.1;
+
+                medicines.push({
+                    name: nameCandidate,
+                    dosage: doseMatch ? doseMatch[0] : "As directed",
+                    frequency: freqMatch ? freqMatch[0] : "Once daily",
+                    route: routeMatch ? routeMatch[0] : "Oral",
+                    quantity: qtyMatch ? qtyMatch[1] : null,
+                    confidence: Math.min(confidence, 1.0),
+                    needsReview: confidence < 0.7,
+                    originalText: trimmed
+                });
+            }
+>>>>>>> 892150e (Update: Backend/src/service/ocr.service.js, Frontend/src/components/MedicinalRecord.jsx and 1 others)
         }
 
         // Map the detailed medicines back to the format expected by the frontend

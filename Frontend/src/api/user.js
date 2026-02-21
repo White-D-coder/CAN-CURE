@@ -2,7 +2,7 @@ import api from './axios';
 
 export const getDashboardData = async () => {
     try {
-        const response = await api.get('/api/user/dashboard');
+        const response = await api.get('/user/dashboard');
         return response.data;
     } catch (error) {
         throw error;
@@ -11,7 +11,7 @@ export const getDashboardData = async () => {
 
 export const getDoctors = async () => {
     try {
-        const response = await api.get('/api/user/doctors');
+        const response = await api.get('/user/doctors');
         return response.data;
     } catch (error) {
         throw error;
@@ -20,7 +20,7 @@ export const getDoctors = async () => {
 
 export const bookAppointment = async (appointmentData) => {
     try {
-        const response = await api.post('/api/user/book-appointment', appointmentData);
+        const response = await api.post('/user/book-appointment', appointmentData);
         return response.data;
     } catch (error) {
         throw error;
@@ -29,7 +29,7 @@ export const bookAppointment = async (appointmentData) => {
 
 export const getDoctorAvailability = async (doctorId, date) => {
     try {
-        const response = await api.get(`/api/user/availability?doctorId=${doctorId}&date=${date}`);
+        const response = await api.get(`/user/availability?doctorId=${doctorId}&date=${date}`);
         return response.data;
     } catch (error) {
         throw error;

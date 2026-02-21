@@ -12,7 +12,11 @@ import {
     deletePatient,
     createTimeSlots,
     updateSlotStatus,
-    getDoctorSlots
+    getDoctorSlots,
+    getAllHospitals,
+    createHospital,
+    updateHospital,
+    deleteHospital
 } from '../../api/admin';
 import {
     Users,
@@ -34,7 +38,8 @@ import {
     Search,
     ChevronRight,
     X,
-    Menu
+    Menu,
+    Building
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -45,6 +50,7 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState({ doctors: 0, patients: 0, appointments: 0 });
     const [activeTab, setActiveTab] = useState('overview');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [hospitals, setHospitals] = useState([]);
 
 
     const [doctorFormData, setDoctorFormData] = useState({
@@ -52,7 +58,8 @@ const AdminDashboard = () => {
         specialist: '',
         experience: '',
         email: '',
-        password: 'password123'
+        password: 'password123',
+        hospitalId: ''
     });
     const [editingDoctorId, setEditingDoctorId] = useState(null);
     const [isDoctorFormOpen, setIsDoctorFormOpen] = useState(false);
@@ -75,6 +82,16 @@ const AdminDashboard = () => {
     const [doctorSlots, setDoctorSlots] = useState([]);
     const [newSlotTime, setNewSlotTime] = useState('');
 
+    const [hospitalFormData, setHospitalFormData] = useState({
+        name: '',
+        address: '',
+        city: '',
+        contact: '',
+        email: ''
+    });
+    const [editingHospitalId, setEditingHospitalId] = useState(null);
+    const [isHospitalFormOpen, setIsHospitalFormOpen] = useState(false);
+
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
 
@@ -84,18 +101,29 @@ const AdminDashboard = () => {
 
     const fetchInitialData = async () => {
         try {
-            const [doctorsRes, statsRes, patientsRes] = await Promise.all([
+            const [doctorsRes, statsRes, patientsRes, hospitalsRes] = await Promise.all([
                 getAllDoctors(),
                 getSystemStats(),
-                getAllUsers()
+                getAllUsers(),
+                getAllHospitals()
             ]);
             setDoctors(doctorsRes);
             setStats(statsRes);
             setPatients(patientsRes);
+            setHospitals(hospitalsRes);
             setError('');
         } catch (err) {
             console.error('Error fetching admin data:', err);
             setError('Failed to load dashboard data.');
+        }
+    };
+
+    const fetchHospitals = async () => {
+        try {
+            const response = await getAllHospitals();
+            setHospitals(response);
+        } catch (err) {
+            console.error('Error fetching hospitals:', err);
         }
     };
 
@@ -135,7 +163,7 @@ const AdminDashboard = () => {
                 await createDoctor(data);
             }
 
-            setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
+            setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123', hospitalId: '' });
             setEditingDoctorId(null);
             setIsDoctorFormOpen(false);
             setError('');
@@ -167,6 +195,25 @@ const AdminDashboard = () => {
         } catch (err) {
             console.error('Error saving patient:', err);
             setError('Failed to save patient. Please try again.');
+        }
+    };
+
+    const handleHospitalSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingHospitalId) {
+                await updateHospital(editingHospitalId, hospitalFormData);
+            } else {
+                await createHospital(hospitalFormData);
+            }
+            setHospitalFormData({ name: '', address: '', city: '', contact: '', email: '' });
+            setEditingHospitalId(null);
+            setIsHospitalFormOpen(false);
+            setSuccessMsg('Hospital saved successfully');
+            fetchHospitals();
+            setTimeout(() => setSuccessMsg(''), 3000);
+        } catch (err) {
+            setError('Failed to save hospital');
         }
     };
 
@@ -223,7 +270,8 @@ const AdminDashboard = () => {
             specialist: doctor.specialist,
             experience: doctor.experience,
             email: doctor.email,
-            password: ''
+            password: '',
+            hospitalId: doctor.hospitalId || ''
         });
         setEditingDoctorId(doctor.doctorId);
         setIsDoctorFormOpen(true);
@@ -263,8 +311,32 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleEditHospital = (hospital) => {
+        setHospitalFormData({
+            name: hospital.name,
+            address: hospital.address,
+            city: hospital.city,
+            contact: hospital.contact,
+            email: hospital.email || ''
+        });
+        setEditingHospitalId(hospital.id);
+        setIsHospitalFormOpen(true);
+    };
+
+    const handleDeleteHospital = async (id) => {
+        if (window.confirm('Are you sure you want to delete this hospital?')) {
+            try {
+                await deleteHospital(id);
+                fetchHospitals();
+            } catch (err) {
+                setError('Failed to delete hospital');
+            }
+        }
+    };
+
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+        { id: 'hospitals', label: 'Hospitals', icon: Building },
         { id: 'doctors', label: 'Doctors', icon: Stethoscope },
         { id: 'patients', label: 'Patients', icon: Users },
         { id: 'schedule', label: 'Schedule', icon: Calendar },
@@ -325,6 +397,103 @@ const AdminDashboard = () => {
                 </div>
             </div>
         </motion.div>
+    );
+
+    const renderHospitals = () => (
+        <>
+            {isHospitalFormOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsHospitalFormOpen(false)} />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative z-10 overflow-hidden"
+                    >
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                {editingHospitalId ? <Edit size={18} className="text-blue-500" /> : <Plus size={18} className="text-blue-500" />}
+                                {editingHospitalId ? 'Edit Hospital' : 'Add New Hospital'}
+                            </h3>
+                            <button onClick={() => setIsHospitalFormOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleHospitalSubmit} className="p-6 space-y-5">
+                            <div className="input-group">
+                                <label className="input-label">Hospital Name</label>
+                                <input type="text" value={hospitalFormData.name} onChange={(e) => setHospitalFormData({ ...hospitalFormData, name: e.target.value })} required placeholder="City Cancer Hospital" className="input-field" />
+                            </div>
+                            <div className="input-group">
+                                <label className="input-label">Address</label>
+                                <input type="text" value={hospitalFormData.address} onChange={(e) => setHospitalFormData({ ...hospitalFormData, address: e.target.value })} required placeholder="123 Health Lane" className="input-field" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="input-group">
+                                    <label className="input-label">City</label>
+                                    <input type="text" value={hospitalFormData.city} onChange={(e) => setHospitalFormData({ ...hospitalFormData, city: e.target.value })} required placeholder="Mumbai" className="input-field" />
+                                </div>
+                                <div className="input-group">
+                                    <label className="input-label">Contact</label>
+                                    <input type="text" value={hospitalFormData.contact} onChange={(e) => setHospitalFormData({ ...hospitalFormData, contact: e.target.value })} required placeholder="+91 9876543210" className="input-field" />
+                                </div>
+                            </div>
+                            <div className="input-group">
+                                <label className="input-label">Email (Optional)</label>
+                                <input type="email" value={hospitalFormData.email} onChange={(e) => setHospitalFormData({ ...hospitalFormData, email: e.target.value })} placeholder="info@hospital.com" className="input-field" />
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button type="submit" className="flex-1 btn btn-primary">
+                                    {editingHospitalId ? 'Update Hospital' : 'Save Hospital'}
+                                </button>
+                                <button type="button" onClick={() => setIsHospitalFormOpen(false)} className="px-4 py-2 border border-slate-200 rounded-xl">Cancel</button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </div>
+            )}
+
+            <div className="card overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold border-b border-slate-200">
+                            <tr>
+                                <th className="p-4 px-6">Hospital Name</th>
+                                <th className="p-4">Location</th>
+                                <th className="p-4">Contact</th>
+                                <th className="p-4">Doctors</th>
+                                <th className="p-4 px-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {hospitals.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="p-8 text-center text-slate-500">No hospitals found.</td>
+                                </tr>
+                            ) : (
+                                hospitals.map((hospital) => (
+                                    <tr key={hospital.id} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="p-4 px-6 font-semibold text-slate-900">{hospital.name}</td>
+                                        <td className="p-4 text-slate-600">{hospital.city}</td>
+                                        <td className="p-4 text-slate-600">{hospital.contact}</td>
+                                        <td className="p-4">
+                                            <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">
+                                                {hospital._count?.doctors || 0}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 px-6 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleEditHospital(hospital)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit size={16} /></button>
+                                                <button onClick={() => handleDeleteHospital(hospital.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16} /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </>
     );
 
     return (
@@ -433,6 +602,19 @@ const AdminDashboard = () => {
                                 Add Patient
                             </button>
                         )}
+                        {activeTab === 'hospitals' && (
+                            <button
+                                onClick={() => {
+                                    setEditingHospitalId(null);
+                                    setHospitalFormData({ name: '', address: '', city: '', contact: '', email: '' });
+                                    setIsHospitalFormOpen(true);
+                                }}
+                                className="btn btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <Building size={18} />
+                                Add Hospital
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -459,6 +641,7 @@ const AdminDashboard = () => {
 
 
                         {activeTab === 'overview' && renderOverview()}
+                        {activeTab === 'hospitals' && renderHospitals()}
 
 
                         {activeTab === 'doctors' && (
@@ -501,6 +684,19 @@ const AdminDashboard = () => {
                                                     <input type="email" value={doctorFormData.email} onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })} required placeholder="doctor@example.com" className="input-field" />
                                                 </div>
                                                 <div className="input-group">
+                                                    <label className="input-label">Affiliated Hospital</label>
+                                                    <select 
+                                                        value={doctorFormData.hospitalId || ''} 
+                                                        onChange={(e) => setDoctorFormData({ ...doctorFormData, hospitalId: e.target.value })}
+                                                        className="input-field"
+                                                    >
+                                                        <option value="">-- Select Hospital --</option>
+                                                        {hospitals.map(h => (
+                                                            <option key={h.id} value={h.id}>{h.name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="input-group">
                                                     <label className="input-label">Password</label>
                                                     <input type="text" value={doctorFormData.password} onChange={(e) => setDoctorFormData({ ...doctorFormData, password: e.target.value })} required={!editingDoctorId} placeholder={editingDoctorId ? "Leave blank to keep" : "password123"} className="input-field" />
                                                 </div>
@@ -528,8 +724,8 @@ const AdminDashboard = () => {
                                                 <tr>
                                                     <th className="p-4 px-6">Doctor Name</th>
                                                     <th className="p-4">Specialization</th>
+                                                    <th className="p-4">Hospital</th>
                                                     <th className="p-4">Experience</th>
-                                                    <th className="p-4">Contact</th>
                                                     <th className="p-4 px-6 text-right">Actions</th>
                                                 </tr>
                                             </thead>
@@ -556,8 +752,13 @@ const AdminDashboard = () => {
                                                                     {doctor.specialist}
                                                                 </span>
                                                             </td>
+                                                            <td className="p-4">
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-slate-900 font-medium">{doctor.hospital?.name || 'Private Practice'}</span>
+                                                                    <span className="text-slate-400 text-[10px]">{doctor.email}</span>
+                                                                </div>
+                                                            </td>
                                                             <td className="p-4 text-slate-600">{doctor.experience} Years</td>
-                                                            <td className="p-4 text-slate-600">{doctor.email}</td>
                                                             <td className="p-4 px-6 text-right">
                                                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                     <button
