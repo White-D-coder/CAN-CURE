@@ -26,61 +26,42 @@ export const extractTextFromPdf = async (pdfBuffer) => {
     }
 };
 
-export const parseMedicines = (text) => {
-    const lines = text.split('\n');
-    const medicines = [];
-    const seenNames = new Set();
+import { GoogleGenAI } from '@google/genai';
+import dotenv from 'dotenv';
+dotenv.config();
 
-    const medicinePatterns = /(tablet|cap|capsule|syr|syrup|inj|injection|pill|tab|drop|drops|ointment|cream|gel|lotion)\b/i;
-    const dosagePattern = /(\d+(?:\.\d+)?\s*(?:mg|g|ml|mcg|iu|%|v\/v|w\/v))/i;
-    const frequencyPattern = /(\d+-\d+-\d+|\b(?:once|twice|thrice|daily|od|bd|bid|tid|qid|sos)\b)/i;
-    const ignoreList = /(patient|doctor|clinic|hospital|date|age|gender|weight|blood|pressure|scan|report|name|dr\.)\b/i;
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'dummy' });
 
-    lines.forEach((line, index) => {
-        let trimmed = line.trim();
-        if (trimmed.length < 4 || ignoreList.test(trimmed)) return;
+export const parseMedicines = async (text) => {
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === '') {
+        console.warn("No GEMINI_API_KEY provided in .env. Falling back to empty extraction.");
+        return [];
+    }
 
-        trimmed = trimmed.replace(/^[\d\.\-\)\>]+\s*/, '');
+    const prompt = `You are a medical data extractor. Extract all medicines from the following medical report text.
+    Return ONLY a valid JSON array of objects. Do not include any markdown formatting like \`\`\`json or extra text.
+    Each object MUST have these exact keys:
+    - id: An integer starting from 0, incrementing for each item.
+    - name: The name of the medicine (string). Do not extract symptoms or patient data.
+    - originalText: The full line where it was found (string).
+    - timing: When to take it (e.g., '1-0-1', 'daily', 'twice', 'SOS') (string). Pick the most accurate timing.
+    - dosage: The dosage amount (e.g., '500mg', '10ml', 'As prescribed') (string).
+    
+    If no actual medicines are found in the text, return an empty array [].
+    
+    Report Text:
+    ${text}`;
 
-        const hasDosage = dosagePattern.test(trimmed);
-        const hasForm = medicinePatterns.test(trimmed);
-        const hasFrequency = frequencyPattern.test(trimmed);
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
 
-        if ((hasDosage || hasForm || hasFrequency) && trimmed.length > 5) {
-            let name = trimmed;
-
-            const dosageMatch = trimmed.match(dosagePattern);
-            if (dosageMatch && dosageMatch.index > 0) {
-                name = trimmed.substring(0, dosageMatch.index).trim();
-            } else if (hasForm && !dosageMatch) {
-                const formMatchStart = trimmed.search(medicinePatterns);
-                if (formMatchStart > 0) {
-                    name = trimmed.substring(0, formMatchStart + trimmed.match(medicinePatterns)[0].length).trim();
-                }
-            } else {
-                const freqMatch = trimmed.match(frequencyPattern);
-                if (freqMatch && freqMatch.index > 0) {
-                    name = trimmed.substring(0, freqMatch.index).trim();
-                } else {
-                    name = trimmed.split(/\s\d/)[0].trim() || trimmed;
-                }
-            }
-
-            name = name.replace(/[^a-zA-Z\s\-]/g, '').replace(/\-+$/, '').trim();
-
-            if (name.length > 2 && !seenNames.has(name.toLowerCase())) {
-                seenNames.add(name.toLowerCase());
-
-                medicines.push({
-                    id: index,
-                    name: name || trimmed,
-                    originalText: trimmed,
-                    timing: hasFrequency ? (trimmed.match(frequencyPattern)?.[0] || 'Daily') : 'Daily',
-                    dosage: hasDosage ? trimmed.match(dosagePattern)?.[0] : 'As prescribed'
-                });
-            }
-        }
-    });
-
-    return medicines;
+        let jsonStr = response.text.replace(/```json\n?|\n?```/g, '').trim();
+        return JSON.parse(jsonStr);
+    } catch (error) {
+        console.error("AI Parsing Error:", error);
+        return [];
+    }
 };
