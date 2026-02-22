@@ -28,6 +28,7 @@ export const extractTextFromPdf = async (pdfBuffer) => {
 
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import fs from 'fs';
 dotenv.config();
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'dummy' });
@@ -96,10 +97,23 @@ ${text}`;
             }
         });
 
+        console.log("=== GEMINI RAW TEXT RESPONSE ===");
+        console.log(response.text);
+
         const parsedData = JSON.parse(response.text);
+
+        console.log("=== GEMINI PARSED JSON ===");
+        console.log(JSON.stringify(parsedData, null, 2));
+
+        try {
+            fs.writeFileSync('debug_gemini.txt', response.text);
+        } catch (e) {
+            console.error("Failed to write log", e);
+        }
 
         // Map the detailed medicines back to the format expected by the frontend
         if (parsedData && Array.isArray(parsedData.medicines)) {
+            console.log(`Found ${parsedData.medicines.length} medicines in JSON.`);
             return parsedData.medicines.map((med, index) => {
                 const name = med.brand_name_as_written || med.generic_name_if_written || "Unknown Medicine";
                 const strength = (med.strength_value && med.strength_value !== "UNKNOWN") ? med.strength_value : "";

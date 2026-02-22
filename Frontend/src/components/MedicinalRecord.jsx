@@ -194,8 +194,8 @@ const MedicinalRecord = ({ user }) => {
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="text-center text-gray-500 py-10 font-medium text-lg">
-                                            दवाई Mention नहीं है
+                                        <div className="text-center text-gray-500 py-10 font-medium">
+                                            No clinical medicines detected in this report.
                                         </div>
                                     )
                                 ) : (
