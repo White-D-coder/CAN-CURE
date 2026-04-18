@@ -9,7 +9,7 @@
 
 ## 🚀 Live Demo
 > [!IMPORTANT]
-> **Live Project Link:** [Click here to view the live application](REPLACE_WITH_YOUR_LIVE_LINK_HERE)
+> **Live Project Link:** [Click here to view the live application](https://cancure.vercel.app/)
 
 ---
 
