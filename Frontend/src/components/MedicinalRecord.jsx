@@ -38,7 +38,8 @@ const MedicinalRecord = ({ user }) => {
         formData.append('file', file); // changed from 'report' to 'file' based on Part 2 instructions
 
         try {
-            const response = await axios.post('http://localhost:3000/api/medicinal/upload', formData, {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await axios.post(`${API_BASE_URL}/api/medicinal/upload`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -60,7 +61,8 @@ const MedicinalRecord = ({ user }) => {
 
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:3000/api/medicinal/sync', {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await axios.post(`${API_BASE_URL}/api/medicinal/sync`, {
                 medicines: ocrResult.medicines,
                 userEmail: user?.email
             });
@@ -82,7 +84,8 @@ const MedicinalRecord = ({ user }) => {
         try {
             // Ensuring numbers are correctly typed
             const payload = { ...riskData, age: Number(riskData.age), hemoglobin: Number(riskData.hemoglobin), wbc: Number(riskData.wbc), platelets: Number(riskData.platelets), tumor_size: Number(riskData.tumor_size), lymph_nodes_affected: Number(riskData.lymph_nodes_affected) };
-            const response = await axios.post('http://localhost:3000/api/medicinal/risk', payload);
+            const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await axios.post(`${API_BASE_URL}/api/medicinal/risk`, payload);
             setRiskPrediction(response.data);
         } catch (error) {
             console.error("Prediction failed", error);

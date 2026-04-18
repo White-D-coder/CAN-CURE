@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/admin';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/admin`;
 
 export const getSystemStats = async () => {
     const response = await axios.get(`${API_URL}/stats`);
