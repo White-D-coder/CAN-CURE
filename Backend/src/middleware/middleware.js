@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+console.log("JWT_SECRET LOADED IN MIDDLEWARE:", JWT_SECRET ? "YES" : "NO");
 
 export const signupMiddleware = (req, res, next) => {
     const { username, email, password } = req.body;
@@ -24,18 +25,22 @@ export const verifyToken = (req, res, next) => {
     const token = authHeader.split(' ')[1];
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        console.log("DECODED TOKEN:", decoded);
         req.user = decoded;
         next();
     } catch (error) {
+        console.error("TOKEN VERIFICATION ERROR:", error.message);
         return res.status(403).json({ message: 'Forbidden: Invalid token' });
     }
 };
 
 export const verifyAdmin = (req, res, next) => {
     verifyToken(req, res, () => {
+        console.log("VERIFY ADMIN ROLE:", req.user?.role);
         if (req.user.role === 'admin') {
             next();
         } else {
+            console.warn("ADMIN ACCESS DENIED for role:", req.user?.role);
             res.status(403).json({ message: 'Access denied: Admins only' });
         }
     });
