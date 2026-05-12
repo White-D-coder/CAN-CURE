@@ -39,6 +39,7 @@ export class AdminController extends BaseController {
             const doctor = await this.adminService.createDoctor(req.body);
             return this.success(res, doctor, "Doctor created successfully", 201);
         } catch (err) {
+            console.error("CREATE DOCTOR ERROR:", err);
             return this.error(res, "Failed to create doctor", 500, err);
         }
     };

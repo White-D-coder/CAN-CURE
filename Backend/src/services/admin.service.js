@@ -47,24 +47,51 @@ export class AdminService extends BaseService {
 
     async createDoctor(data) {
         const hashedPassword = await bcrypt.hash(data.password, 10);
+        
+        // Add Dr. prefix if not present
+        let doctorName = data.name;
+        if (doctorName && !doctorName.startsWith('Dr. ')) {
+            doctorName = `Dr. ${doctorName}`;
+        }
+
+        const existingDoctor = await this.prisma.doctor.findUnique({
+            where: { email: data.email }
+        });
+
+        if (existingDoctor) {
+            throw new Error(`Doctor with email ${data.email} already exists`);
+        }
+
+        const doctorData = {
+            name: doctorName,
+            username: data.username || data.email, // Ensure unique username
+            specialist: data.specialist,
+            experience: parseInt(data.experience) || 0,
+            email: data.email,
+            password: hashedPassword,
+            hospitalId: (data.hospitalId && data.hospitalId !== "") ? data.hospitalId : null
+        };
+
         return await this.prisma.doctor.create({
-            data: {
-                ...data,
-                experience: parseInt(data.experience),
-                password: hashedPassword
-            }
+            data: doctorData
         });
     }
 
     async updateDoctor(id, data) {
+        // Add Dr. prefix if not present
+        let doctorName = data.name;
+        if (doctorName && !doctorName.startsWith('Dr. ')) {
+            doctorName = `Dr. ${doctorName}`;
+        }
+
         const updateData = {
-            name: data.name,
+            name: doctorName,
             specialist: data.specialist,
-            experience: parseInt(data.experience),
+            experience: parseInt(data.experience) || 0,
             email: data.email,
-            hospitalId: data.hospitalId || null
+            hospitalId: (data.hospitalId && data.hospitalId !== "") ? data.hospitalId : null
         };
-        if (data.password) {
+        if (data.password && data.password !== "") {
             updateData.password = await bcrypt.hash(data.password, 10);
         }
         return await this.prisma.doctor.update({

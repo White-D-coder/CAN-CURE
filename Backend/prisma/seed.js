@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -91,6 +92,36 @@ async function main() {
     }
     console.log(`Seeded slots for ${doctor.name}`);
   }
+
+  // Seed Admins
+  const admins = [
+    { username: 'admin@cancure.com', password: 'admin123' },
+    { username: 'hospital@cancure.com', password: 'hospital123' }
+  ];
+
+  for (const adminData of admins) {
+    await prisma.admin.upsert({
+      where: { username: adminData.username },
+      update: {},
+      create: adminData,
+    });
+  }
+  console.log('Seeded demo admins');
+
+  // Seed Patient
+  const patientData = {
+    username: 'patient_demo',
+    email: 'patient@cancure.com',
+    password: await bcrypt.hash('patient123', 10),
+    name: 'John Patient'
+  };
+
+  await prisma.user.upsert({
+    where: { email: patientData.email },
+    update: {},
+    create: patientData,
+  });
+  console.log('Seeded demo patient');
 
   console.log('Seeding finished.');
 }

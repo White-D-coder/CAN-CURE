@@ -205,6 +205,44 @@ function Login() {
                     </motion.button>
                 </form>
 
+                <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #f3f4f6' }}>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '12px', textAlign: 'center', fontWeight: '600', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Demo Access</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                        <button
+                            onClick={() => { setEmail('admin@cancure.com'); setPassword('admin123'); }}
+                            style={{ padding: '8px 4px', fontSize: '0.75rem', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f9fafb', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseOver={(e) => { e.target.style.background = '#eff6ff'; e.target.style.borderColor = '#bfdbfe'; }}
+                            onMouseOut={(e) => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; }}
+                        >
+                            Admin
+                        </button>
+                        <button
+                            onClick={() => { setEmail('patient@cancure.com'); setPassword('patient123'); }}
+                            style={{ padding: '8px 4px', fontSize: '0.75rem', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f9fafb', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseOver={(e) => { e.target.style.background = '#eff6ff'; e.target.style.borderColor = '#bfdbfe'; }}
+                            onMouseOut={(e) => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; }}
+                        >
+                            Patient
+                        </button>
+                        <button
+                            onClick={() => { setEmail('hospital@cancure.com'); setPassword('hospital123'); }}
+                            style={{ padding: '8px 4px', fontSize: '0.75rem', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f9fafb', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseOver={(e) => { e.target.style.background = '#eff6ff'; e.target.style.borderColor = '#bfdbfe'; }}
+                            onMouseOut={(e) => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; }}
+                        >
+                            Hospital
+                        </button>
+                        <button
+                            onClick={() => { setEmail('sarah.wilson@medcan.com'); setPassword('password123'); }}
+                            style={{ padding: '8px 4px', fontSize: '0.75rem', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f9fafb', cursor: 'pointer', transition: 'all 0.2s' }}
+                            onMouseOver={(e) => { e.target.style.background = '#eff6ff'; e.target.style.borderColor = '#bfdbfe'; }}
+                            onMouseOut={(e) => { e.target.style.background = '#f9fafb'; e.target.style.borderColor = '#e5e7eb'; }}
+                        >
+                            Doctor
+                        </button>
+                    </div>
+                </div>
+
 
                 <p
                     style={{

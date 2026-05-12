@@ -1,18 +1,17 @@
 import Tesseract from 'tesseract.js';
-<<<<<<< HEAD
-import { PDFParse } from 'pdf-parse';
-=======
 import { createRequire } from 'module';
 import { google } from 'googleapis';
 import fs from 'fs';
 import { prisma } from '../db/prisma.js';
+import { GoogleGenAI } from '@google/genai';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const require = createRequire(import.meta.url);
 const pdfParse = require('pdf-parse');
->>>>>>> 892150e (Update: Backend/src/service/ocr.service.js, Frontend/src/components/MedicinalRecord.jsx and 1 others)
 
 // --- GOOGLE DRIVE CONFIGURATION ---
-// Note: This requires a service_account_key.json file in the root/config
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 
 const auth = new google.auth.GoogleAuth({
@@ -26,7 +25,7 @@ export const uploadToDrive = async (filePath, fileName) => {
     try {
         const fileMetadata = {
             name: fileName,
-            parents: [process.env.GOOGLE_DRIVE_FOLDER_ID], // Ensure this is in .env
+            parents: [process.env.GOOGLE_DRIVE_FOLDER_ID], 
         };
         const media = {
             mimeType: 'application/pdf',
@@ -40,7 +39,7 @@ export const uploadToDrive = async (filePath, fileName) => {
         return res.data.webViewLink;
     } catch (error) {
         console.error("Google Drive Upload Error:", error);
-        return null; // Fallback or handle accordingly
+        return null;
     }
 };
 
@@ -59,8 +58,7 @@ export const extractTextFromImage = async (imageBuffer) => {
 export const extractTextFromPdf = async (pdfBuffer) => {
     try {
         console.log("Starting PDF text extraction...");
-        const parser = new PDFParse(new Uint8Array(pdfBuffer));
-        const data = await parser.getText();
+        const data = await pdfParse(pdfBuffer);
         console.log("PDF extraction complete.");
         return data.text;
     } catch (error) {
@@ -69,41 +67,26 @@ export const extractTextFromPdf = async (pdfBuffer) => {
     }
 };
 
-import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
-import fs from 'fs';
-dotenv.config();
-
-<<<<<<< HEAD
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || 'dummy' });
+let ai = null;
+if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key') {
+    try {
+        ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+    } catch (e) {
+        console.error("Failed to initialize GoogleGenAI:", e.message);
+    }
+}
 
 export const parseMedicines = async (text) => {
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === '') {
-        console.warn("No GEMINI_API_KEY provided in .env. Falling back to empty extraction.");
+    if (!ai) {
+        console.warn("Google AI not initialized (missing or invalid GEMINI_API_KEY). Extraction disabled.");
         return [];
     }
 
+    const genModel = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     const prompt = `You are a clinical prescription intelligence engine.
-
-STRICT MODE:
-- Extract only explicitly written data.
-- If unclear, return "UNKNOWN".
-- Do NOT infer disease from medicine.
-- Do NOT assume dosage meaning.
-- Output valid JSON only.
-
-Clean the OCR text without changing medical meaning. Fix obvious OCR spelling errors, normalize units, remove random symbols. Preserve all medical terms exactly.
-
-EXTRACT:
-1. Patient_Info: name, age, gender, date
-2. Clinical_Information: symptoms_explicit, diagnoses_explicit, vitals_if_present
-3. Medicines: brand_name_as_written, generic_name_if_written, strength_value, strength_unit, dosage_form, frequency_exact_text, timing_exact_text, duration_exact_text, total_quantity_if_written
-4. Lab_Tests_Ordered
-5. Followup_Notes
-
-Validate the extracted data:
-- Check if strength numeric format is correct, unit consistent, dosage form valid, frequency readable.
-- If any unsafe ambiguity exists, set "requires_manual_review": true
+Extract only explicitly written data. If unclear, return "UNKNOWN".
+Output valid JSON only.
 
 Return JSON exactly in this format:
 {
@@ -133,96 +116,15 @@ Report Text:
 ${text}`;
 
     try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-            }
-        });
+        const result = await genModel.generateContent(prompt);
+        const response = await result.response;
+        const responseText = response.text();
+        
+        // Clean up response text if it contains markdown code blocks
+        const cleanedText = responseText.replace(/```json|```/g, '').trim();
+        const parsedData = JSON.parse(cleanedText);
 
-        console.log("=== GEMINI RAW TEXT RESPONSE ===");
-        console.log(response.text);
-
-        const parsedData = JSON.parse(response.text);
-
-        console.log("=== GEMINI PARSED JSON ===");
-        console.log(JSON.stringify(parsedData, null, 2));
-
-        try {
-            fs.writeFileSync('debug_gemini.txt', response.text);
-        } catch (e) {
-            console.error("Failed to write log", e);
-=======
-    // Expanded Regex Patterns
-    const DOSE_REGEX = /\b\d+(\.\d+)?\s*(mg|g|ml|mcg|iu|unit|%|units)\b/i;
-    const FREQ_REGEX = /\b(\d+-\d+-\d+|od|bd|bid|tds|tid|qid|sos|hs|prn|stat|daily|weekly|once|twice|thrice|every\s+\d+\s+hours?|thrice\s+daily|twice\s+daily)\b/i;
-    const FORM_REGEX = /\b(tab|cap|inj|syp|syrup|sol|susp|drop|oint|crm|gel|neb|pill|capsule|tablet|injection|strip)\b/i;
-    const ROUTE_REGEX = /\b(oral|iv|im|sc|po|topical|local|sublingual)\b/i;
-    const STRIP_QTY_REGEX = /[\d×x*]\s*(\d+)\b/; // Matches "x 10" or "× 10"
-    const IGNORE_KEYWORDS = /(test|hemoglobin|rbc|wbc|platelet|count|examination|date|diagnosis|patient|age|sex|ref|dr\.|doctor|report|clinic|hospital)/i;
-
-    lines.forEach((line, index) => {
-        let trimmed = line.trim();
-        if (!trimmed || trimmed.length < 4 || IGNORE_KEYWORDS.test(trimmed)) return;
-
-        // Cleanup: Normalization
-        trimmed = trimmed.replace(/^[\d\.\-\)\>]+\s*/, '') // Remove bullets/numbers
-                        .replace(/[^\w\s\-\.\(\)\/]/g, ' ') // Remove weird symbols but keep basics
-                        .replace(/\s+/g, ' ')
-                        .trim();
-
-        const hasForm = FORM_REGEX.test(trimmed);
-        const hasDose = DOSE_REGEX.test(trimmed);
-        const hasFreq = FREQ_REGEX.test(trimmed);
-        const hasQty = STRIP_QTY_REGEX.test(trimmed);
-
-        // Core logic: If it has at least two medicine markers, it's likely a medicine
-        if (hasForm || (hasDose && hasFreq)) {
-            const doseMatch = trimmed.match(DOSE_REGEX);
-            const freqMatch = trimmed.match(FREQ_REGEX);
-            const routeMatch = trimmed.match(ROUTE_REGEX);
-            const formMatch = trimmed.match(FORM_REGEX);
-            const qtyMatch = trimmed.match(STRIP_QTY_REGEX);
-
-            let splitIndex = trimmed.length;
-            if (doseMatch && doseMatch.index < splitIndex) splitIndex = doseMatch.index;
-            if (formMatch && formMatch.index < splitIndex) splitIndex = formMatch.index;
-
-            let nameCandidate = trimmed.substring(0, splitIndex).trim();
-            
-            // Further clean name
-            nameCandidate = nameCandidate
-                .replace(/rx\s*:?/i, '')
-                .replace(/\.*$/, '') // Remove trailing dots
-                .trim();
-
-            if (nameCandidate.length > 2 && !seenNames.has(nameCandidate.toLowerCase())) {
-                seenNames.add(nameCandidate.toLowerCase());
-                
-                // Confidence Scoring
-                let confidence = 0.5;
-                if (hasForm) confidence += 0.2;
-                if (hasDose) confidence += 0.2;
-                if (hasFreq) confidence += 0.1;
-
-                medicines.push({
-                    name: nameCandidate,
-                    dosage: doseMatch ? doseMatch[0] : "As directed",
-                    frequency: freqMatch ? freqMatch[0] : "Once daily",
-                    route: routeMatch ? routeMatch[0] : "Oral",
-                    quantity: qtyMatch ? qtyMatch[1] : null,
-                    confidence: Math.min(confidence, 1.0),
-                    needsReview: confidence < 0.7,
-                    originalText: trimmed
-                });
-            }
->>>>>>> 892150e (Update: Backend/src/service/ocr.service.js, Frontend/src/components/MedicinalRecord.jsx and 1 others)
-        }
-
-        // Map the detailed medicines back to the format expected by the frontend
         if (parsedData && Array.isArray(parsedData.medicines)) {
-            console.log(`Found ${parsedData.medicines.length} medicines in JSON.`);
             return parsedData.medicines.map((med, index) => {
                 const name = med.brand_name_as_written || med.generic_name_if_written || "Unknown Medicine";
                 const strength = (med.strength_value && med.strength_value !== "UNKNOWN") ? med.strength_value : "";

@@ -163,7 +163,7 @@ const AdminDashboard = () => {
                 await createDoctor(data);
             }
 
-            setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123', hospitalId: '' });
+            setDoctorFormData({ name: 'Dr. ', specialist: '', experience: '', email: '', password: 'password123', hospitalId: '' });
             setEditingDoctorId(null);
             setIsDoctorFormOpen(false);
             setError('');
@@ -580,7 +580,7 @@ const AdminDashboard = () => {
                             <button
                                 onClick={() => {
                                     setEditingDoctorId(null);
-                                    setDoctorFormData({ name: '', specialist: '', experience: '', email: '', password: 'password123' });
+                                    setDoctorFormData({ name: 'Dr. ', specialist: '', experience: '', email: '', password: 'password123' });
                                     setIsDoctorFormOpen(true);
                                 }}
                                 className="btn btn-primary flex items-center gap-2 shadow-lg shadow-blue-500/20"
