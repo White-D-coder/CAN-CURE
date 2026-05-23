@@ -95,14 +95,14 @@ async function main() {
 
   // Seed Admins
   const admins = [
-    { username: 'admin@cancure.com', password: 'admin123' },
-    { username: 'hospital@cancure.com', password: 'hospital123' }
+    { username: 'admin@canqure.com', password: 'admin123', role: 'admin' },
+    { username: 'hospital@canqure.com', password: 'hospital123', role: 'hospital_admin' }
   ];
 
   for (const adminData of admins) {
     await prisma.admin.upsert({
       where: { username: adminData.username },
-      update: {},
+      update: { role: adminData.role },
       create: adminData,
     });
   }
@@ -111,17 +111,32 @@ async function main() {
   // Seed Patient
   const patientData = {
     username: 'patient_demo',
-    email: 'patient@cancure.com',
+    email: 'patient@canqure.com',
     password: await bcrypt.hash('patient123', 10),
     name: 'John Patient'
   };
 
-  await prisma.user.upsert({
+  const patient = await prisma.user.upsert({
     where: { email: patientData.email },
     update: {},
     create: patientData,
   });
   console.log('Seeded demo patient');
+
+  // Seed Mock Appointments for Routing Dashboard
+  const docForApt = await prisma.doctor.findFirst();
+  if (docForApt && patient) {
+    const mockAppointments = [
+      { date: '2026-06-01', time: '10:00', patientName: 'James Morrison', userId: patient.id, doctorId: docForApt.doctorId, urgencyLevel: 'URGENT', status: 'PENDING' },
+      { date: '2026-06-02', time: '11:00', patientName: 'Clara Oswald', userId: patient.id, doctorId: docForApt.doctorId, urgencyLevel: 'NORMAL', status: 'ACCEPTED' },
+      { date: '2026-06-03', time: '14:00', patientName: 'Robert Baratheon', userId: patient.id, doctorId: docForApt.doctorId, urgencyLevel: 'NORMAL', status: 'PENDING' },
+    ];
+
+    for (const appt of mockAppointments) {
+      await prisma.appointment.create({ data: appt }).catch(e => console.log("Appointment exist or err", e.message));
+    }
+    console.log('Seeded mock appointments');
+  }
 
   console.log('Seeding finished.');
 }

@@ -9,22 +9,22 @@ const SOSButton = () => {
     const { user } = useAuth();
 
     const handleSOS = async () => {
-        // 1. Primary Action: Emergency Services
-        window.location.href = 'tel:112';
-
-        // 2. Secondary Action: Clinical Escalation (if user is logged in)
+        // 1. Primary Action: Emergency Services (Optional for demo: window.location.href = 'tel:112';)
+        
+        // 2. Secondary Action: Clinical Escalation & Broadcast
         if (user && user.id) {
             try {
-                // Find current scheduled appointment
-                const apts = await api.get(`/user/${user.id}/appointments`);
-                const activeApt = apts.data.find(a => a.status === 'SCHEDULED');
-                
-                if (activeApt) {
-                    await api.post(`/consultations/${activeApt.id}/emergency-escalate`);
-                }
+                const token = localStorage.getItem('token');
+                await api.post('/user/sos-broadcast', {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                alert("CRITICAL SOS BROADCASTED: Notifying all connected nearby hospitals!");
             } catch (err) {
                 console.error("Clinical SOS failed:", err);
+                alert("Failed to broadcast SOS. Please call emergency services directly.");
             }
+        } else {
+            alert("Please log in to broadcast clinical SOS.");
         }
     };
 

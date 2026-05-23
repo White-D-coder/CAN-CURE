@@ -95,21 +95,27 @@ apiRouter.post('/login', async (req, res) => {
         const { identifier, password } = req.body;
 
         const admin = await prisma.admin.findUnique({ where: { username: identifier } });
+        console.log("LOGIN ATTEMPT - ADMIN CHECK:", admin ? "FOUND" : "NOT FOUND", "Identifier:", identifier);
         if (admin) {
             const isMatch = password === admin.password || await bcrypt.compare(password, admin.password);
+            console.log("PASSWORD MATCH:", isMatch);
             if (isMatch) {
-                const token = jwt.sign({ id: admin.adminId, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
-                return res.status(200).json({ message: "Login successful", token, role: 'admin', user: { id: admin.adminId, username: admin.username, role: 'admin' } });
+                const role = admin.role || 'admin';
+                const token = jwt.sign({ id: admin.adminId, role }, JWT_SECRET, { expiresIn: '1h' });
+                console.log("GENERATED ADMIN TOKEN FOR:", admin.username);
+                return res.status(200).json({ message: "Login successful", token, role, user: { id: admin.adminId, username: admin.username, role } });
             }
         }
 
         const doctor = await prisma.doctor.findFirst({
             where: { OR: [{ email: identifier }, { username: identifier }] }
         });
+        console.log("LOGIN ATTEMPT - DOCTOR CHECK:", doctor ? "FOUND" : "NOT FOUND");
         if (doctor) {
             const isMatch = await bcrypt.compare(password, doctor.password);
             if (isMatch || password === doctor.password) {
                 const token = jwt.sign({ id: doctor.doctorId, role: 'doctor' }, JWT_SECRET, { expiresIn: '1h' });
+                console.log("GENERATED DOCTOR TOKEN FOR:", doctor.name);
                 return res.status(200).json({ message: "Login successful", token, role: 'doctor', user: { id: doctor.doctorId, name: doctor.name, email: doctor.email, role: 'doctor' } });
             }
         }
@@ -133,10 +139,10 @@ apiRouter.post('/login', async (req, res) => {
 })
 
 app.get('/', (req, res) => {
-    res.send("Welcome to CAN-CURE Backend Service")
+    res.send("Welcome to CAN-QURE Backend Service")
 })
 
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0', () => {
     console.log("Server started on port 3000 - API V1 Standardized");
 });
 

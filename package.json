@@ -1,5 +1,5 @@
 {
-  "name": "can-cure-root",
+  "name": "can-qure-root",
   "version": "1.0.0",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",

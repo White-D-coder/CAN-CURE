@@ -4,7 +4,7 @@ usecaseDiagram
     actor Doctor
     actor System
 
-    package "CAN-CURE: AI-Powered Bilingual Platform" {
+    package "CAN-QURE: AI-Powered Bilingual Platform" {
         
         usecase "Register & Login" as Auth
         usecase "Upload Medical Reports (PDF/Image)" as Upload

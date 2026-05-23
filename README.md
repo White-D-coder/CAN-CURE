@@ -1,15 +1,15 @@
-# 🎗️ CAN-CURE: AI-Powered Oncology Ecosystem
+# 🎗️ CAN-QURE: AI-Powered Oncology Ecosystem
 
-[![Status](https://img.shields.io/badge/Status-Final_Submission-brightgreen)](https://github.com/White-D-coder/CAN-CURE)
+[![Status](https://img.shields.io/badge/Status-Final_Submission-brightgreen)](https://github.com/White-D-coder/CAN-QURE)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**CAN-CURE** is a cutting-edge cancer care management platform designed to bridge the fragmented healthcare ecosystem. It provides a centralized, secure, and intelligent dashboard for patients and oncologists to manage medical records, treatment histories, and clinical data.
+**CAN-QURE** is a cutting-edge cancer care management platform designed to bridge the fragmented healthcare ecosystem. It provides a centralized, secure, and intelligent dashboard for patients and oncologists to manage medical records, treatment histories, and clinical data.
 
 ---
 
 ## 🚀 Live Demo
 > [!IMPORTANT]
-> **Live Project Link:** [Click here to view the live application](https://cancure.vercel.app/)
+> **Live Project Link:** [Click here to view the live application](https://canqure.vercel.app/)
 
 ---
 
@@ -26,7 +26,7 @@
 ## 📝 Executive Summary
 Currently, cancer care is plagued by disorganized paper trails—reports from disparate labs, hospitals, and diagnostic centers are scattered, leading to critical delays in doctor reviews and patient anxiety. 
 
-**CAN-CURE** acts as an intelligent digital layer, consolidating this data into a structured, accessible, and bilingual system, laying the groundwork for future AI-driven diagnostics and analytics.
+**CAN-QURE** acts as an intelligent digital layer, consolidating this data into a structured, accessible, and bilingual system, laying the groundwork for future AI-driven diagnostics and analytics.
 
 ---
 
@@ -90,8 +90,8 @@ We have documented the system architecture using detailed Mermaid diagrams:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/White-D-coder/CAN-CURE.git
-   cd CAN-CURE
+   git clone https://github.com/White-D-coder/CAN-QURE.git
+   cd CAN-QURE
    ```
 
 2. **Backend Setup:**

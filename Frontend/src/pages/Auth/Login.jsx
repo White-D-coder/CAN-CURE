@@ -38,6 +38,8 @@ function Login() {
 
             if (res.data.role === 'admin') {
                 navigate('/admin');
+            } else if (res.data.role === 'hospital_admin') {
+                navigate('/hospital');
             } else if (res.data.role === 'doctor') {
                 navigate('/doctors');
             } else {

@@ -99,8 +99,8 @@ def train_model(data_path: str = 'cancer_patient_data.csv'):
     print("\nClassification Report:\n", classification_report(y_test, y_pred))
 
     # --- PART 4: Model Saving ---
-    joblib.dump(model, 'cancure_risk_model.pkl')
-    joblib.dump(preprocessor, 'cancure_preprocessor.pkl')
+    joblib.dump(model, 'canqure_risk_model.pkl')
+    joblib.dump(preprocessor, 'canqure_preprocessor.pkl')
     print("\nModel and Preprocessor saved successfully.")
 
 
@@ -112,9 +112,9 @@ def predict_risk(patient_data: dict) -> dict:
     Performance is optimized to execute in under 100 ms.
     """
     try:
-        model = joblib.load('cancure_risk_model.pkl')
+        model = joblib.load('canqure_risk_model.pkl')
     except FileNotFoundError:
-        raise Exception("Model file ('cancure_risk_model.pkl') not found. Please train the model first.")
+        raise Exception("Model file ('canqure_risk_model.pkl') not found. Please train the model first.")
 
     # Convert dictionary to DataFrame for the sklearn pipeline
     df = pd.DataFrame([patient_data])
@@ -145,7 +145,7 @@ def predict_risk(patient_data: dict) -> dict:
 
 # --- PART 6: FastAPI Backend Endpoint ---
 
-app = FastAPI(title="Cancure ML Backend", version="1.0")
+app = FastAPI(title="Canqure ML Backend", version="1.0")
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -197,7 +197,7 @@ async def summarize_consultation(request: SummarizeRequest):
 @app.on_event("startup")
 def startup_event():
     # Attempt to load the model on startup, if not present, train it
-    if not os.path.exists('cancure_risk_model.pkl'):
+    if not os.path.exists('canqure_risk_model.pkl'):
         print("Model not found on startup. Initiating training pipeline...")
         train_model()
 

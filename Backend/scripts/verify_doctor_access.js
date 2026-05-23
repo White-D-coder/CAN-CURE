@@ -14,7 +14,7 @@ async function verify() {
                 name: 'Dr. Verify',
                 specialist: 'General',
                 experience: 10,
-                email: 'drverify@cancure.com',
+                email: 'drverify@canqure.com',
                 password: hashedPassword
             }
         });
@@ -56,7 +56,7 @@ async function verify() {
 
         // Login as Doctor
         const loginRes = await axios.post(`${API_URL}/login`, {
-            identifier: 'drverify@cancure.com',
+            identifier: 'drverify@canqure.com',
             password: 'password123'
         });
         const token = loginRes.data.token;
@@ -124,7 +124,7 @@ async function verify() {
         // await prisma.appointment.deleteMany();
         // await prisma.medicine.deleteMany();
         // await prisma.user.deleteMany({ where: { email: { in: ['p1@verify.com', 'p2@verify.com'] } } });
-        // await prisma.doctor.delete({ where: { email: 'drverify@cancure.com' } });
+        // await prisma.doctor.delete({ where: { email: 'drverify@canqure.com' } });
         await prisma.$disconnect();
     }
 }

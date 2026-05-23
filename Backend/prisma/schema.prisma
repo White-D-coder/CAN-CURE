@@ -26,6 +26,10 @@ model Hospital {
   city         String
   contact      String
   email        String?
+  bedsAvailable Int?         @default(0)
+  facilities   String[]
+  adminId      String?       @unique @db.ObjectId
+  admin        Admin?        @relation(fields: [adminId], references: [adminId])
   doctors      Doctor[]
   appointments Appointment[]
   createdAt    DateTime      @default(now())
@@ -84,6 +88,8 @@ model Admin {
   adminId  String @id @default(auto()) @map("_id") @db.ObjectId
   username String @unique
   password String
+  role     String @default("admin")
+  hospital Hospital?
 }
 
 model Medicine {

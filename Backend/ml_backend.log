@@ -1,4 +1,4 @@
-/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/cancure_ml_backend.py:160: DeprecationWarning: 
+/Users/deeptanubhunia/Desktop/CAN-CURE/Backend/canqure_ml_backend.py:160: DeprecationWarning: 
         on_event is deprecated, use lifespan event handlers instead.
 
         Read more about it in the

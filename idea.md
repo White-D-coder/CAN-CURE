@@ -2,9 +2,9 @@
 
 ## 1. Executive Summary
 
-**CAN-CURE** is a cutting-edge cancer care management platform designed to bridge the fragmented healthcare ecosystem. It provides a centralized, secure, and intelligent dashboard for patients and oncologists to manage medical records, treatment histories, and clinical data.
+**CAN-QURE** is a cutting-edge cancer care management platform designed to bridge the fragmented healthcare ecosystem. It provides a centralized, secure, and intelligent dashboard for patients and oncologists to manage medical records, treatment histories, and clinical data.
 
-Currently, cancer care is plagued by disorganized paper trails—reports from disparate labs, hospitals, and diagnostic centers are scattered, leading to critical delays in doctor reviews and patient anxiety. CAN-CURE acts as an intelligent digital layer, consolidating this data into a structured, accessible, and bilingual system, laying the groundwork for future AI-driven diagnostics and analytics.
+Currently, cancer care is plagued by disorganized paper trails—reports from disparate labs, hospitals, and diagnostic centers are scattered, leading to critical delays in doctor reviews and patient anxiety. CAN-QURE acts as an intelligent digital layer, consolidating this data into a structured, accessible, and bilingual system, laying the groundwork for future AI-driven diagnostics and analytics.
 
 ---
 
@@ -16,7 +16,7 @@ Currently, cancer care is plagued by disorganized paper trails—reports from di
 - **Language Barriers**: Information is often accessible only in English, alienating non-English speaking patients.
 - **Lost History**: Continuity of care is compromised when records are lost or forgotten.
 
-### The Solution: CAN-CURE
+### The Solution: CAN-QURE
 - **Centralized Digital Repository**: A single secure cloud location for all medical history.
 - **Structured Data Access**: Doctors see organized timelines, not just random files.
 - **Bilingual Accessibility**: Native support for English and Hindi (expandable) to democratize access.
@@ -89,4 +89,4 @@ The current architecture is specifically designed to support these upcoming modu
 
 ## 6. Conclusion
 
-CAN-CURE is not just a storage app; it is a foundational step towards a Digital Oncology Ecosystem. By solving the immediate problem of data disorganization with a robust, clean-code backend, it sets the stage for advanced AI interventions that can genuinely save lives by saving time.
+CAN-QURE is not just a storage app; it is a foundational step towards a Digital Oncology Ecosystem. By solving the immediate problem of data disorganization with a robust, clean-code backend, it sets the stage for advanced AI interventions that can genuinely save lives by saving time.

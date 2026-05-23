@@ -8,6 +8,7 @@ import AdminDashboard from './pages/AdminDashboard/AdminDashboard';
 import UserDashboard from './pages/UserDashboard/UserDashboard';
 import RiskAssessment from './pages/RiskAssessment/RiskAssessment';
 import ReportHistory from './pages/ReportHistory/ReportHistory';
+import HospitalDashboard from './pages/HospitalDashboard/HospitalDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -22,6 +23,15 @@ function App() {
                     element={
                         <ProtectedRoute allowedRoles={['admin']}>
                             <AdminDashboard />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/hospital"
+                    element={
+                        <ProtectedRoute allowedRoles={['hospital_admin', 'admin']}>
+                            <HospitalDashboard />
                         </ProtectedRoute>
                     }
                 />

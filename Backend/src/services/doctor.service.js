@@ -36,20 +36,22 @@ export class DoctorService extends BaseService {
     }
 
     async getPatientDetails(doctorId, patientId) {
-        const appointment = await this.checkAppointment(doctorId, patientId);
-        if (!appointment) return null;
-
-        return await this.prisma.user.findUnique({
+        console.log("Fetching user details for:", patientId);
+        const user = await this.prisma.user.findUnique({
             where: { id: patientId },
             include: {
                 medicines: true,
                 CancerType: true,
                 Reports: true,
-                Appointments: {
-                    where: { doctorId: doctorId }
-                }
+                Appointments: true // Fetch all appointments for dashboard display
             }
         });
+
+        if (!user) {
+            console.log("User not found in findUnique");
+        }
+
+        return user;
     }
 
     async addPrescription(doctorId, patientId, medicineData) {

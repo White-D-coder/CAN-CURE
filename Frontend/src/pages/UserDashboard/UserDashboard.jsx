@@ -24,7 +24,8 @@ import {
     UploadCloud,
     TrendingUp,
     Users,
-    Brain
+    Brain,
+    MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -33,6 +34,7 @@ import MedicinalRecord from '../../components/MedicinalRecord';
 import RiskAssessment from '../RiskAssessment/RiskAssessment';
 import ReportHistory from '../ReportHistory/ReportHistory';
 import UploadReport from '../../components/UploadReport';
+import EmergencyLocator from '../../components/EmergencyLocator';
 
 const UserDashboard = () => {
     const { user, logout } = useAuth();
@@ -214,6 +216,8 @@ const UserDashboard = () => {
                         </div>
                     </motion.div>
                 );
+            case 'emergency':
+                return <EmergencyLocator user={user} />;
             case 'appointments':
                 return (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -247,7 +251,7 @@ const UserDashboard = () => {
                                                 <p className="text-xs text-slate-500">{new Date(apt.date).toLocaleDateString()}</p>
                                             </td>
                                             <td className="p-6">
-                                                <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter">Confirmed</span>
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${apt.status === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700' : apt.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : apt.status === 'EMERGENCY' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{apt.status || 'Scheduled'}</span>
                                             </td>
                                         </tr>
                                     ))}
@@ -391,6 +395,7 @@ const UserDashboard = () => {
                 <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
                     {[
                         { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
+                        { id: 'emergency', icon: MapPin, label: 'Emergency Map' },
                         { id: 'upload', icon: UploadCloud, label: 'Report Upload' },
                         { id: 'risk', icon: Activity, label: 'AI Risk Prediction' },
                         { id: 'journey', icon: TrendingUp, label: 'My Journey' },
@@ -404,10 +409,12 @@ const UserDashboard = () => {
                             onClick={() => { setActiveTab(item.id); }}
                             className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-bold transition-all duration-200 group ${activeTab === item.id
                                 ? 'bg-primary-600 text-white shadow-xl shadow-primary-900/40'
-                                : 'text-slate-500 hover:bg-slate-800 hover:text-white'
+                                : item.id === 'emergency' 
+                                    ? 'text-red-400 hover:bg-red-500/10 hover:text-red-300'
+                                    : 'text-slate-500 hover:bg-slate-800 hover:text-white'
                                 }`}
                         >
-                            <item.icon size={22} className={activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:text-white transition-colors'} />
+                            <item.icon size={22} className={activeTab === item.id ? 'text-white' : item.id === 'emergency' ? 'text-red-400 group-hover:text-red-300' : 'text-slate-500 group-hover:text-white transition-colors'} />
                             {item.label}
                         </button>
                     ))}

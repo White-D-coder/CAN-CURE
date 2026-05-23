@@ -65,3 +65,13 @@ export const verifyPatient = (req, res, next) => {
         }
     });
 };
+
+export const verifyHospitalAdmin = (req, res, next) => {
+    verifyToken(req, res, () => {
+        if (req.user.role === 'hospital_admin' || req.user.role === 'admin') {
+            next();
+        } else {
+            res.status(403).json({ message: 'Access denied: Hospital Admins only' });
+        }
+    });
+};

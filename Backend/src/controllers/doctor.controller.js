@@ -42,9 +42,11 @@ export class DoctorController extends BaseController {
     getPatientDetails = async (req, res) => {
         try {
             const { doctorId, patientId } = req.params;
+            console.log("getPatientDetails called:", { doctorId, patientId });
             const patientData = await this.doctorService.getPatientDetails(doctorId, patientId);
 
             if (!patientData) {
+                console.log("No patient data found for:", { doctorId, patientId });
                 return this.error(res, "Access denied. No appointment found with this patient.", 403);
             }
 
