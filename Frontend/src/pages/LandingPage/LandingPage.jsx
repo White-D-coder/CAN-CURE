@@ -39,7 +39,7 @@ const LandingPage = () => {
                             <Activity className="w-6 h-6 text-primary-600" />
                         </div>
                         <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                            CANCURE
+                            CANQURE
                         </span>
                     </div>
 
@@ -219,7 +219,7 @@ const LandingPage = () => {
 
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose CAN-CURE?</h2>
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose CAN-QURE?</h2>
                         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                             We combine advanced technology with compassionate care to provide a comprehensive solution for cancer management.
                         </p>
@@ -253,10 +253,10 @@ const LandingPage = () => {
                     <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                         <div className="flex items-center gap-2">
                             <Activity className="w-5 h-5 text-gray-400" />
-                            <span className="text-lg font-bold text-gray-700">CAN-CURE</span>
+                            <span className="text-lg font-bold text-gray-700">CAN-QURE</span>
                         </div>
                         <div className="text-gray-500 text-sm">
-                            © {new Date().getFullYear()} CAN-CURE. All rights reserved.
+                            © {new Date().getFullYear()} CAN-QURE. All rights reserved.
                         </div>
                         <div className="flex gap-6">
                             <a href="#" className="text-gray-400 hover:text-primary-600 transition-colors">Privacy</a>

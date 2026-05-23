@@ -23,7 +23,7 @@ const PreCallBrief = ({ patient, onClose, onStartCall }) => (
             <header className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <div>
                     <h2 className="text-3xl font-black text-slate-900">Pre-Consultation Briefing</h2>
-                    <p className="text-slate-500 mt-1 font-medium italic">Case #CC-{patient.id.slice(-6)} • Prepared by Cancure Intelligence</p>
+                    <p className="text-slate-500 mt-1 font-medium italic">Case #CC-{patient.id.slice(-6)} • Prepared by Canqure Intelligence</p>
                 </div>
                 <button onClick={onClose} className="p-3 hover:bg-slate-200 rounded-2xl transition-colors">
                     <X size={24} className="text-slate-400" />

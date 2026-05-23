@@ -384,7 +384,7 @@ const UserDashboard = () => {
                         <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
                             <span className="text-white text-xl font-black">C</span>
                         </div>
-                        CanCure
+                        CanQure
                     </div>
                 </div>
 
